@@ -116,8 +116,28 @@ function renderHome(){
   $('#teamSub').textContent='ทีม '+t.length+'/'+MAX_TEAM+' ใบ';
 }
 $('#howBtn').onclick=()=>tutorial(false);
-$('#tuneBtn').onclick=()=>$('#tune').classList.remove('hidden');
-$('#tuneOk').onclick=()=>{$('#tune').classList.add('hidden');if(!$('#teamScr').classList.contains('hidden'))renderTeam()};
+/* ---------- โค้ดของขวัญ ---------- */
+const GIFT_CODES={
+  DEV:()=>{SV.coins=(SV.coins||0)+99999999;SV.candy=(SV.candy||0)+999999999;let n=0;
+    Object.keys(CARDS).forEach(id=>{if(!SV.owned.includes(id)){SV.owned.push(id);SV.count[id]=1;n++}});
+    return 'เงิน +99,999,999 · ลูกอม +999,999,999 · ปลดล็อคการ์ดใหม่ '+n+' ใบ'}
+};
+function codeModal(){
+  modal(`<h2>🎁 ใส่โค้ดรับของขวัญ</h2><form class="auth" id="cdF"><input id="cdI" placeholder="พิมพ์โค้ดที่นี่" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="30"><p class="aerr" id="cdE"></p><p class="mute" id="cdOk"></p><div class="two"><button type="submit">รับของขวัญ</button><button type="button" class="sec" id="cdX">ปิด</button></div></form>`);
+  $('#cdX').onclick=closeModal;
+  $('#cdF').onsubmit=e=>{e.preventDefault();
+    const c=$('#cdI').value.trim().toUpperCase(),f=GIFT_CODES[c];
+    SV.codes=SV.codes||{};
+    if(!c){$('#cdE').textContent='กรุณาพิมพ์โค้ด';return}
+    if(!f){$('#cdE').textContent='โค้ดไม่ถูกต้อง';return}
+    if(SV.codes[c]){$('#cdE').textContent='โค้ดนี้ใช้ไปแล้ว';return}
+    SV.codes[c]=1;const msg=f();save();hud();
+    if(typeof renderHome==='function')renderHome();
+    $('#cdE').textContent='';$('#cdOk').textContent='✅ รับสำเร็จ: '+msg;$('#cdI').value='';toast('รับของขวัญสำเร็จ!')};
+  setTimeout(()=>{const i=$('#cdI');if(i)i.focus()},50);
+}
+$('#codeBtn').onclick=codeModal;
+if($('#tuneOk'))$('#tuneOk').onclick=()=>{$('#tune').classList.add('hidden');if(!$('#teamScr').classList.contains('hidden'))renderTeam()};
 $('#devMoney').onclick=()=>{SV.coins+=1000;save();hud();toast('เพิ่มเงิน +1,000 แล้ว')};
 $('#devCandy').onclick=()=>{SV.candy+=1000;save();hud();toast('เพิ่มลูกอม +1,000 แล้ว')};
 $('#devExp').onclick=()=>{SV.exp+=1000;save();hud();if(!$('#lvrScr').classList.contains('hidden'))renderLvr();toast('เพิ่ม EXP +1,000 แล้ว (Lv.'+lvOf(SV.exp)+')')};
