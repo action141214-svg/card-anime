@@ -112,7 +112,7 @@ function enterGame(){
 $('#titleScr').onclick=()=>{if(window.Online)Online.gate(enterGame);else enterGame()};
 function renderHome(){
   const t=SV.team.filter(x=>SV.owned.includes(x));
-  fan($('#heroes'),t.length?t:SORTED.filter(k=>SV.owned.includes(k)));
+  fan($('#heroes'),t);   /* ทีมว่าง = ไม่แสดงการ์ดเลย (ไม่บัง UI) */
   $('#teamSub').textContent='ทีม '+t.length+'/'+MAX_TEAM+' ใบ';
 }
 $('#howBtn').onclick=()=>tutorial(false);
