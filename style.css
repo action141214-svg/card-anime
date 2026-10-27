@@ -542,3 +542,5 @@ button.upslot:hover{transform:translateY(-3px)}
 .pk.ban{border-color:#ff5470;box-shadow:0 0 16px #ff5470}.pk.ban::after{content:"🚫";position:absolute;top:30%;left:0;right:0;text-align:center;font-size:2.2em;text-shadow:0 2px 8px #000}
 .vsrow{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}.vsc{display:flex;gap:4px;margin-top:6px}.vsc img{height:clamp(60px,12vh,100px);aspect-ratio:687/1024;object-fit:cover;border-radius:6px}
 @media (max-width:760px) and (orientation:portrait){.ontiles{grid-template-columns:1fr 1fr}.ontiles .mode{flex-direction:column;min-height:150px;text-align:center}}
+/* ปุ่มออกจากระบบ (หน้าหลัก) */
+.bar #logoutBtn{margin-left:10px}

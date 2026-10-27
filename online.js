@@ -118,7 +118,8 @@ async function uploadSave(){
 }
 addEventListener('pagehide',()=>{if(me&&saveT){clearTimeout(saveT);uploadSave()}});
 addEventListener('visibilitychange',()=>{if(document.hidden&&me&&saveT){clearTimeout(saveT);uploadSave()}});
-function updateMe(){['onMe','roomMe','frMe','chMe'].forEach(i=>{const e=$('#'+i);if(e)e.textContent=me?'👤 '+(me.name||me.username):'—'})}
+function updateMe(){['onMe','roomMe','frMe','chMe'].forEach(i=>{const e=$('#'+i);if(e)e.textContent=me?'👤 '+(me.name||me.username):'—'});
+  const lb=$('#logoutBtn');if(lb){lb.classList.toggle('hidden',!(sb&&me));lb.textContent='🚪 ออกจากระบบ'+(me?' ('+(me.name||me.username)+')':'')}}
 
 /* ---------------- ตั้งชื่อ ---------------- */
 function askName(force){
@@ -266,12 +267,18 @@ function hub(){
   $('#onJoin').onclick=()=>joinRoom($('#onCode').value.trim());
   $('#onCode').onkeydown=e=>{if(e.key==='Enter')joinRoom($('#onCode').value.trim())};
 }
-async function logout(){
-  if(!confirm('ออกจากระบบ?'))return;
-  clearTimeout(saveT);await uploadSave();
-  if(R)await leaveRoom(true);
+/* ออกจากระบบ: ถามยืนยันด้วยหน้าต่างในเกม → อัปโหลดเซฟล่าสุด → ออกจากห้อง/ตัดการเชื่อมต่อ → signOut → โหลดหน้าใหม่ (กลับหน้าเริ่ม/ล็อคอิน) */
+function logout(){
+  if(!sb||!me)return;
+  modal(`<h2>ออกจากระบบ?</h2><p>ระบบจะบันทึกเซฟขึ้นเซิร์ฟเวอร์ก่อนออก<br><small>ไอดี: ${esc(me.username)} · ล็อคอินกลับมาด้วยไอดีเดิมได้ตลอด</small></p><div class="two"><button id="loY">ออกจากระบบ</button><button class="sec" id="loN">ยกเลิก</button></div>`);
+  $('#loN').onclick=closeModal;$('#loY').onclick=doLogout;
+}
+async function doLogout(){
+  const b=$('#loY');if(b){b.disabled=true;b.textContent='กำลังออกจากระบบ…'}
+  try{clearTimeout(saveT);await uploadSave()}catch(e){}
+  try{if(R)await leaveRoom(true)}catch(e){}
   stopRealtime();try{await sb.auth.signOut()}catch(e){}
-  location.reload();
+  me=null;location.reload();
 }
 function friends(){if(!sb||!me){go('online');return}updateMe();bindFriends();renderFriends();loadFriends()}
 function chat(){if(!sb||!me){go('online');return}updateMe();chatOpen()}
@@ -482,5 +489,5 @@ function renderRoom(){
   }
 }
 
-window.Online={gate,onSave,hub,friends,chat,room,get me(){return me},_test:{get R(){return R},joinRoom,createRoom}};
+window.Online={gate,onSave,hub,friends,chat,room,logout,get me(){return me},_test:{get R(){return R},joinRoom,createRoom}};
 })();

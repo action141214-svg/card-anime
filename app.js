@@ -137,6 +137,7 @@ function codeModal(){
   setTimeout(()=>{const i=$('#cdI');if(i)i.focus()},50);
 }
 $('#codeBtn').onclick=codeModal;
+$('#logoutBtn').onclick=()=>{if(window.Online)Online.logout()};
 if($('#tuneOk'))$('#tuneOk').onclick=()=>{$('#tune').classList.add('hidden');if(!$('#teamScr').classList.contains('hidden'))renderTeam()};
 $('#devMoney').onclick=()=>{SV.coins+=1000;save();hud();toast('เพิ่มเงิน +1,000 แล้ว')};
 $('#devCandy').onclick=()=>{SV.candy+=1000;save();hud();toast('เพิ่มลูกอม +1,000 แล้ว')};
