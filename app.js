@@ -92,10 +92,10 @@ function hud(){
 }
 function fan(el,ids){const n=ids.length;el.innerHTML=ids.map((id,i)=>`<img src="${CARDS[id].img}" alt="${CARDS[id].name}" style="--i:${i-(n-1)/2}">`).join('')}
 function go(name){clearAuto();
-  const m={play:'playScr',raid:'raidScr',chal:'chalScr',home:'homeScr',team:'teamScr',stages:'stagesScr',gacha:'gachaScr',inv:'invScr',up:'upScr',lvr:'lvrScr',event:'eventScr',hwstages:'stagesScr',hwgacha:'gachaScr',evboss:'evbossScr',evo:'evoScr',online:'onlineScr',room:'roomScr',friends:'friendsScr',chat:'chatScr'};
+  const m={play:'playScr',raid:'raidScr',chal:'chalScr',home:'homeScr',team:'teamScr',stages:'stagesScr',gacha:'gachaScr',inv:'invScr',up:'upScr',lvr:'lvrScr',event:'eventScr',hwstages:'stagesScr',hwgacha:'gachaScr',evboss:'evbossScr',evo:'evoScr',sell:'sellScr',online:'onlineScr',room:'roomScr',friends:'friendsScr',chat:'chatScr'};
   if(name==='up')upSel=null;if(name==='evo'){if(!evoKeep)evoSel=null;evoKeep=false}if(name==='stages')sMode='main';if(name==='hwstages')sMode='hw';if(name==='gacha')gMode='main';if(name==='hwgacha')gMode='hw';
   closeModal();show(m[name]);hud();
-  ({evo:renderEvo,play:renderPlay,raid:renderRaid,chal:renderChal,home:renderHome,team:renderTeam,stages:renderStages,gacha:renderGacha,inv:renderInv,up:renderUp,lvr:renderLvr,event:renderEvent,hwstages:renderStages,hwgacha:renderGacha,evboss:renderEvBoss,online:()=>Online.hub(),room:()=>Online.room(),friends:()=>Online.friends(),chat:()=>Online.chat()})[name]();
+  ({evo:renderEvo,sell:renderSell,play:renderPlay,raid:renderRaid,chal:renderChal,home:renderHome,team:renderTeam,stages:renderStages,gacha:renderGacha,inv:renderInv,up:renderUp,lvr:renderLvr,event:renderEvent,hwstages:renderStages,hwgacha:renderGacha,evboss:renderEvBoss,online:()=>Online.hub(),room:()=>Online.room(),friends:()=>Online.friends(),chat:()=>Online.chat()})[name]();
 }
 document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go)});
 
@@ -589,26 +589,34 @@ function setAuto(v){SV.autoSell=v;save();$('#autoSell').checked=v;$('#autoSell2'
 $('#autoSell').onchange=e=>setAuto(e.target.checked);$('#autoSell2').onchange=e=>setAuto(e.target.checked);
 function sell(id,n){
   n=Math.min(n,extra(id));if(n<=0)return toast('ต้องเก็บไว้อย่างน้อย 1 ใบ');
-  SV.count[id]-=n;SV.coins+=n*refund(id);save();hud();renderInv();toast('ขาย '+CARDS[id].name+' ×'+n+' ได้ 💰'+n*refund(id));
+  SV.count[id]-=n;SV.coins+=n*refund(id);save();hud();renderSell();toast('ขาย '+CARDS[id].name+' ×'+n+' ได้ 💰'+n*refund(id));
 }
-function renderInv(){
+/* ขายการ์ด (เข้าจากหน้าจัดทีม) */
+function renderSell(){
   $('#autoSell2').checked=SV.autoSell;
   const tot=SV.owned.reduce((s,id)=>s+extra(id)*refund(id),0),n=SV.owned.reduce((s,id)=>s+extra(id),0);
   $('#sellAll').textContent=n?`ขายการ์ดซ้ำทั้งหมด (${n} ใบ · 💰${tot})`:'ไม่มีการ์ดซ้ำให้ขาย';$('#sellAll').disabled=!n;
-  const g=$('#invList');g.innerHTML='';
+  const g=$('#sellList');g.innerHTML='';
   for(const id of SORTED.filter(k=>SV.owned.includes(k))){
     const c=CARDS[id],e=extra(id),d=document.createElement('div');d.className='gcard';d.style.setProperty('--c',c.color);
     d.innerHTML=`<div class="gimg"><div class="gw"><img src="${c.img}" alt="${c.name}"><span class="tag">มี ×${SV.count[id]}</span></div></div><div class="ginfo"><b>${c.name} ${rarTag(id)}</b><span>ราคาขาย 💰${refund(id)} / ใบ</span><div class="two"><button class="sec small" data-sell="${id},1" ${e?'':'disabled'}>ขาย 1 ใบ</button><button class="sec small" data-sell="${id},99" ${e?'':'disabled'}>ขายซ้ำทั้งหมด${e?' (+💰'+e*refund(id)+')':''}</button></div></div>`;
     g.appendChild(d);
   }
-  for(const [k,it] of Object.entries(ITEMS)){   /* วัตถุดิบ (ไม่ใช่การ์ดต่อสู้) */
-    const n=itemN(k),d=document.createElement('div');d.className='gcard'+(n?'':' locked');d.style.setProperty('--c',it.color);
-    d.innerHTML=`<div class="gimg"><div class="gw"><img src="${it.img}" alt="${it.name}"><span class="tag">มี ×${n}</span></div></div><div class="ginfo"><b>${it.name} <i class="rar" style="--r:${RARITY[it.rar]}">${it.rar}</i></b><span>วัตถุดิบวิวัฒนาการ</span><div class="two"><button class="sec small" data-go="evo">ไปเควสพัฒนา</button></div></div>`;
+}
+/* คลังไอเทม: ดูจำนวนวัตถุดิบ/ไอเทมที่มี */
+function renderInv(){
+  const keys=Object.keys(ITEMS),have=keys.reduce((s,k)=>s+itemN(k),0);
+  $('#invSum').textContent='วัตถุดิบที่มี '+have+' ชิ้น · 💰 '+SV.coins.toLocaleString()+' · 🍬 '+(SV.candy||0).toLocaleString();
+  const g=$('#invList');g.innerHTML='';
+  for(const k of keys){
+    const it=ITEMS[k],n=itemN(k),use=EVOS.filter(e=>e.need.items[k]),d=document.createElement('div');
+    d.className='gcard'+(n?'':' locked');d.style.setProperty('--c',it.color);
+    d.innerHTML=`<div class="gimg"><div class="gw"><img src="${it.img}" alt="${it.name}"><span class="tag">มี ×${n}</span></div></div><div class="ginfo"><b>${it.name} <i class="rar" style="--r:${RARITY[it.rar]}">${it.rar}</i></b><span>วัตถุดิบวิวัฒนาการ</span><small>${use.length?'ใช้กับ: '+use.map(e=>CARDS[e.from].name+' → '+CARDS[e.to].name).join(', '):it.desc}</small><div class="two"><button class="sec small" data-go="evo">ไปเควสพัฒนา</button></div></div>`;
     g.appendChild(d);
   }
 }
-$('#invList').onclick=e=>{const b=e.target.closest('[data-sell]');if(b){const[id,n]=b.dataset.sell.split(',');sell(id,+n)}};
-$('#sellAll').onclick=()=>{let t=0;SV.owned.forEach(id=>{const n=extra(id);if(n){t+=n*refund(id);SV.count[id]-=n}});SV.coins+=t;save();hud();renderInv();toast('ขายการ์ดซ้ำทั้งหมด ได้ 💰'+t)};
+$('#sellList').onclick=e=>{const b=e.target.closest('[data-sell]');if(b){const[id,n]=b.dataset.sell.split(',');sell(id,+n)}};
+$('#sellAll').onclick=()=>{let t=0;SV.owned.forEach(id=>{const n=extra(id);if(n){t+=n*refund(id);SV.count[id]-=n}});SV.coins+=t;save();hud();renderSell();toast('ขายการ์ดซ้ำทั้งหมด ได้ 💰'+t)};
 
 /* ---------- อีเว้นท์ ---------- */
 const EVENT_OPEN=true;   /* เปลี่ยนเป็น false เพื่อปิดอีเว้นท์ (ด่านบอส + ตู้ฮาโลวีน) */

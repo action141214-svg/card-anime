@@ -31,7 +31,7 @@
     <button class="mbtn" data-go="team"><span>🃏</span><b>จัดทีม</b><small id="teamSub"></small></button>
     <button class="mbtn" data-go="gacha"><span>🎰</span><b>ตู้กาชา</b><small>สุ่มการ์ดใหม่</small></button>
     <button class="mbtn" data-go="up"><span>⬆️</span><b>อัพเกรด</b><small>อัพเลเวล / อัพดาว</small></button>
-    <button class="mbtn" data-go="inv"><span>📦</span><b>คลัง</b><small>จำนวนการ์ด / ขายซ้ำ</small></button>
+    <button class="mbtn" data-go="inv"><span>📦</span><b>คลัง</b><small>วัตถุดิบ / ไอเทม</small></button>
     <button class="mbtn" data-go="evo"><span>🧬</span><b>เควสพัฒนา</b><small>อีโวการ์ด</small></button>
     <button class="mbtn" id="howBtn"><span>📖</span><b>วิธีเล่น</b><small>ดูบทสอนอีกครั้ง</small></button>
   </nav>
@@ -41,7 +41,7 @@
 <!-- จัดทีม -->
 <section class="screen hidden" id="teamScr">
   <header class="top"><button class="sec small" data-go="home">← กลับ</button><h1>จัดทีม</h1><div class="coin">💰 <b class="coinN">0</b></div></header>
-  <div class="tinfo"><span id="tcount"></span><small>แตะการ์ดเพื่อใส่/เอาออก · ใส่ได้สูงสุด 4 ใบ · การ์ดโจมตีตามลำดับซ้ายไปขวา · กด i เพื่อดูความสามารถ</small></div>
+  <div class="tinfo"><span id="tcount"></span><button class="small" data-go="sell">💰 ขายการ์ด</button><small>แตะการ์ดเพื่อใส่/เอาออก · ใส่ได้สูงสุด 4 ใบ · การ์ดโจมตีตามลำดับซ้ายไปขวา · กด i เพื่อดูความสามารถ</small></div>
   <div class="tslots" id="tslots"></div>
   <div class="gallery" id="gallery"></div>
 </section>
@@ -179,11 +179,18 @@
   <div class="gallery" id="upList"></div>
 </section>
 
-<!-- คลังการ์ด -->
+<!-- คลังไอเทม (วัตถุดิบ) -->
 <section class="screen hidden" id="invScr">
-  <header class="top"><button class="sec small" data-go="home">← กลับ</button><h1>คลังการ์ด</h1><div class="coin">💰 <b class="coinN">0</b></div></header>
-  <div class="tinfo"><label class="tg"><input type="checkbox" id="autoSell2"> ขายการ์ดซ้ำอัตโนมัติเมื่อสุ่มได้ (คืนเงิน)</label><button class="small" id="sellAll"></button></div>
+  <header class="top"><button class="sec small" data-go="home">← กลับ</button><h1>คลังไอเทม</h1><div class="coin">💰 <b class="coinN">0</b></div></header>
+  <div class="tinfo"><span id="invSum"></span><small>วัตถุดิบและไอเทมที่สะสมไว้ · ใช้ในเควสพัฒนา</small></div>
   <div class="gallery" id="invList"></div>
+</section>
+
+<!-- ขายการ์ด (เข้าจากหน้าจัดทีม) -->
+<section class="screen hidden" id="sellScr">
+  <header class="top"><button class="sec small" data-go="team">← กลับ</button><h1>ขายการ์ด</h1><div class="coin">💰 <b class="coinN">0</b></div></header>
+  <div class="tinfo"><label class="tg"><input type="checkbox" id="autoSell2"> ขายการ์ดซ้ำอัตโนมัติเมื่อสุ่มได้ (คืนเงิน)</label><button class="small" id="sellAll"></button><small>ขายได้เฉพาะใบที่ซ้ำ (ต้องเก็บไว้ 1 ใบเสมอ)</small></div>
+  <div class="gallery" id="sellList"></div>
 </section>
 
 <!-- ต่อสู้ (ออโต้) -->

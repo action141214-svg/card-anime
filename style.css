@@ -344,8 +344,9 @@ button.mini{min-height:28px;padding:2px 8px;font-size:.8em;box-shadow:none;borde
 .tg{display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--ink)}
 .tg input{width:20px;height:20px;min-height:0;accent-color:var(--gold)}
 .cnt{font-style:normal;font-family:Kanit;color:var(--gold);font-size:.85em}
-#invList .ginfo .two{flex-wrap:wrap;justify-content:center}
-#invList .ginfo button{padding:4px 10px}
+#invList .ginfo .two,#sellList .ginfo .two{flex-wrap:wrap;justify-content:center}
+#invList .ginfo button,#sellList .ginfo button{padding:4px 10px}
+#invList .ginfo small{color:var(--mute);line-height:1.4}
 .up{font-style:normal;color:var(--hp);font-family:Kanit;font-weight:600}
 #upList .ginfo{gap:2px}#upList .ginfo span{color:var(--ink)}
 #upList .two{flex-wrap:wrap;justify-content:center;gap:6px}#upList .two button{padding:4px 8px;font-size:.85em;min-height:34px}
