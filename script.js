@@ -40,7 +40,7 @@ const CARDS={
         desc:'เมื่อโจมตี เรียกอาวุธจาก Gate of Babylon มาโจมตีแบบสุ่ม 3 ครั้ง ครั้งละ 10 ดาเมจ'},
   /* ===== การ์ดอีเว้นท์ฮาโลวีน ===== */
   hutao:{name:'ฮูเต๋า',rar:'LTD',event:'halloween',img:'hutao.jpeg',power:40,hp:400,color:'#ff6b3d',ability:'ghost',
-        desc:'ทุกครั้งที่โจมตีเรียกผีเมาช่วยโจมตี สุ่ม 2 รูปแบบ: ให้สถานะเผาไหม้ / เรียกผีตัวเล็กโจมตี 2 ครั้ง (ครั้งละ 10% ของ POWER ปัจจุบัน)'},
+        desc:'ทุกครั้งที่โจมตีเรียกผีเมาช่วยโจมตี สุ่ม 2 รูปแบบ: ให้สถานะเผาไหม้ (เสีย 15% ของ HP สูงสุดศัตรู ต่อเทิร์น) / เรียกผีตัวเล็กโจมตี 2 ครั้ง (ครั้งละ 10% ของ POWER ปัจจุบัน)'},
   luffy:{name:'ลูฟี่ ไนท์แมร์',rar:'LTD',event:'halloween',img:'nightmare.jpeg',power:35,hp:500,color:'#4fa8ff',ability:'possess',
         desc:'เมื่อโจมตีจะทำให้ศัตรูติดสถานะ "เข้าสิง" มีโอกาส 50% ที่ศัตรูจะโจมตีตัวเองในเทิร์นถัดไป'},
   gengar:{name:'เก็งการ์ร่างกิกะแม็กซ์',rar:'LTD',event:'halloween',img:'gengar.jpeg',power:37,hp:490,color:'#9b4dff',ability:'gmax',
@@ -365,8 +365,8 @@ async function ghostAb(ak,dk){
   if(mode===0){
     await fly();
     const sp=fxEl('spark',tx,ty,160,160);setTimeout(()=>sp.remove(),500);dw.classList.remove('burnfx');void dw.offsetWidth;dw.classList.add('burnfx');
-    D.burn=C.bt;D.burnDmg=Math.max(D.burnDmg||0,Math.round(A.p*C.bd));render();
-    log('🔥 '+nm(dk)+' ติดสถานะเผาไหม้ ('+C.bt+' เทิร์น เสีย HP '+D.burnDmg+' ต่อเทิร์น)',ak);await sl(400);
+    D.burn=C.bt;D.burnDmg=Math.max(D.burnDmg||0,Math.round(Math.min(D.max,statAt(D.id,D.lv,D.star).hp)*C.bd));render();   /* เผา % ของ HP สูงสุดศัตรู (บอส HP มหาศาลคิดจาก HP ปกติของการ์ดบอส) */
+    log('🔥 '+nm(dk)+' ติดสถานะเผาไหม้ ('+C.bt+' เทิร์น เสีย HP '+D.burnDmg+' ต่อเทิร์น = '+Math.round(C.bd*100)+'% ของ HP สูงสุด)',ak);await sl(400);
   }else{
     for(let i=0;i<2&&D.hp>0;i++){
       await fly(i?30:-30);
@@ -471,7 +471,7 @@ async function handleKO(dk,ak){
   if(CARDS[dd.id].ability==='clone'&&!dd.cl&&!dd.safe){   /* นารูโตะ: ถูกกำจัดครั้งแรก → เรียกร่างแยกมาแทน สเตตัสลดลง C.nr */
     const cw=$('#f'+dk+' .cw');cw.classList.add('ko');log('💀 '+nm(dk)+' ถูกกำจัด!','sys');render();await sl(700);
     dd.cl=true;dd.p=Math.max(1,Math.round(dd.p*(1-C.nr)*10)/10);dd.max=Math.max(1,Math.round(dd.max*(1-C.nr)));dd.hp=dd.max;
-    dd.para=dd.sealed=dd.lightning=dd.miss=dd.poss=dd.bleed=dd.turbo=false;dd.burn=0;dd.sev=0;dd.hb=dd.ps=0;dd.fg=null;dd.t=0;
+    dd.para=dd.sealed=dd.lightning=dd.miss=dd.poss=dd.bleed=dd.turbo=false;dd.burn=0;dd.burnDmg=0;dd.sev=0;dd.hb=dd.ps=0;dd.fg=null;dd.t=0;
     setFighter(dk);log('🌀 เรียกร่างแยก! '+nm(dk)+' ลงสนาม (POWER '+dd.p+' · HP '+dd.hp+')','sys');
     const cw2=$('#f'+dk+' .cw');floatTxt(cw2,'ร่างแยก!','heal');cw2.classList.remove('gold');void cw2.offsetWidth;cw2.classList.add('gold');setTimeout(()=>cw2.classList.remove('gold'),1400);
     render();await sl(600);return false;
