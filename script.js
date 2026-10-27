@@ -20,6 +20,8 @@ const CARDS={
         desc:'ฟื้นฟู HP 20% ของ HP สูงสุด และมีโอกาส 40% ทำให้ศัตรูติดสถานะ "ชะงัก" ไม่สามารถโจมตีในเทิร์นนั้นได้ (ได้จากการอีโวนารูโตะ)'},
   gekko:{name:'เก็กโค ฮายาเตะ',rar:'R',img:'gekko.jpeg',power:25,hp:300,color:'#4aa3ff',ability:'gekko',
         desc:'เมื่อการ์ดใบนี้โจมตีจะสร้างสถานะ "เลือดไหล" และสถานะ "ติดพิษ" ซึ่งสร้างความเสียหาย 10% ของ POWER ปัจจุบัน'},
+  mahoraga:{name:'จักรพรรดิดาบแปดทิศ ปรวาณบดีกระบัด มโหรากา',rar:'USR',evo:true,img:'mahoraga.jpeg',power:35,hp:420,color:'#e8e2c8',ability:'wheel',
+        desc:'การปรับตัวของมโหรากา ทุกๆ เทิร์นกงล้อจะหมุนหนึ่งครั้งและสุ่มการเพิ่มค่าสเตตัสให้ตนเอง: เพิ่ม 50 POWER / ฟื้นฟู HP 20% ของ HP ที่เสียไป / ต้านทานสถานะด้านลบ (ได้จากการอีโวฟุชิงุโระ เมงุมิ)'},
   sasukekid:{name:'อุจิวะ ซาสึเกะ (ร่างเด็ก)',rar:'R',img:'sasuke_kid.jpeg',power:25,hp:250,color:'#4a6fd8',ability:'fireball',
         desc:'ปล่อยคาถาเพลิง สร้างความเสียหาย 20% ของ POWER ปัจจุบัน และทำให้ศัตรูติดสถานะ "เผาไหม้" สร้างความเสียหาย 10% ของ HP สูงสุดของศัตรู'},
   ino:{name:'ยามานากะ อิโนะ',rar:'R',img:'ino.jpeg',power:27,hp:290,color:'#c9a6ff',ability:'ino',
@@ -55,7 +57,7 @@ const CARDS={
 /* ลำดับระดับการ์ด จากน้อยไปมาก */
 const R_ORDER=['R','S','SR','SSR','UR','USR','LTD'];
 const rIdx=r=>R_ORDER.indexOf(r);
-const ID={sasukecurse:{p:'#scP',h:'#scH'},sasukekid:{p:'#kdP',h:'#kdH'},naruto1:{p:'#n1P',h:'#n1H'},ino:{p:'#inP',h:'#inH'},gekko:{p:'#qP',h:'#qH'},naruto:{p:'#wP',h:'#wH'},ichigo:{p:'#oP',h:'#oH'},megumi:{p:'#mP',h:'#mH'},yuji:{p:'#yP',h:'#yH'},goku:{p:'#gP',h:'#gH'},zenitsu:{p:'#zP',h:'#zH'},kirito:{p:'#kP',h:'#kH'},gil:{p:'#iP',h:'#iH'},kurapika:{p:'#rP',h:'#rH'},sasuke:{p:'#sP',h:'#sH'},hutao:{p:'#hP',h:'#hH'},luffy:{p:'#fP',h:'#fH'},gengar:{p:'#eP',h:'#eH'},alucard:{p:'#aP',h:'#aH'},isaac:{p:'#xP',h:'#xH'},okarun:{p:'#uP',h:'#uH'}};
+const ID={mahoraga:{p:'#mhP',h:'#mhH'},sasukecurse:{p:'#scP',h:'#scH'},sasukekid:{p:'#kdP',h:'#kdH'},naruto1:{p:'#n1P',h:'#n1H'},ino:{p:'#inP',h:'#inH'},gekko:{p:'#qP',h:'#qH'},naruto:{p:'#wP',h:'#wH'},ichigo:{p:'#oP',h:'#oH'},megumi:{p:'#mP',h:'#mH'},yuji:{p:'#yP',h:'#yH'},goku:{p:'#gP',h:'#gH'},zenitsu:{p:'#zP',h:'#zH'},kirito:{p:'#kP',h:'#kH'},gil:{p:'#iP',h:'#iH'},kurapika:{p:'#rP',h:'#rH'},sasuke:{p:'#sP',h:'#sH'},hutao:{p:'#hP',h:'#hH'},luffy:{p:'#fP',h:'#fH'},gengar:{p:'#eP',h:'#eH'},alucard:{p:'#aP',h:'#aH'},isaac:{p:'#xP',h:'#xH'},okarun:{p:'#uP',h:'#uH'}};
 
 /* อาวุธ Gate of Babylon (SVG หันไปทางขวา) */
 const WEAPONS=[
@@ -90,7 +92,7 @@ function setFighter(k){
 function startBattle(opts){
   OPT=opts;FIXED=!!opts.online;RNG=opts.seed!=null?mulberry(opts.seed>>>0):null;if(opts.online){speed=1;$('#speedBtn').textContent='ความเร็ว x1'}
   run++;paused=false;$('#pauseBtn').textContent='หยุด';$('#fx').innerHTML='';$('#autoBtn').classList.toggle('hidden',!opts.auto);
-  C={gr:num('#gr')/100,zc:num('#zc')/100,kh:num('#kh')/100,ki:Math.max(1,num('#ki')),gc:num('#gc'),gd:num('#gd'),nh:num('#nh')/100,rm:num('#rm'),lb:num('#lb')/100,lc:num('#lc')/100,ym:num('#ym'),gm:num('#oM'),gn:Math.max(1,num('#oN')),sd:num('#mD')/100,sn:num('#mN')/100,se:num('#mE'),sr:num('#mR')/100,bd:num('#hB')/100,bt:Math.max(1,num('#hT')),gh:num('#hG')/100,pc:num('#fC')/100,gx:num('#eG')/100,ab:num('#aB')/100,kf:num('#kdF')/100,sv:num('#scV')/100,sc:num('#scC')/100,st:Math.max(1,num('#scT')),kb:num('#kdB')/100,kt:Math.max(1,num('#kdT')),xn:num('#xN'),xk:num('#xK'),xm:num('#xM'),ot:num('#uT')/100,od:num('#uD')/100,nr:num('#wR')/100,gk:num('#qR')/100,ni:Math.max(1,Math.round(num('#inI'))),nx:num('#inX'),n1h:num('#n1h')/100,n1c:num('#n1c')/100};
+  C={gr:num('#gr')/100,zc:num('#zc')/100,kh:num('#kh')/100,ki:Math.max(1,num('#ki')),gc:num('#gc'),gd:num('#gd'),nh:num('#nh')/100,rm:num('#rm'),lb:num('#lb')/100,lc:num('#lc')/100,ym:num('#ym'),gm:num('#oM'),gn:Math.max(1,num('#oN')),sd:num('#mD')/100,sn:num('#mN')/100,se:num('#mE'),sr:num('#mR')/100,bd:num('#hB')/100,bt:Math.max(1,num('#hT')),gh:num('#hG')/100,pc:num('#fC')/100,gx:num('#eG')/100,ab:num('#aB')/100,kf:num('#kdF')/100,sv:num('#scV')/100,sc:num('#scC')/100,st:Math.max(1,num('#scT')),kb:num('#kdB')/100,kt:Math.max(1,num('#kdT')),xn:num('#xN'),xk:num('#xK'),xm:num('#xM'),ot:num('#uT')/100,od:num('#uD')/100,nr:num('#wR')/100,gk:num('#qR')/100,ni:Math.max(1,Math.round(num('#inI'))),nx:num('#inX'),n1h:num('#n1h')/100,n1c:num('#n1c')/100,wp:num('#mhW'),wr:num('#mhR')/100};
   const mk=(lvs,sts)=>(id,i)=>{const l=(lvs&&lvs[i])||1,sr=(sts&&sts[i])||1,s=statAt(id,l,sr);return{id,lv:l,star:sr,p:s.p,hp:s.hp,max:s.hp,para:false,sealed:false,lightning:false,miss:false,burn:0,burnDmg:0,sev:0,poss:false,bleed:false,hb:0,ps:0,turbo:false,fg:null,t:0}};
   let first=opts.first||$('#first').value;if(first==='r')first=RR()<.5?'a':'b';
   S={a:null,b:null,roster:{a:opts.a.map(mk(opts.la,opts.sa)),b:opts.b.map(mk(opts.lb,opts.sb))},idx:{a:0,b:0},turn:first,n:1,over:false};
@@ -110,11 +112,11 @@ const endInfo=()=>{const sm=(k,f)=>S.roster[k].reduce((s,r)=>s+f(r),0);return{wi
 const dodges=k=>{const d=S&&S[k];return !!d&&d.hp>0&&CARDS[d.id].ability==='turbo'&&RR()<C.od};
 /* เก็งการ์ร่างกิกะแม็กซ์ / โอคารุน: สถานะด้านลบทุกชนิด → ล้างทันที + เพิ่ม POWER */
 function gmaxPurify(k){
-  const s=S&&S[k];if(!s||s.hp<=0||!['gmax','turbo'].includes(CARDS[s.id].ability))return;
+  const s=S&&S[k];if(!s||s.hp<=0||!(['gmax','turbo'].includes(CARDS[s.id].ability)||s.resist))return;
   const n=(s.para?1:0)+(s.sealed?1:0)+(s.lightning?1:0)+(s.miss?1:0)+(s.burn>0?1:0)+(s.sev>0?1:0)+(s.poss?1:0)+(s.bleed?1:0)+(s.hb>0?1:0)+(s.ps>0?1:0);if(!n)return;
   s.para=s.sealed=s.lightning=s.miss=s.poss=s.bleed=false;s.burn=0;s.sev=0;s.hb=s.ps=0;
   const cw=$('#f'+k+' .cw');
-  if(CARDS[s.id].ability==='turbo'){log('🛡 '+nm(k)+' ไม่ได้รับผลของสถานะด้านลบ',k);if(cw)floatTxt(cw,'IMMUNE','sm');return}
+  if(CARDS[s.id].ability==='turbo'||s.resist){log('🛡 '+nm(k)+' ไม่ได้รับผลของสถานะด้านลบ',k);if(cw)floatTxt(cw,'IMMUNE','sm');return}
   const add=Math.round(s.p*C.gx*n*10)/10;s.p=Math.round((s.p+add)*10)/10;
   log('✦ '+nm(k)+' แปลงสถานะด้านลบ '+n+' อย่างเป็น POWER +'+add+' (เป็น '+s.p+')',k);
   if(cw){floatTxt(cw,'+'+add,'heal');cw.classList.remove('gold');void cw.offsetWidth;cw.classList.add('gold');setTimeout(()=>cw.classList.remove('gold'),1400)}
@@ -196,7 +198,7 @@ function getsugaFx(ak,dk){
 /* ---------- คุราปิก้า: สุ่มนิ้ว (โอกาสเท่ากัน 20% ต่อนิ้ว) ---------- */
 const FN=['นิ้วโป้ง','นิ้วชี้','นิ้วกลาง','นิ้วนาง','นิ้วก้อย'];
 const FD=['ฟื้นฟู HP','ขโมยความสามารถ','ผนึกความสามารถศัตรู','ลบสถานะด้านลบ','โจมตีซ้ำ'];
-const AN={kyuubi:'จักระจิ้งจอก (ฟื้นฟู HP + ชะงัก)',getsuga:'เกตสึกะ (ดาเมจ ×3)',shiki:'ทศฉายา (เรียกชิกิกามิ)',upset:'ล้มยักษ์ (ดาเมจเพิ่มใส่ศัตรูระดับสูงกว่า)',lightning:'สายฟ้า',grow:'POWER เพิ่มขึ้น',paralyze:'ทำให้ชา',heal:'ฟื้นฟู HP',gate:'Gate of Babylon',ghost:'ผีเมาช่วยโจมตี',possess:'เข้าสิง (ศัตรูมีโอกาสโจมตีตัวเอง)',gmax:'แปลงสถานะลบเป็น POWER',double:'โจมตี 2 ครั้ง + เลือดไหล',scythe:'สุ่มการโจมตี 3 รูปแบบ',turbo:'สัญลักษณ์เทอร์โบ'};
+const AN={wheel:'ธรรมจักร (กงล้อหมุนสุ่มเสริมพลัง)',kyuubi:'จักระจิ้งจอก (ฟื้นฟู HP + ชะงัก)',getsuga:'เกตสึกะ (ดาเมจ ×3)',shiki:'ทศฉายา (เรียกชิกิกามิ)',upset:'ล้มยักษ์ (ดาเมจเพิ่มใส่ศัตรูระดับสูงกว่า)',lightning:'สายฟ้า',grow:'POWER เพิ่มขึ้น',paralyze:'ทำให้ชา',heal:'ฟื้นฟู HP',gate:'Gate of Babylon',ghost:'ผีเมาช่วยโจมตี',possess:'เข้าสิง (ศัตรูมีโอกาสโจมตีตัวเอง)',gmax:'แปลงสถานะลบเป็น POWER',double:'โจมตี 2 ครั้ง + เลือดไหล',scythe:'สุ่มการโจมตี 3 รูปแบบ',turbo:'สัญลักษณ์เทอร์โบ'};
 /* ไอคอนมือ: นิ้วที่ใช้ในเทิร์นนั้นจะเรืองสีทอง */
 function handSvg(i,sz=40){
   const F=[['M10 66 L22 56 L36 84 L22 92Z','',''],['M24 16h12a2 2 0 0 1 2 2v44H22V18a2 2 0 0 1 2-2z'],['M38 8h12a2 2 0 0 1 2 2v52H36V10a2 2 0 0 1 2-2z'],['M52 14h12a2 2 0 0 1 2 2v46H50V16a2 2 0 0 1 2-2z'],['M66 28h11a2 2 0 0 1 2 2v32H64V30a2 2 0 0 1 2-2z']];
@@ -277,6 +279,7 @@ async function applyAb(name,ak,dk,opt={}){
   else if(name==='fireball'){await fireballAb(ak,dk)}
   else if(name==='sevpara'){await sevAb(ak,dk)}
   else if(name==='ino'){await inoAb(ak,dk)}
+  else if(name==='wheel'){if(opt.force)await wheelAb(ak)}
   else if(name==='turbo'){if(!a.turbo){a.turbo=true;log('⚡ '+nm(ak)+' ติดสัญลักษณ์เทอร์โบ! การโจมตีครั้งถัดไปดาเมจเพิ่ม '+Math.round(C.ot*100)+'% ของ POWER ปัจจุบัน',ak)}render()}
   else if(name==='heal'&&(opt.force||a.t%C.ki===0))heal(ak,C.kh);
 }
@@ -296,6 +299,26 @@ async function fingerAct(f,ak,dk){
   }
 }
 
+/* ---------- มโหรากา: ธรรมจักรแปดซี่ — ทุกเทิร์นกงล้อหมุน 1 ครั้ง สุ่มเสริมพลังให้ตนเอง 1 อย่าง ---------- */
+async function wheelAb(k){
+  const a=S[k],cw=$('#f'+k+' .cw');a.resist=false;
+  const pick=Math.floor(RR()*3);
+  floatTxt(cw,'☸ กงล้อหมุน','sm');await sl(350);
+  if(pick===0){
+    a.p=Math.round((a.p+C.wp)*10)/10;
+    log('☸ กงล้อหมุน! '+nm(k)+' เพิ่ม POWER +'+C.wp+' (เป็น '+a.p+')',k);
+    floatTxt(cw,'+'+C.wp+' POWER','heal');cw.classList.remove('gold');void cw.offsetWidth;cw.classList.add('gold');setTimeout(()=>cw.classList.remove('gold'),1400);
+  }else if(pick===1){
+    const lost=Math.max(0,a.max-a.hp),h=a.noHeal?0:Math.min(lost,Math.round(lost*C.wr));
+    if(h>0){a.hp+=h;healFx(k);floatTxt(cw,'+'+h,'heal');log('☸ กงล้อหมุน! '+nm(k)+' ฟื้นฟู HP +'+h+' (เหลือ HP '+Math.ceil(a.hp)+')',k)}
+    else log('☸ กงล้อหมุน! '+nm(k)+' ได้ฟื้นฟู HP แต่ไม่มี HP ที่เสียไปให้ฟื้น',k);
+  }else{
+    a.resist=true;
+    log('☸ กงล้อหมุน! '+nm(k)+' ต้านทานสถานะด้านลบทุกชนิดจนถึงเทิร์นถัดไปของตน',k);
+    gmaxPurify(k);
+  }
+  render();await sl(450);
+}
 /* ---------- เมงุมิ: ทศฉายา (Ten Shadows Technique) เรียกชิกิกามิเงาสุ่ม 1 ใน 5 ---------- */
 const SHIKI=[{k:'dog',e:'🐕',n:'สุนัข',en:'Divine Dogs'},{k:'owl',e:'🦉',n:'นกฮูก',en:'Nue'},{k:'toad',e:'🐸',n:'กบ',en:'Toad'},{k:'ele',e:'🐘',n:'คชสาร',en:'Max Elephant'},{k:'rabbit',e:'🐇',n:'กระต่าย',en:'Rabbit Escape'}];
 function shadowPool(r){
@@ -525,6 +548,7 @@ async function doTurn(){
       if(a.hp<=0){if(await handleKO(ak,dk))return;S.turn=dk;S.n++;render();return}
     }else log('👻 '+nm(ak)+' ถูกเข้าสิงแต่ฝืนไว้ได้ โจมตีตามปกติ','sys');
   }
+  if(!sealed&&ac.ability==='wheel')await wheelAb(ak);
   a.fg=finger;render();
   if(!skip){
     if(sealed)log('🔒 '+nm(ak)+' ถูกผนึก ใช้ความสามารถไม่ได้ในเทิร์นนี้','sys');
