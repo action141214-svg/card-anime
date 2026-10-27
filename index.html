@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Card Duel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&family=Noto+Sans+Thai:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- หน้าแรก: แตะเพื่อเข้าเกม -->
+<section class="screen title" id="titleScr">
+  <div class="fan" id="titleFan"></div>
+  <h1 class="logo">Card Duel</h1>
+  <p class="sub">เกมการ์ดต่อสู้ผลัดกันโจมตี</p>
+  <div class="tap">แตะเพื่อเข้าเกม</div>
+</section>
+
+<!-- หน้าหลัก -->
+<section class="screen hidden" id="homeScr">
+  <header class="top hud">
+    <div class="lv"><b id="lvN">Lv.1</b><div class="xp"><i id="xpFill"></i></div><small id="xpTxt"></small></div>
+    <div class="hudr"><button class="sec small rwbtn" data-go="online">🌐 ออนไลน์<i class="dot hidden" id="onDot"></i></button><button class="sec small rwbtn" data-go="lvr">🎁 รางวัลเลเวล<i class="dot hidden" id="lvrDot"></i></button><div class="coin">💰 <b class="coinN">0</b></div></div>
+  </header>
+  <div class="fan sm" id="heroes"></div>
+  <nav class="menu">
+    <button class="mbtn" data-go="play"><span>⚔️</span><b>เล่น</b><small>ด่าน / เรด / ชาเลนจ์</small></button>
+    <button class="mbtn" data-go="event"><span>🎃</span><b>อีเว้นท์</b><small>ฮาโลวีน</small></button>
+    <button class="mbtn" data-go="team"><span>🃏</span><b>จัดทีม</b><small id="teamSub"></small></button>
+    <button class="mbtn" data-go="gacha"><span>🎰</span><b>ตู้กาชา</b><small>สุ่มการ์ดใหม่</small></button>
+    <button class="mbtn" data-go="up"><span>⬆️</span><b>อัพเกรด</b><small>อัพเลเวล / อัพดาว</small></button>
+    <button class="mbtn" data-go="inv"><span>📦</span><b>คลัง</b><small>จำนวนการ์ด / ขายซ้ำ</small></button>
+    <button class="mbtn" data-go="evo"><span>🧬</span><b>เควสพัฒนา</b><small>อีโวการ์ด</small></button>
+    <button class="mbtn" id="howBtn"><span>📖</span><b>วิธีเล่น</b><small>ดูบทสอนอีกครั้ง</small></button>
+  </nav>
+  <footer class="bar"><button class="sec small" id="tuneBtn">⚙ ตั้งค่า / ปรับค่าทดลอง</button></footer>
+</section>
+
+<!-- จัดทีม -->
+<section class="screen hidden" id="teamScr">
+  <header class="top"><button class="sec small" data-go="home">← กลับ</button><h1>จัดทีม</h1><div class="coin">💰 <b class="coinN">0</b></div></header>
+  <div class="tinfo"><span id="tcount"></span><small>แตะการ์ดเพื่อใส่/เอาออก · ใส่ได้สูงสุด 4 ใบ · การ์ดโจมตีตามลำดับซ้ายไปขวา · กด i เพื่อดูความสามารถ</small></div>
+  <div class="tslots" id="tslots"></div>
+  <div class="gallery" id="gallery"></div>
+</section>
+
+<!-- เลือกด่าน -->
+<section class="screen hidden" id="stagesScr">
+  <header class="top"><button class="sec small" id="sBack" data-go="play">← กลับ</button><h1 id="sTitle">เลือกด่าน</h1><div class="coin">💰 <b class="coinN">0</b></div></header>
+  <div class="stages" id="stgList"></div>
+  <div class="myteam"><span>ทีมของคุณ</span><div id="stgTeam"></div><button class="sec small" data-go="team">จัดทีม</button></div>
+</section>
+
+<!-- ตู้กาชา (แบนเนอร์เรทอัป) -->
+<section class="screen hidden" id="gachaScr">
+  <header class="top"><button class="sec small" id="gBack" data-go="home">← กลับ</button><h1 id="gTitle">ตู้กาชา</h1><div class="hudr"><div class="coin candy hidden" id="gCandy">🍬 <b class="candyN">0</b></div><div class="coin">💰 <b class="coinN">0</b></div></div></header>
+  <div class="gbanner">
+    <div class="bbox" id="bbox" role="button" tabindex="0" aria-label="ดูรายละเอียดและเรทการ์ด">
+      <div class="bhead"><b class="rt" id="bRt">RATE UP!!!</b><span class="bx" id="bBoost"></span></div>
+      <div class="bcards" id="bCards"></div>
+      <p class="bdesc" id="bDesc"></p>
+    </div>
+  </div>
+  <div class="btimer" id="bTimer"></div>
+  <div class="pullbar">
+    <button id="pullBtn" class="price"></button>
+    <button id="pull10Btn" class="price"></button>
+    <button class="sec small" id="rateBtn">ดูเรททั้งหมด</button>
+    <label class="tg"><input type="checkbox" id="autoSell"> ขายการ์ดซ้ำอัตโนมัติ (คืนเงิน)</label>
+  </div>
+</section>
+
+<!-- อีเว้นท์ -->
+<section class="screen hidden" id="eventScr">
+  <header class="top"><button class="sec small" data-go="home">← กลับ</button><h1>อีเว้นท์ 🎃</h1><div class="hudr"><div class="coin candy">🍬 <b class="candyN">0</b></div><div class="coin">💰 <b class="coinN">0</b></div></div></header>
+  <div class="tinfo"><span id="evInfo"></span></div>
+  <div class="modes">
+    <button class="mode m-hws" id="evBtnStages"><span class="mi">🎃</span><b>ด่านอีเว้นท์</b><small>สู้บอสฮาโลวีน HP 99,000,000 · 20 เทิร์น<br>ยิ่งดาเมจเยอะ ยิ่งได้ลูกอม 🍬 · รีบอสทุกวัน</small><em id="evStages"></em></button>
+    <button class="mode m-hwg" id="evBtnGacha"><span class="mi">👻</span><b>ตู้สุ่มฮาโลวีน</b><small>ใช้ลูกอม 🍬 สุ่มการ์ดฮาโลวีนสุดพิเศษ<br>การ์ดอีเว้นท์ออก 1% · การันตี 1,000 ครั้ง</small><em id="evGacha"></em></button>
+  </div>
+</section>
+
+<!-- ด่านอีเว้นท์: บอสลูกอม -->
+<section class="screen hidden" id="evbossScr">
+  <header class="top"><button class="sec small" data-go="event">← กลับ</button><h1>ด่านอีเว้นท์ 🎃</h1><div class="hudr"><div class="coin candy">🍬 <b class="candyN">0</b></div><div class="coin">💰 <b class="coinN">0</b></div></div></header>
+  <div class="raid">
+    <div class="rboss"><img id="ebImg" alt="บอสอีเว้นท์"></div>
+    <div class="rinfo">
+      <h2 id="ebName"></h2>
+      <div class="rhp"><div class="fill" id="ebFill"></div></div>
+      <div class="rhpt"><b id="ebHp"></b><span id="ebDealt"></span></div>
+      <div class="rmeta"><span id="ebAtt"></span><span id="ebReset"></span></div>
+      <div class="ebrule" id="ebRule"></div>
+      <div class="myteam"><span>ทีมของคุณ</span><div id="ebTeam"></div><button class="sec small" data-go="team">จัดทีม</button></div>
+      <div class="two"><button id="ebGo">โจมตีบอส</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ออนไลน์: หน้าหลัก -->
+<section class="screen hidden" id="onlineScr">
+  <header class="top"><button class="sec small" data-go="home">← กลับ</button><h1>ออนไลน์ 🌐</h1><div class="coin" id="onMe">—</div></header>
+  <div class="onbody" id="onBody"></div>
+</section>
+
+<!-- ออนไลน์: ห้องต่อสู้ -->
+<section class="screen hidden" id="roomScr">
+  <header class="top"><button class="sec small" id="roomLeave">← ออกจากห้อง</button><h1 id="roomTitle">ห้องต่อสู้</h1><div class="coin" id="roomMe">—</div></header>
+  <div class="onbody" id="roomBody"></div>
+</section>
+
+<!-- ออนไลน์: เพื่อน -->
+<section class="screen hidden" id="friendsScr">
+  <header class="top"><button class="sec small" data-go="online">← กลับ</button><h1>เพื่อน 👥</h1><div class="coin" id="frMe">—</div></header>
+  <div class="onbody" id="frBody"></div>
+</section>
+
+<!-- ออนไลน์: แชทโลก -->
+<section class="screen hidden" id="chatScr">
+  <header class="top"><button class="sec small" data-go="online">← กลับ</button><h1>แชทโลก 💬</h1><div class="coin" id="chMe">—</div></header>
+  <div class="chat"><div class="chatlog" id="chatLog" aria-live="polite"></div>
+    <form class="chatform" id="chatForm"><input id="chatIn" maxlength="200" placeholder="พิมพ์ข้อความ…" autocomplete="off"><button type="submit">ส่ง</button></form></div>
+</section>
+
+<!-- เลือกโหมดเล่น -->
+<section class="screen hidden" id="playScr">
+  <header class="top"><button class="sec small" data-go="home">← กลับ</button><h1>เลือกโหมดการเล่น</h1><div class="coin">💰 <b class="coinN">0</b></div></header>
+  <div class="modes">
+    <button class="mode m-stage" data-go="stages"><span class="mi">⚔️</span><b>เล่นด่าน</b><small>ผ่านด่านตามลำดับ รับ EXP และเงิน<br>ชนะครั้งแรกได้รางวัลเยอะ</small><em id="mdStages"></em></button>
+    <button class="mode m-raid" data-go="raid"><span class="mi">🐉</span><b>ลงเรด</b><small>รุมบอสยักษ์ HP สะสมข้ามรอบ<br>รีเซ็ตทุก 1 ชั่วโมง</small><em id="mdRaid"></em></button>
+    <button class="mode m-chal" data-go="chal"><span class="mi">🏆</span><b>ลงชาเลนจ์</b><small>ภารกิจพิเศษ 3 ระดับ ง่าย / ปานกลาง / ยาก<br>เปลี่ยนศัตรูใหม่ทุก 30 นาที</small><em id="mdChal"></em></button>
+  </div>
+</section>
+
+<!-- เรด -->
+<section class="screen hidden" id="raidScr">
+  <header class="top"><button class="sec small" data-go="play">← กลับ</button><h1>ลงเรด</h1><div class="coin">💰 <b class="coinN">0</b></div></header>
+  <div class="raid">
+    <div class="rboss"><img id="rbImg" alt="บอส"></div>
+    <div class="rinfo">
+      <h2 id="rbName"></h2>
+      <div class="rhp"><div class="fill" id="rbFill"></div></div>
+      <div class="rhpt"><b id="rbHp"></b><span id="rbDealt"></span></div>
+      <div class="rmeta"><span id="rbAtt"></span><span id="rbReset"></span></div>
+      <div class="rms" id="rbMs"></div>
+      <div class="myteam"><span>ทีมของคุณ</span><div id="rbTeam"></div><button class="sec small" data-go="team">จัดทีม</button></div>
+      <div class="two"><button id="rbGo">โจมตีบอส</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ชาเลนจ์ -->
+<section class="screen hidden" id="chalScr">
+  <header class="top"><button class="sec small" data-go="play">← กลับ</button><h1>ลงชาเลนจ์</h1><div class="coin">💰 <b class="coinN">0</b></div></header>
+  <div class="tinfo"><span id="chInfo"></span></div>
+  <div class="stages" id="chalList"></div>
+</section>
+
+<!-- รางวัลเลเวล -->
+<!-- เควสพัฒนา -->
+<section class="screen hidden" id="evoScr">
+  <header class="top"><button class="sec small" data-go="home">← กลับ</button><h1>เควสพัฒนา</h1><div class="coin">💰 <b class="coinN">0</b></div></header>
+  <div class="tinfo"><span id="evoHint"></span><small>เลือกการ์ดตัวละครเพื่อรับเควส · ผ่านด่านเควสเพื่อสะสมวัตถุดิบ แล้วนำมาอีโวการ์ด</small></div>
+  <div class="evo" id="evoBody"></div>
+</section>
+
+<section class="screen hidden" id="lvrScr">
+  <header class="top"><button class="sec small" data-go="home">← กลับ</button><h1>รางวัลเลเวล</h1><div class="coin">💰 <b class="coinN">0</b></div></header>
+  <div class="tinfo"><span id="lvrNow"></span><button class="small" id="lvrAll"></button></div>
+  <div class="rgrid" id="lvrList"></div>
+</section>
+
+<!-- อัปเลเวล -->
+<section class="screen hidden" id="upScr">
+  <header class="top"><button class="sec small" data-go="home">← กลับ</button><h1>อัพเกรดการ์ด</h1><div class="coin">💰 <b class="coinN">0</b></div></header>
+  <div class="tinfo"><span>อัพเลเวลสูงสุด Lv.100 · อัพดาวสูงสุด 6 ★</span><small>เลเวล: ใช้เงิน เพิ่ม POWER/HP +4% ต่อเลเวล · ดาว: ใช้การ์ดซ้ำ เพิ่ม POWER/HP +10% ต่อดาว</small></div>
+  <div class="gallery" id="upList"></div>
+</section>
+
+<!-- คลังการ์ด -->
+<section class="screen hidden" id="invScr">
+  <header class="top"><button class="sec small" data-go="home">← กลับ</button><h1>คลังการ์ด</h1><div class="coin">💰 <b class="coinN">0</b></div></header>
+  <div class="tinfo"><label class="tg"><input type="checkbox" id="autoSell2"> ขายการ์ดซ้ำอัตโนมัติเมื่อสุ่มได้ (คืนเงิน)</label><button class="small" id="sellAll"></button></div>
+  <div class="gallery" id="invList"></div>
+</section>
+
+<!-- ต่อสู้ (ออโต้) -->
+<section class="screen hidden" id="battleScr">
+  <header class="top">
+    <div><div class="turn" id="turnLbl"></div><small class="stg-name" id="stgName"></small></div>
+    <div class="ctl">
+      <button class="sec small" id="pauseBtn">หยุด</button>
+      <button class="sec small" id="speedBtn">ความเร็ว x1</button>
+      <button class="sec small hidden" id="autoBtn">ออโต้: ปิด</button>
+      <button class="sec small" id="backBtn">ออกจากด่าน</button>
+    </div>
+  </header>
+  <div class="stage">
+    <div class="team" id="teamA"></div>
+    <div class="center"><div class="vs">VS</div><div id="log" aria-live="polite"></div></div>
+    <div class="team" id="teamB"></div>
+  </div>
+</section>
+
+<div id="fx" aria-hidden="true"></div>
+<div id="toast" role="status"></div>
+
+<!-- หน้าต่างอเนกประสงค์ (สอนเล่น / แจกการ์ด / ผลลัพธ์ / กาชา) -->
+<div class="modal hidden" id="mdl"><div class="panel" id="mdlBody"></div></div>
+
+<!-- ปรับค่าทดลอง -->
+<div class="modal hidden" id="tune"><div class="panel">
+  <h2>ปรับค่าทดลอง</h2>
+  <div class="cfg">
+    <b>โกคู</b><label for="gP">POWER</label><input id="gP" type="number" value="7" min="1"><label for="gH">HP</label><input id="gH" type="number" value="200" min="1"><label for="gr">เพิ่ม POWER ต่อเทิร์น (%)</label><input id="gr" type="number" value="50" min="0">
+    <b>เซ็นอิทสึ</b><label for="zP">POWER</label><input id="zP" type="number" value="25" min="1"><label for="zH">HP</label><input id="zH" type="number" value="200" min="1"><label for="zc">โอกาสทำให้ชา (%)</label><input id="zc" type="number" value="40" min="0" max="100">
+    <b>คิริโตะ</b><label for="kP">POWER</label><input id="kP" type="number" value="30" min="1"><label for="kH">HP</label><input id="kH" type="number" value="230" min="1"><label for="kh">ฟื้นฟู HP (% ของ HP ทั้งหมด)</label><input id="kh" type="number" value="10" min="0"><label for="ki">ฟื้นฟูทุกกี่เทิร์น</label><input id="ki" type="number" value="2" min="1">
+    <b>คุราปิก้า</b><label for="rP">POWER</label><input id="rP" type="number" value="37" min="1"><label for="rH">HP</label><input id="rH" type="number" value="300" min="1"><label for="nh">นิ้วโป้ง: ฟื้นฟู HP (% ของ HP ทั้งหมด)</label><input id="nh" type="number" value="10" min="0"><label for="rm">นิ้วก้อย: ตัวคูณดาเมจ</label><input id="rm" type="number" value="2" min="0" step="0.5">
+    <b>ซาสึเกะ</b><label for="sP">POWER</label><input id="sP" type="number" value="45" min="1"><label for="sH">HP</label><input id="sH" type="number" value="450" min="1"><label for="lb">สายฟ้า: ดาเมจเพิ่ม (% ของ POWER ผู้โจมตี)</label><input id="lb" type="number" value="20" min="0"><label for="lc">โอกาสทำให้ชา (%)</label><input id="lc" type="number" value="45" min="0" max="100">
+    <b>อิจิโกะ</b><label for="oP">POWER</label><input id="oP" type="number" value="29" min="1"><label for="oH">HP</label><input id="oH" type="number" value="280" min="1"><label for="oN">ท่าไม้ตายทุกกี่เทิร์น</label><input id="oN" type="number" value="2" min="1"><label for="oM">ตัวคูณดาเมจท่าไม้ตาย</label><input id="oM" type="number" value="3" min="1" step="0.5">
+    <b>เมงุมิ</b><label for="mP">POWER</label><input id="mP" type="number" value="32" min="1"><label for="mH">HP</label><input id="mH" type="number" value="270" min="1"><label for="mD">สุนัข: ดาเมจ (% ของ POWER)</label><input id="mD" type="number" value="50" min="0"><label for="mN">นกฮูก: โอกาสชา (%)</label><input id="mN" type="number" value="50" min="0" max="100"><label for="mE">คชสาร: ตัวคูณดาเมจ</label><input id="mE" type="number" value="2" min="0" step="0.5"><label for="mR">กระต่าย: โอกาสโจมตีไม่โดน (%)</label><input id="mR" type="number" value="50" min="0" max="100">
+    <b>ยูจิ</b><label for="yP">POWER</label><input id="yP" type="number" value="29" min="1"><label for="yH">HP</label><input id="yH" type="number" value="240" min="1"><label for="ym">ตัวคูณดาเมจใส่ศัตรูระดับสูงกว่า</label><input id="ym" type="number" value="2" min="1" step="0.5">
+    <b>กิลกาเมช</b><label for="iP">POWER</label><input id="iP" type="number" value="20" min="1"><label for="iH">HP</label><input id="iH" type="number" value="210" min="1"><label for="gc">จำนวนอาวุธที่เรียก</label><input id="gc" type="number" value="3" min="0"><label for="gd">ดาเมจต่ออาวุธ</label><input id="gd" type="number" value="10" min="0">
+    <b>ฮูเต๋า</b><label for="hP">POWER</label><input id="hP" type="number" value="40" min="1"><label for="hH">HP</label><input id="hH" type="number" value="400" min="1"><label for="hB">เผาไหม้: ดาเมจต่อเทิร์น (% ของ POWER)</label><input id="hB" type="number" value="10" min="0"><label for="hT">เผาไหม้: นานกี่เทิร์น</label><input id="hT" type="number" value="3" min="1"><label for="hG">ผีตัวเล็ก: ดาเมจ (% ของ POWER)</label><input id="hG" type="number" value="10" min="0">
+    <b>ลูฟี่ ไนท์แมร์</b><label for="fP">POWER</label><input id="fP" type="number" value="35" min="1"><label for="fH">HP</label><input id="fH" type="number" value="500" min="1"><label for="fC">เข้าสิง: โอกาสโจมตีตัวเอง (%)</label><input id="fC" type="number" value="50" min="0" max="100">
+    <b>เก็งการ์ร่างกิกะแม็กซ์</b><label for="eP">POWER</label><input id="eP" type="number" value="37" min="1"><label for="eH">HP</label><input id="eH" type="number" value="490" min="1"><label for="eG">แปลงสถานะลบ: POWER เพิ่มต่อสถานะ (%)</label><input id="eG" type="number" value="10" min="0">
+    <b>อลูคาร์ด</b><label for="aP">POWER</label><input id="aP" type="number" value="22" min="1"><label for="aH">HP</label><input id="aH" type="number" value="460" min="1"><label for="aB">เลือดไหล: ดาเมจต่อเทิร์น (% ของ HP สูงสุดศัตรู)</label><input id="aB" type="number" value="5" min="0">
+    <b>ไอแซ็ค ฟรอสเตอร์</b><label for="xP">POWER</label><input id="xP" type="number" value="33" min="1"><label for="xH">HP</label><input id="xH" type="number" value="333" min="1"><label for="xN">โอกาสโจมตีเฉียดจุดตาย (%)</label><input id="xN" type="number" value="33" min="0" max="100"><label for="xM">เฉียดจุดตาย: ตัวคูณดาเมจ</label><input id="xM" type="number" value="2" min="1" step="0.5"><label for="xK">โอกาสโจมตีจุดตาย (%) (ที่เหลือ = โจมตีปกติ)</label><input id="xK" type="number" value="33" min="0" max="100">
+    <b>โอคารุน</b><label for="uP">POWER</label><input id="uP" type="number" value="40" min="1"><label for="uH">HP</label><input id="uH" type="number" value="400" min="1"><label for="uD">โอกาสหลบการโจมตี (%)</label><input id="uD" type="number" value="30" min="0" max="100"><label for="uT">เทอร์โบ: ดาเมจเพิ่ม (% ของ POWER)</label><input id="uT" type="number" value="30" min="0">
+    <b>นารูโตะ</b><label for="wP">POWER</label><input id="wP" type="number" value="25" min="1"><label for="wH">HP</label><input id="wH" type="number" value="230" min="1"><label for="wR">ร่างแยก: สเตตัสที่ลดลง (% ของสเตตัสทั้งหมด)</label><input id="wR" type="number" value="10" min="0" max="99">
+    <b>นารูโตะ 1 หาง (อีโว)</b><label for="n1P">POWER</label><input id="n1P" type="number" value="35" min="1"><label for="n1H">HP</label><input id="n1H" type="number" value="350" min="1"><label for="n1h">ฟื้นฟู HP (% ของ HP สูงสุด)</label><input id="n1h" type="number" value="20" min="0" max="100"><label for="n1c">โอกาสทำให้ชะงัก (%)</label><input id="n1c" type="number" value="40" min="0" max="100">
+    <b>เก็กโค ฮายาเตะ</b><label for="qP">POWER</label><input id="qP" type="number" value="25" min="1"><label for="qH">HP</label><input id="qH" type="number" value="300" min="1"><label for="qR">เลือดไหล/พิษ: ดาเมจต่อสถานะ (% ของ POWER)</label><input id="qR" type="number" value="10" min="0" max="100">
+    <b>ยามานากะ อิโนะ</b><label for="inP">POWER</label><input id="inP" type="number" value="27" min="1"><label for="inH">HP</label><input id="inH" type="number" value="290" min="1"><label for="inI">ย้ายร่างทุกๆ (เทิร์นของอิโนะ)</label><input id="inI" type="number" value="2" min="1"><label for="inX">ดาเมจโจมตีตัวเอง (× POWER ของศัตรู)</label><input id="inX" type="number" value="2" min="0" step="0.5">
+    <b>ซาสึเกะ (ร่างเด็ก)</b><label for="kdP">POWER</label><input id="kdP" type="number" value="25" min="1"><label for="kdH">HP</label><input id="kdH" type="number" value="250" min="1"><label for="kdF">คาถาเพลิง: ดาเมจ (% ของ POWER)</label><input id="kdF" type="number" value="20" min="0"><label for="kdB">เผาไหม้: ดาเมจต่อเทิร์น (% ของ HP สูงสุดศัตรู)</label><input id="kdB" type="number" value="10" min="0"><label for="kdT">เผาไหม้: นานกี่เทิร์น</label><input id="kdT" type="number" value="3" min="1">
+    <b>ซาสึเกะ อักขระคำสาป (อีโว)</b><label for="scP">POWER</label><input id="scP" type="number" value="35" min="1"><label for="scH">HP</label><input id="scH" type="number" value="370" min="1"><label for="scV">ไฟฟ้าช็อต: ดาเมจต่อเทิร์น (% ของ HP สูงสุดศัตรู)</label><input id="scV" type="number" value="10" min="0"><label for="scC">โอกาสโจมตีไม่ได้ (%)</label><input id="scC" type="number" value="50" min="0" max="100"><label for="scT">ชาขั้นรุนแรง: นานกี่เทิร์น</label><input id="scT" type="number" value="3" min="1">
+    <b>กติกา</b><label for="first">ใครโจมตีก่อน</label><select id="first"><option value="a">ฝั่งผู้เล่น</option><option value="b">ฝั่งศัตรู</option><option value="r">สุ่ม</option></select>
+    <b>เครื่องมือทดสอบ</b>
+  </div>
+  <div class="two"><button class="sec small" id="devMoney">+1,000 เงิน</button><button class="sec small" id="devEvo">ชุดทดสอบอีโว</button><button class="sec small" id="devCandy">+1,000 ลูกอม</button><button class="sec small" id="devExp">+1,000 EXP</button><button class="sec small" id="devRaid">รีเซ็ตเรด/ชาเลนจ์</button><button class="sec small" id="devReset">รีเซ็ตเซฟ</button></div>
+  <button id="tuneOk" style="margin-top:12px">ตกลง</button>
+</div></div>
+
+<script src="js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.min.js"></script>
+<script src="js/script.js"></script>
+<script src="js/app.js"></script>
+<script src="js/online.js"></script>
+</body>
+</html>
