@@ -118,6 +118,7 @@ function renderHome(){
 $('#howBtn').onclick=()=>tutorial(false);
 /* ---------- โค้ดของขวัญ ---------- */
 const GIFT_CODES={
+  RELEASE:()=>{SV.coins=(SV.coins||0)+10000;SV.candy=(SV.candy||0)+3000;return 'เงิน +10,000 · ลูกอม +3,000'},
   DEV:()=>{SV.coins=(SV.coins||0)+99999999;SV.candy=(SV.candy||0)+999999999;let n=0;
     Object.keys(CARDS).forEach(id=>{if(!SV.owned.includes(id)){SV.owned.push(id);SV.count[id]=1;n++}});
     return 'เงิน +99,999,999 · ลูกอม +999,999,999 · ปลดล็อคการ์ดใหม่ '+n+' ใบ'}
