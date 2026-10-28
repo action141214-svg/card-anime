@@ -4,13 +4,13 @@ const MAX_TEAM=4;
 /* ตู้กาชา: สุ่มได้ทุกใบรวมถึงตัวซ้ำ (น้ำหนัก = % ที่ออก) — ปรับทีหลังได้ */
 const GACHA={cost:100,cost10:900,
   /* การ์ดที่สุ่มได้ในตู้ (LTD ยังไม่เปิดให้สุ่ม — ซาสึเกะจะหาวิธีได้รับภายหลัง) */
-  pool:['goku','zenitsu','yuji','naruto','sasukekid','gekko','ino','kirara','garo','vegeta','ichigo','kirito','megumi','gil','kurapika','shuna','chahaein','kaneki','reze','kdash','mai','kula'],
+  pool:['goku','zenitsu','yuji','naruto','sasukekid','gekko','ino','kirara','garo','vegeta','ichigo','kirito','megumi','gil','kurapika','shuna','chahaein','kaneki','reze','kdash','mai','kula','slime'],
   /* เรทออก % : base = ปกติ, up = ตอนเป็นการ์ดเรทอัป (การ์ด R ที่เหลือแบ่งเท่าๆ กัน) */
   /* เรทตามระดับ (รวมทุกใบในระดับนั้น): USR 0.1% · UR 1% — แบ่งเท่าๆ กันในระดับเดียวกัน, ถ้าเป็นการ์ดเรทอัปได้ส่วนแบ่ง rarUp ของระดับนั้น (ตัวเลขใน rates ด้านล่างของ UR/USR ใช้แสดงผลเท่านั้น) */
   rarTotal:{USR:0.1,UR:1},rarUp:0.7,
   /* การันตี (ตู้ปกติ): สุ่มครบกี่ครั้งโดยยังไม่ได้ระดับนั้น → ครั้งถัดไปได้แน่นอน (ได้ USR ถือว่านับ UR ใหม่ด้วย) */
   pityUR:400,pityUSR:1000,
-  rates:{base:{kirito:15,ichigo:15,kaneki:10,megumi:5,shuna:8,chahaein:4,gil:0.5,reze:0.5,kurapika:0.05,kdash:0.05,mai:0.05},up:{kirito:30,ichigo:30,kaneki:10,megumi:10,shuna:8,chahaein:4,gil:0.7,reze:0.7,kurapika:0.07,kdash:0.07,mai:0.07}},
+  rates:{base:{kirito:15,ichigo:15,kaneki:10,megumi:5,shuna:8,slime:8,chahaein:4,gil:0.5,reze:0.5,kurapika:0.05,kdash:0.05,mai:0.05},up:{kirito:30,ichigo:30,kaneki:10,megumi:10,shuna:8,slime:8,chahaein:4,gil:0.7,reze:0.7,kurapika:0.07,kdash:0.07,mai:0.07}},
   dup:{R:20,S:40,SR:55,SSR:70,UR:90,USR:130,LTD:180},
   /* ตู้เดียว เรทอัปเปลี่ยนทุก 1 ชั่วโมง (เวลาไทย) วนตามลำดับนี้: c = การ์ดตรงกลาง, s = การ์ดข้างๆ (เรทปกติ) */
   rotation:[{c:'kurapika',s:['yuji','kirito']},{c:'gil',s:['zenitsu','kirito']},{c:'kirito',s:['goku','gil']},
@@ -131,6 +131,7 @@ const GIFT_CODES={
   GILQUEEN:()=>{if(!SV.owned.includes('gilqueen')){SV.owned.push('gilqueen');SV.count.gilqueen=1}else SV.count.gilqueen=(SV.count.gilqueen||1)+1;SV.lv.gilqueen=100;return 'ได้รับ ราชินีแห่งวีรชน กิลกาเมช เลเวล 100'},
   HOJIN:()=>{SV.items=SV.items||{};SV.items.hojin=(SV.items.hojin||0)+3;return 'ได้รับ ธรรมจักรแปดซี่ ×3'},
   CC:()=>{if(!SV.owned.includes('cc')){SV.owned.push('cc');SV.count.cc=1}else SV.count.cc=(SV.count.cc||1)+1;SV.lv.cc=Math.max(SV.lv.cc||1,100);SV.star=SV.star||{};SV.star.cc=Math.max(SV.star.cc||1,5);return 'ได้รับ ซีซี เลเวล 100 · 5 ดาว'},
+  RIMURU:()=>{if(!SV.owned.includes('rimuru')){SV.owned.push('rimuru');SV.count.rimuru=1}else SV.count.rimuru=(SV.count.rimuru||1)+1;SV.lv.rimuru=Math.max(SV.lv.rimuru||1,100);SV.star=SV.star||{};SV.star.rimuru=Math.max(SV.star.rimuru||1,5);return 'ได้รับ ริมุรุ เทมเพสต์ เลเวล 100 · 5 ดาว'},
   FULL:()=>{SV.items=SV.items||{};Object.keys(ITEMS).forEach(k=>{SV.items[k]=(SV.items[k]||0)+999});return 'ได้รับวัตถุดิบอีโวทุกชิ้น ชิ้นละ 999'}
 };
 function codeModal(){
@@ -227,7 +228,7 @@ function renderTeam(){
   }
 }
 /* ปุ่ม i: ดูความสามารถของการ์ด */
-const MORE={cc:['เมื่ออยู่ในทีม (และยังไม่ถูกกำจัด) ป้องกันสถานะผิดปกติทั้งหมดให้การ์ดทุกใบในทีม','ครอบคลุม: ชา, ไหม้, เลือดไหล, พิษ, แช่แข็ง, มึนงง, ถูกผนึก ฯลฯ'],konan:['เพิ่ม HP และ POWER +20% ให้การ์ดอีเว้นท์ฮาโลวีนในทีม (รวมตัวเอง)','ทุกครั้งที่โจมตี สุ่มกระดาษ 1 ใน 2 แบบ (แบบละ 50%)','📜 ลดความเสียหาย: POWER ศัตรูลด 75% ของ POWER สูงสุด จนจบการโจมตีครั้งถัดไป','💥 ระเบิด: 75% ของ POWER ปัจจุบันใส่การ์ดใบที่สองของฝ่ายตรงข้าม (ถ้าไม่มีก็ไม่มีผล)'],kirara:['แสตก "กลุ่มดาวกางเขนใต้" เพิ่ม 1 ทุกครั้งที่โจมตี (สูงสุด 5) และหายเมื่อศัตรูถูกกำจัด','แต่ละแสตก = อุปสรรค 1 ชิ้นพุ่งใส่ สุ่ม: 🚗 รถยนต์ 70% POWER','🪨 ก้อนหิน 40% POWER + โอกาส 40% มึนงง (โจมตีไม่ได้ 1 เทิร์น)','🗡️ ของมีคม 55% POWER + เลือดไหล 5% ของ HP สูงสุดศัตรู'],garo:['โจมตี 2 ครั้งต่อเทิร์น','โอกาส 40% หลบการโจมตีที่เข้ามาแต่ละครั้ง'],vegeta:['หลังโจมตีปกติ ปล่อยกระสุนพลังสุ่ม 2-5 ลูก','กระสุนแต่ละลูกสร้างความเสียหาย 60% ของ POWER ปัจจุบัน'],kula:['โอกาส 60% ติดสถานะ "ผลึกน้ำแข็ง" ❄','ศัตรูถูกแช่แข็ง โจมตีไม่ได้ 1 เทิร์น','ผลึกตกค้าง 2 เทิร์น เสีย HP 60% ของ POWER คุลาต่อเทิร์น'],mahoraga:['ทุกเทิร์น กงล้อธรรมจักรหมุน 1 ครั้ง แล้วสุ่มได้ 1 อย่าง (โอกาสเท่ากัน):','☸ เพิ่ม POWER +50','☸ ฟื้นฟู HP 20% ของ HP ที่เสียไป','☸ ต้านทานสถานะด้านลบทุกชนิด (ล้างสถานะที่ติดอยู่และกันสถานะใหม่จนถึงเทิร์นถัดไปของตน)'],sasukecurse:['ทุกครั้งที่โจมตี ศัตรูจะติดสถานะ "ชาขั้นรุนแรง" (⚡) นาน 3 เทิร์น (ต่ออายุทุกครั้งที่โจมตี)','ต้นเทิร์นของศัตรู: ถูกไฟฟ้าช็อต เสีย HP 10% ของ HP สูงสุดของศัตรู 1 ครั้ง','และมีโอกาส 50% ที่ศัตรูจะโจมตีไม่ได้ในเทิร์นนั้น','ลบสถานะได้ด้วยนิ้วนางของคุราปิก้า (โอคารุนไม่ได้รับผล)'],sasukekid:['ทุกครั้งที่โจมตี ปล่อยคาถาเพลิง ลูกไฟสร้างความเสียหาย 20% ของ POWER ปัจจุบัน','ศัตรูติดสถานะ "เผาไหม้" (🔥) เสีย HP 10% ของ HP สูงสุดของศัตรู ต้นเทิร์นทุกเทิร์น นาน 3 เทิร์น','ลบสถานะได้ด้วยนิ้วนางของคุราปิก้า'],ino:['ทุกๆ 2 เทิร์นของอิโนะ (เทิร์นที่ 2, 4, 6 …) จะย้ายร่างศัตรู','ศัตรูที่ถูกย้ายร่างโจมตีตัวเอง เสีย HP 2 เท่าของ POWER ปัจจุบันของตัวมันเอง','ใช้หลังการโจมตีปกติ · ถูกผนึกความสามารถแล้วใช้ไม่ได้'],gekko:['เมื่อโจมตี จะสร้างสถานะ "เลือดไหล" และ "ติดพิษ" ใส่ศัตรู','แต่ละสถานะทำให้เสีย HP 10% ของ POWER ปัจจุบันของเก็กโค ต่อเทิร์น (ต้นเทิร์นของศัตรู)','ไม่ซ้อนทับ — โจมตีซ้ำเพียงอัปเดตดาเมจให้เท่ากับค่าสูงสุด · หายเมื่อถูกล้างสถานะ'],naruto:['เมื่อถูกกำจัดครั้งแรก จะเรียกร่างแยกลงสนามแทนทันที (ฟื้น HP เต็มตามสเตตัสร่างแยก)','ร่างแยกมี POWER และ HP ลดลง 10% ของสเตตัสทั้งหมด (ปรับได้ในหน้าปรับค่าทดลอง)','ร่างแยกถูกกำจัดแล้วไม่เรียกซ้ำอีก'],okarun:['มีโอกาส 30% หลบการโจมตี (รวมการโจมตีจากผู้ช่วยหรือความสามารถของศัตรู) หลบแล้วไม่โดนดาเมจ','ไม่ได้รับผลของสถานะด้านลบทุกชนิด (ชา ผนึก สายฟ้า เผาไหม้ เข้าสิง เลือดไหล ฯลฯ)','เมื่อโจมตีจะติดสัญลักษณ์เทอร์โบ (⚡) ทำให้การโจมตีครั้งถัดไปดาเมจเพิ่ม 30% ของ POWER ปัจจุบัน'],isaac:['ทุกครั้งที่โจมตีสุ่ม 1 ใน 3 รูปแบบ (ตั้งค่าโอกาสได้ในหน้าปรับค่าทดลอง ค่าเริ่มต้นประมาณ 1 ใน 3 เท่ากัน)','โจมตีปกติ: ดาเมจเท่า POWER','โจมตีเฉียดจุดตาย: ดาเมจ 2 เท่าของ POWER ปัจจุบัน','โจมตีจุดตาย: ศัตรูตายทันที'],alucard:['โจมตีได้ 2 ครั้งใน 1 เทิร์น (ครั้งที่ 2 ต่อจากครั้งแรกทันที)','เมื่อโจมตี ศัตรูติดสถานะ "เลือดไหล" (🩸) เสีย HP 5% ของ HP สูงสุดของศัตรู ต้นเทิร์นทุกเทิร์น จนกว่าจะถูกลบสถานะหรือตาย'],gengar:['เมื่อติดสถานะด้านลบ (ชา / ผนึก / สายฟ้า / สับสน / เผาไหม้ / เข้าสิง) จะล้างสถานะนั้นทันที','ทุกสถานะที่ล้างได้ เพิ่ม POWER ให้ตัวเอง 10% ของ POWER ปัจจุบัน'],luffy:['ทุกครั้งที่โจมตี ศัตรูจะติดสถานะ "เข้าสิง" (ป้าย 👻)','ในเทิร์นถัดไปของศัตรู มีโอกาส 50% ที่จะโจมตีตัวเอง (ดาเมจเท่า POWER ของตัวเอง) แทนการโจมตีปกติ','สถานะหมดลงเมื่อถึงเทิร์นของศัตรู ไม่ว่าจะโจมตีตัวเองหรือไม่'],hutao:['ทุกครั้งที่โจมตี เรียกผีเมาช่วยโจมตี สุ่ม 1 ใน 2 รูปแบบ (50%)','เผาไหม้: ติดสถานะเผาไหม้ เสีย HP ต้นเทิร์นของศัตรู 15% ของ HP สูงสุดของศัตรู นาน 3 เทิร์น','ผีตัวเล็ก: โจมตี 2 ครั้ง ครั้งละ 10% ของ POWER ปัจจุบัน'],ichigo:['ทุกๆ 2 เทิร์น การโจมตีครั้งถัดไป (ครั้งที่ 3, 6, 9 …) สร้างดาเมจ 3 เท่าของ POWER ปัจจุบัน','การ์ดจะมีป้าย "พลังสะสม ×3" เมื่อการโจมตีครั้งหน้าคือท่าไม้ตาย (เกตสึกะ เท็นโช)'],megumi:['สุนัข (Divine Dogs): สร้างดาเมจ 50% ของ POWER ปัจจุบัน','นกฮูก (Nue): มีโอกาส 50% ทำให้ศัตรูติดชาในเทิร์นนั้น','กบ (Toad): ลิ้นพันศัตรู ทำให้โจมตีได้อีกครั้ง','คชสาร (Max Elephant): สร้างดาเมจ 2 เท่าของ POWER ปัจจุบัน','กระต่าย (Rabbit Escape): มีโอกาส 50% ทำให้ศัตรูโจมตีไม่โดน','ทุกเทิร์นสุ่มเรียก 1 ตัว ตัวละ 20% เท่ากัน'],kurapika:['นิ้วโป้ง: ฟื้นฟู HP 10% ของ HP ทั้งหมด','นิ้วชี้: ขโมยความสามารถของการ์ดศัตรูมาใช้ในเทิร์นนั้น','นิ้วกลาง: ผนึกความสามารถของศัตรู (ใช้ไม่ได้ในเทิร์นของเขา)','นิ้วนาง: ลบสถานะด้านลบ','นิ้วก้อย: โจมตีซ้ำ ดาเมจ 2 เท่าของ POWER','ทุกครั้งที่โจมตีสุ่มนิ้วที่ใช้ นิ้วละ 20% เท่ากัน']};
+const MORE={slime:['สังหารการ์ดศัตรูได้ → แปลงร่างเป็นการ์ดนั้นทันที','คงสเตตัส (POWER / HP) และความสามารถของการ์ดที่ถูกสังหาร (HP เต็ม)','สังหารใบถัดไปก็แปลงร่างต่อได้เรื่อยๆ'],rimuru:['ผลลัพธ์ด้านลบ (สถานะผิดปกติ) ไม่มีผล','HP ต่ำกว่า 30% → โหมด "ผู้ไร้ความปราณี": สเตตัสรวม +50% นาน 6 เทิร์น','สังหารศัตรูได้ภายใน 6 เทิร์น → ฟื้น HP จนเต็ม','มีผลได้ 1 ครั้งต่อเกม'],cc:['เมื่ออยู่ในทีม (และยังไม่ถูกกำจัด) ป้องกันสถานะผิดปกติทั้งหมดให้การ์ดทุกใบในทีม','ครอบคลุม: ชา, ไหม้, เลือดไหล, พิษ, แช่แข็ง, มึนงง, ถูกผนึก ฯลฯ'],konan:['เพิ่ม HP และ POWER +20% ให้การ์ดอีเว้นท์ฮาโลวีนในทีม (รวมตัวเอง)','ทุกครั้งที่โจมตี สุ่มกระดาษ 1 ใน 2 แบบ (แบบละ 50%)','📜 ลดความเสียหาย: POWER ศัตรูลด 75% ของ POWER สูงสุด จนจบการโจมตีครั้งถัดไป','💥 ระเบิด: 75% ของ POWER ปัจจุบันใส่การ์ดใบที่สองของฝ่ายตรงข้าม (ถ้าไม่มีก็ไม่มีผล)'],kirara:['แสตก "กลุ่มดาวกางเขนใต้" เพิ่ม 1 ทุกครั้งที่โจมตี (สูงสุด 5) และหายเมื่อศัตรูถูกกำจัด','แต่ละแสตก = อุปสรรค 1 ชิ้นพุ่งใส่ สุ่ม: 🚗 รถยนต์ 70% POWER','🪨 ก้อนหิน 40% POWER + โอกาส 40% มึนงง (โจมตีไม่ได้ 1 เทิร์น)','🗡️ ของมีคม 55% POWER + เลือดไหล 5% ของ HP สูงสุดศัตรู'],garo:['โจมตี 2 ครั้งต่อเทิร์น','โอกาส 40% หลบการโจมตีที่เข้ามาแต่ละครั้ง'],vegeta:['หลังโจมตีปกติ ปล่อยกระสุนพลังสุ่ม 2-5 ลูก','กระสุนแต่ละลูกสร้างความเสียหาย 60% ของ POWER ปัจจุบัน'],kula:['โอกาส 60% ติดสถานะ "ผลึกน้ำแข็ง" ❄','ศัตรูถูกแช่แข็ง โจมตีไม่ได้ 1 เทิร์น','ผลึกตกค้าง 2 เทิร์น เสีย HP 60% ของ POWER คุลาต่อเทิร์น'],mahoraga:['ทุกเทิร์น กงล้อธรรมจักรหมุน 1 ครั้ง แล้วสุ่มได้ 1 อย่าง (โอกาสเท่ากัน):','☸ เพิ่ม POWER +50','☸ ฟื้นฟู HP 20% ของ HP ที่เสียไป','☸ ต้านทานสถานะด้านลบทุกชนิด (ล้างสถานะที่ติดอยู่และกันสถานะใหม่จนถึงเทิร์นถัดไปของตน)'],sasukecurse:['ทุกครั้งที่โจมตี ศัตรูจะติดสถานะ "ชาขั้นรุนแรง" (⚡) นาน 3 เทิร์น (ต่ออายุทุกครั้งที่โจมตี)','ต้นเทิร์นของศัตรู: ถูกไฟฟ้าช็อต เสีย HP 10% ของ HP สูงสุดของศัตรู 1 ครั้ง','และมีโอกาส 50% ที่ศัตรูจะโจมตีไม่ได้ในเทิร์นนั้น','ลบสถานะได้ด้วยนิ้วนางของคุราปิก้า (โอคารุนไม่ได้รับผล)'],sasukekid:['ทุกครั้งที่โจมตี ปล่อยคาถาเพลิง ลูกไฟสร้างความเสียหาย 20% ของ POWER ปัจจุบัน','ศัตรูติดสถานะ "เผาไหม้" (🔥) เสีย HP 10% ของ HP สูงสุดของศัตรู ต้นเทิร์นทุกเทิร์น นาน 3 เทิร์น','ลบสถานะได้ด้วยนิ้วนางของคุราปิก้า'],ino:['ทุกๆ 2 เทิร์นของอิโนะ (เทิร์นที่ 2, 4, 6 …) จะย้ายร่างศัตรู','ศัตรูที่ถูกย้ายร่างโจมตีตัวเอง เสีย HP 2 เท่าของ POWER ปัจจุบันของตัวมันเอง','ใช้หลังการโจมตีปกติ · ถูกผนึกความสามารถแล้วใช้ไม่ได้'],gekko:['เมื่อโจมตี จะสร้างสถานะ "เลือดไหล" และ "ติดพิษ" ใส่ศัตรู','แต่ละสถานะทำให้เสีย HP 10% ของ POWER ปัจจุบันของเก็กโค ต่อเทิร์น (ต้นเทิร์นของศัตรู)','ไม่ซ้อนทับ — โจมตีซ้ำเพียงอัปเดตดาเมจให้เท่ากับค่าสูงสุด · หายเมื่อถูกล้างสถานะ'],naruto:['เมื่อถูกกำจัดครั้งแรก จะเรียกร่างแยกลงสนามแทนทันที (ฟื้น HP เต็มตามสเตตัสร่างแยก)','ร่างแยกมี POWER และ HP ลดลง 10% ของสเตตัสทั้งหมด (ปรับได้ในหน้าปรับค่าทดลอง)','ร่างแยกถูกกำจัดแล้วไม่เรียกซ้ำอีก'],okarun:['มีโอกาส 30% หลบการโจมตี (รวมการโจมตีจากผู้ช่วยหรือความสามารถของศัตรู) หลบแล้วไม่โดนดาเมจ','ไม่ได้รับผลของสถานะด้านลบทุกชนิด (ชา ผนึก สายฟ้า เผาไหม้ เข้าสิง เลือดไหล ฯลฯ)','เมื่อโจมตีจะติดสัญลักษณ์เทอร์โบ (⚡) ทำให้การโจมตีครั้งถัดไปดาเมจเพิ่ม 30% ของ POWER ปัจจุบัน'],isaac:['ทุกครั้งที่โจมตีสุ่ม 1 ใน 3 รูปแบบ (ตั้งค่าโอกาสได้ในหน้าปรับค่าทดลอง ค่าเริ่มต้นประมาณ 1 ใน 3 เท่ากัน)','โจมตีปกติ: ดาเมจเท่า POWER','โจมตีเฉียดจุดตาย: ดาเมจ 2 เท่าของ POWER ปัจจุบัน','โจมตีจุดตาย: ศัตรูตายทันที'],alucard:['โจมตีได้ 2 ครั้งใน 1 เทิร์น (ครั้งที่ 2 ต่อจากครั้งแรกทันที)','เมื่อโจมตี ศัตรูติดสถานะ "เลือดไหล" (🩸) เสีย HP 5% ของ HP สูงสุดของศัตรู ต้นเทิร์นทุกเทิร์น จนกว่าจะถูกลบสถานะหรือตาย'],gengar:['เมื่อติดสถานะด้านลบ (ชา / ผนึก / สายฟ้า / สับสน / เผาไหม้ / เข้าสิง) จะล้างสถานะนั้นทันที','ทุกสถานะที่ล้างได้ เพิ่ม POWER ให้ตัวเอง 10% ของ POWER ปัจจุบัน'],luffy:['ทุกครั้งที่โจมตี ศัตรูจะติดสถานะ "เข้าสิง" (ป้าย 👻)','ในเทิร์นถัดไปของศัตรู มีโอกาส 50% ที่จะโจมตีตัวเอง (ดาเมจเท่า POWER ของตัวเอง) แทนการโจมตีปกติ','สถานะหมดลงเมื่อถึงเทิร์นของศัตรู ไม่ว่าจะโจมตีตัวเองหรือไม่'],hutao:['ทุกครั้งที่โจมตี เรียกผีเมาช่วยโจมตี สุ่ม 1 ใน 2 รูปแบบ (50%)','เผาไหม้: ติดสถานะเผาไหม้ เสีย HP ต้นเทิร์นของศัตรู 15% ของ HP สูงสุดของศัตรู นาน 3 เทิร์น','ผีตัวเล็ก: โจมตี 2 ครั้ง ครั้งละ 10% ของ POWER ปัจจุบัน'],ichigo:['ทุกๆ 2 เทิร์น การโจมตีครั้งถัดไป (ครั้งที่ 3, 6, 9 …) สร้างดาเมจ 3 เท่าของ POWER ปัจจุบัน','การ์ดจะมีป้าย "พลังสะสม ×3" เมื่อการโจมตีครั้งหน้าคือท่าไม้ตาย (เกตสึกะ เท็นโช)'],megumi:['สุนัข (Divine Dogs): สร้างดาเมจ 50% ของ POWER ปัจจุบัน','นกฮูก (Nue): มีโอกาส 50% ทำให้ศัตรูติดชาในเทิร์นนั้น','กบ (Toad): ลิ้นพันศัตรู ทำให้โจมตีได้อีกครั้ง','คชสาร (Max Elephant): สร้างดาเมจ 2 เท่าของ POWER ปัจจุบัน','กระต่าย (Rabbit Escape): มีโอกาส 50% ทำให้ศัตรูโจมตีไม่โดน','ทุกเทิร์นสุ่มเรียก 1 ตัว ตัวละ 20% เท่ากัน'],kurapika:['นิ้วโป้ง: ฟื้นฟู HP 10% ของ HP ทั้งหมด','นิ้วชี้: ขโมยความสามารถของการ์ดศัตรูมาใช้ในเทิร์นนั้น','นิ้วกลาง: ผนึกความสามารถของศัตรู (ใช้ไม่ได้ในเทิร์นของเขา)','นิ้วนาง: ลบสถานะด้านลบ','นิ้วก้อย: โจมตีซ้ำ ดาเมจ 2 เท่าของ POWER','ทุกครั้งที่โจมตีสุ่มนิ้วที่ใช้ นิ้วละ 20% เท่ากัน']};
 function showInfo(id){
   const c=CARDS[id],own=SV.owned.includes(id),l=clv(id),s=statAt(id,l,cstar(id));
   modal(`<div class="info"><div class="iimg" style="--c:${c.color}"><img src="${c.img}" alt="${c.name}"></div><div class="itxt"><h2>${c.name} ${rarTag(id)}</h2>
@@ -350,7 +351,7 @@ function grant(id){
 function pull(n){
   const hw=gMode==='hw',cost=gcost(n);
   if(pulling)return;if(hw&&!hwOpen())return toast('อีเว้นท์จบแล้ว');if(gbal()<cost)return toast(hw?'ลูกอมไม่พอ':'เงินไม่พอ');
-  if(hw)SV.candy-=cost;else SV.coins-=cost;const res=[];for(let i=0;i<n;i++)res.push(grant(roll()));save();hud();
+  if(hw)SV.candy-=cost;else{SV.coins-=cost;onSpend(cost)}const res=[];for(let i=0;i<n;i++)res.push(grant(roll()));save();hud();
   pulling=true;renderGacha();
   const box=$('#bbox'),im=$('.bc.main img'),ids=gcfg().pool;
   box.classList.add('shake');let k=0;const cyc=setInterval(()=>{im.src=CARDS[ids[k++%ids.length]].img},90);
@@ -432,6 +433,7 @@ function renderPlay(){
    kills = จำนวนครั้งที่กิลกาเมชสังหารศัตรู (นับทุกโหมดยกเว้นออนไลน์) · chal = จำนวนครั้งที่ชนะชาเลนจ์ · done = เควสที่รับรางวัลแล้ว */
 const cqN=k=>(SV.cq&&SV.cq[k])||0;
 /* สถิติเควส: heal = HP ที่ทีมเราฟื้นทุกวิธี · dmg = ดาเมจรวมที่ทำใส่ศัตรู (นับทุกโหมดยกเว้นออนไลน์ เริ่มนับตั้งแต่อัปเดตนี้) */
+function onSpend(n){SV.cq=SV.cq||{};SV.cq.spent=(SV.cq.spent||0)+(n||0)}   /* เงินที่ใช้ไปรวม (กาชา · อัปเลเวล · อีโว) นับตั้งแต่อัปเดตนี้ */
 function onStatHook(heal,dmg){SV.cq=SV.cq||{};if(heal)SV.cq.heal=(SV.cq.heal||0)+heal;if(dmg)SV.cq.dmg=(SV.cq.dmg||0)+dmg}
 const totalCards=()=>Object.values(SV.count||{}).reduce((t,n)=>t+(n||0),0);
 function onKillHook(id){if(id!=='gil')return;SV.cq=SV.cq||{};SV.cq.kills=(SV.cq.kills||0)+1}
@@ -442,7 +444,9 @@ const CQ=[{id:'gilq',card:'gilqueen',name:'ราชินีแห่งวี�
   {id:'cc',card:'cc',name:'ซีซี',
   reqs:[{t:'ฟื้นฟู HP ด้วยความสามารถอะไรก็ได้',unit:'HP',need:100000,cur:()=>Math.floor(cqN('heal'))},
         {t:'สร้างความเสียหายรวม',unit:'ดาเมจ',need:1000000,cur:()=>Math.floor(cqN('dmg'))},
-        {t:'มีการ์ดรวม',unit:'ใบ',need:5000,cur:totalCards}]}];
+        {t:'มีการ์ดรวม',unit:'ใบ',need:5000,cur:totalCards}]},
+  {id:'slime',card:'slime',name:'ริมุรุ ร่างสไลม์',
+  reqs:[{t:'ใช้เงิน',unit:'💰',need:1000000,cur:()=>Math.floor(cqN('spent'))}]}];
 const cqDone=q=>!!(SV.cq&&SV.cq.done&&SV.cq.done[q.id]);
 const cqReady=q=>q.reqs.every(r=>r.cur()>=r.need);
 function renderCharQ(){
@@ -649,7 +653,7 @@ $('#upList').onclick=e=>{
   const b=e.target.closest('[data-up]');if(!b)return;
   const[id,k]=b.dataset.up.split(','),r=upAffordable(id,+k);
   if(!r.k)return toast('เงินไม่พอ');
-  SV.coins-=r.c;SV.lv[id]=clv(id)+r.k;save();hud();renderUp(id);
+  SV.coins-=r.c;onSpend(r.c);SV.lv[id]=clv(id)+r.k;save();hud();renderUp(id);
   toast(CARDS[id].name+' → Lv.'+clv(id)+' (-💰'+r.c+')');
 };
 
@@ -919,7 +923,7 @@ function ifEnd(quit,r){
 }
 /* ---------- เควสพัฒนา (Evolution Quest) ---------- */
 /* วัตถุดิบ (ไอเทม) */
-const ITEMS={hojin:{name:'ธรรมจักรแปดซี่',img:'hojin.jpeg',rar:'UR',color:'#ffc93d',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้ EVOLUTION ให้กับการ์ดฟุชิงุโระ เมงุมิ'},sealc:{name:'อักขระต้องคำสาป',img:'sasuke_seal.jpeg',rar:'S',color:'#a06cff',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดอุจิวะ ซาสึเกะ (ร่างเด็ก)'},sword:{name:'ดาบของชา แฮ อิน',img:'swordcha.jpeg',rar:'SSR',color:'#e24b5b',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดชา แฮ อิน'},seal9:{name:'ตราประทับ 9 หาง',img:'narutoevo.jpeg',rar:'S',color:'#ffcf4a',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดอุซึมากิ นารูโตะ'}};
+const ITEMS={hojin:{name:'ธรรมจักรแปดซี่',img:'hojin.jpeg',rar:'UR',color:'#ffc93d',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้ EVOLUTION ให้กับการ์ดฟุชิงุโระ เมงุมิ'},sealc:{name:'อักขระต้องคำสาป',img:'sasuke_seal.jpeg',rar:'S',color:'#a06cff',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดอุจิวะ ซาสึเกะ (ร่างเด็ก)'},sword:{name:'ดาบของชา แฮ อิน',img:'swordcha.jpeg',rar:'SSR',color:'#e24b5b',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดชา แฮ อิน'},shisu:{name:'หน้ากากของชิสุ',img:'shisu.jpeg',rar:'SR',color:'#cfd8ff',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดริมุรุ ร่างสไลม์'},seal9:{name:'ตราประทับ 9 หาง',img:'narutoevo.jpeg',rar:'S',color:'#ffcf4a',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดอุซึมากิ นารูโตะ'}};
 const itemN=k=>SV.items[k]||0;
 /* เควสพัฒนา: from = การ์ดที่อีโว, to = การ์ดหลังอีโว, need = เงื่อนไข, boss = ด่านเควส (ชนะได้เงิน + มีโอกาสดรอปวัตถุดิบ) */
 const EVOS=[{from:'naruto',to:'naruto1',need:{cards:50,items:{seal9:1},coins:10000},
@@ -929,7 +933,9 @@ const EVOS=[{from:'naruto',to:'naruto1',need:{cards:50,items:{seal9:1},coins:100
   {from:'megumi',to:'mahoraga',need:{cards:50,items:{hojin:3},coins:100000},
   boss:{card:'mahoraga',name:'มโหรากา',hp:5000,power:150,lv:1,coins:100,drops:[{item:'hojin',rate:.01}]}},
   {from:'chahaein',to:'chaevo',need:{cards:50,items:{sword:1},coins:20000000},
-  boss:{card:'chaboss',name:'เริงระบำเจ้าหญิงดาบ ชา แฮ อิน',hp:10000,power:150,lv:1,coins:100,drops:[{item:'sword',rate:.01}]}}];
+  boss:{card:'chaboss',name:'เริงระบำเจ้าหญิงดาบ ชา แฮ อิน',hp:10000,power:150,lv:1,coins:100,drops:[{item:'sword',rate:.01}]}},
+  {from:'slime',to:'rimuru',need:{cards:100,items:{shisu:1},coins:50000000},
+  boss:{card:'slime',count:4,name:'ริมุรุ ร่างสไลม์ ×4',hp:5000,power:100,lv:1,coins:100,drops:[{item:'shisu',rate:.005}]}}];
 let evoSel=null,evoKeep=false,questTab='char';
 /* หน้า "เควส" มี 2 แท็บ: เควสตัวละคร (char) และ เควสพัฒนา (evo) */
 function renderQuest(){
@@ -966,7 +972,7 @@ function renderEvo(){
         ${row('เงิน 💰',SV.coins,e.need.coins)}</ul>
         <button id="evoDo" ${ok?'':'disabled'}>🧬 อีโวการ์ด</button></div>
       <div class="box"><b>ด่านเควส: ${b.name}</b>
-        <div class="evboss"><img src="${bc.img}" alt="${bc.name}"><div><div>HP <b>${b.hp.toLocaleString()}</b> · POWER <b>${b.power}</b></div><div>ชนะได้ 💰${b.coins} ทุกครั้ง</div>${b.drops.map(d=>`<div class="drop"><img src="${ITEMS[d.item].img}" alt=""> ${ITEMS[d.item].name} โอกาสออก ${+(d.rate*100).toFixed(1)}% · มี ×${itemN(d.item)}</div>`).join('')}</div></div>
+        <div class="evboss"><img src="${bc.img}" alt="${bc.name}"><div><div>${b.count>1?b.count+' ตัว · ':''}HP <b>${b.hp.toLocaleString()}</b>${b.count>1?' ต่อตัว':''} · POWER <b>${b.power}</b></div><div>ชนะได้ 💰${b.coins} ทุกครั้ง</div>${b.drops.map(d=>`<div class="drop"><img src="${ITEMS[d.item].img}" alt=""> ${ITEMS[d.item].name} โอกาสออก ${+(d.rate*100).toFixed(1)}% · มี ×${itemN(d.item)}</div>`).join('')}</div></div>
         <button id="evoPlay">⚔ เล่นด่านเควส</button></div>
     </div></div>`;
   $('#evoDo').onclick=()=>confirmEvolve(e);$('#evoPlay').onclick=()=>startEvoQuest(e);
@@ -978,7 +984,7 @@ function startEvoQuest(e){
   const team=SV.team.filter(x=>SV.owned.includes(x));
   if(!team.length){toast('ต้องมีการ์ดในทีมอย่างน้อย 1 ใบ');return go('team')}
   const b=e.boss;clearAuto();setAutoBtn();
-  Battle.start({auto:true,a:team,la:team.map(clv),sa:team.map(cstar),b:[b.card],lb:[b.lv],bossHp:{max:b.hp,cur:b.hp},bossP:b.power,noHeal:true,title:'เควสพัฒนา · '+b.name,first:'a',
+  Battle.start({auto:true,a:team,la:team.map(clv),sa:team.map(cstar),...(b.count>1?{b:Array(b.count).fill(b.card),lb:Array(b.count).fill(b.lv),fixB:{hp:b.hp,p:b.power}}:{b:[b.card],lb:[b.lv],bossHp:{max:b.hp,cur:b.hp},bossP:b.power}),noHeal:true,title:'เควสพัฒนา · '+b.name,first:'a',
     onExit:()=>{evoKeep=true;go('evo')},onEnd:r=>finishEvoQuest(e,r)});
 }
 function finishEvoQuest(e,r){
@@ -1004,7 +1010,7 @@ function confirmEvolve(e){
 function doEvolve(e){
   if(!evoOk(e)){closeModal();return renderEvo()}
   const lv=SV.lv[e.from]||1;
-  SV.count[e.from]-=e.need.cards;Object.entries(e.need.items).forEach(([k,n])=>{SV.items[k]=itemN(k)-n});SV.coins-=e.need.coins;
+  SV.count[e.from]-=e.need.cards;Object.entries(e.need.items).forEach(([k,n])=>{SV.items[k]=itemN(k)-n});SV.coins-=e.need.coins;onSpend(e.need.coins);
   if(SV.owned.includes(e.to))SV.count[e.to]=(SV.count[e.to]||1)+1;else{SV.owned.push(e.to);SV.count[e.to]=1}
   SV.lv[e.to]=Math.max(SV.lv[e.to]||1,lv);
   if(SV.count[e.from]<=0){   /* ใช้การ์ดเดิมหมด: ถอดออกจากคลัง และเปลี่ยนในทีมเป็นการ์ดใหม่ */
