@@ -6,7 +6,9 @@ const GACHA={cost:100,cost10:900,
   /* การ์ดที่สุ่มได้ในตู้ (LTD ยังไม่เปิดให้สุ่ม — ซาสึเกะจะหาวิธีได้รับภายหลัง) */
   pool:['goku','zenitsu','yuji','naruto','sasukekid','gekko','ino','ichigo','kirito','megumi','gil','kurapika','shuna','chahaein','reze','kdash'],
   /* เรทออก % : base = ปกติ, up = ตอนเป็นการ์ดเรทอัป (การ์ด R ที่เหลือแบ่งเท่าๆ กัน) */
-  rates:{base:{kirito:15,ichigo:15,megumi:5,gil:2,kurapika:0.1,shuna:8,chahaein:4,reze:1.5,kdash:0.1},up:{kirito:30,ichigo:30,megumi:10,gil:5,kurapika:0.5,shuna:8,chahaein:4,reze:1.5,kdash:0.1}},
+  /* เรทตามระดับ (รวมทุกใบในระดับนั้น): USR 0.1% · UR 1% — แบ่งเท่าๆ กันในระดับเดียวกัน, ถ้าเป็นการ์ดเรทอัปได้ส่วนแบ่ง rarUp ของระดับนั้น (ตัวเลขใน rates ด้านล่างของ UR/USR ใช้แสดงผลเท่านั้น) */
+  rarTotal:{USR:0.1,UR:1},rarUp:0.7,
+  rates:{base:{kirito:15,ichigo:15,megumi:5,shuna:8,chahaein:4,gil:0.5,reze:0.5,kurapika:0.05,kdash:0.05},up:{kirito:30,ichigo:30,megumi:10,shuna:8,chahaein:4,gil:0.7,reze:0.7,kurapika:0.07,kdash:0.07}},
   dup:{R:20,S:40,SR:55,SSR:70,UR:90,USR:130,LTD:180},
   /* ตู้เดียว เรทอัปเปลี่ยนทุก 1 ชั่วโมง (เวลาไทย) วนตามลำดับนี้: c = การ์ดตรงกลาง, s = การ์ดข้างๆ (เรทปกติ) */
   rotation:[{c:'kurapika',s:['yuji','kirito']},{c:'gil',s:['zenitsu','kirito']},{c:'kirito',s:['goku','gil']},
@@ -279,7 +281,11 @@ function evRates(b){
 function bannerRates(b){
   if(gMode==='hw')return evRates(b);
   const{pool,rates:R}=gcfg(),r={};let used=0;
-  pool.forEach(id=>{const v=id===b.c?R.up[id]:R.base[id];if(v!==undefined){r[id]=v;used+=v}});
+  const RT=GACHA.rarTotal||{};
+  pool.forEach(id=>{if(RT[CARDS[id].rar]!==undefined)return;const v=id===b.c?R.up[id]:R.base[id];if(v!==undefined){r[id]=v;used+=v}});
+  for(const rar of Object.keys(RT)){   /* ระดับที่กำหนดเรทรวมไว้ (UR / USR) */
+    const ids=pool.filter(id=>CARDS[id].rar===rar);if(!ids.length)continue;const T=RT[rar],upIn=ids.includes(b.c)&&ids.length>1;
+    ids.forEach(id=>{r[id]=upIn?(id===b.c?T*GACHA.rarUp:T*(1-GACHA.rarUp)/(ids.length-1)):T/ids.length});used+=T}
   const rs=pool.filter(id=>r[id]===undefined);rs.forEach(id=>r[id]=(100-used)/rs.length);
   return r;
 }
