@@ -8,6 +8,8 @@ const GACHA={cost:100,cost10:900,
   /* เรทออก % : base = ปกติ, up = ตอนเป็นการ์ดเรทอัป (การ์ด R ที่เหลือแบ่งเท่าๆ กัน) */
   /* เรทตามระดับ (รวมทุกใบในระดับนั้น): USR 0.1% · UR 1% — แบ่งเท่าๆ กันในระดับเดียวกัน, ถ้าเป็นการ์ดเรทอัปได้ส่วนแบ่ง rarUp ของระดับนั้น (ตัวเลขใน rates ด้านล่างของ UR/USR ใช้แสดงผลเท่านั้น) */
   rarTotal:{USR:0.1,UR:1},rarUp:0.7,
+  /* การันตี (ตู้ปกติ): สุ่มครบกี่ครั้งโดยยังไม่ได้ระดับนั้น → ครั้งถัดไปได้แน่นอน (ได้ USR ถือว่านับ UR ใหม่ด้วย) */
+  pityUR:400,pityUSR:1000,
   rates:{base:{kirito:15,ichigo:15,megumi:5,shuna:8,chahaein:4,gil:0.5,reze:0.5,kurapika:0.05,kdash:0.05},up:{kirito:30,ichigo:30,megumi:10,shuna:8,chahaein:4,gil:0.7,reze:0.7,kurapika:0.07,kdash:0.07}},
   dup:{R:20,S:40,SR:55,SSR:70,UR:90,USR:130,LTD:180},
   /* ตู้เดียว เรทอัปเปลี่ยนทุก 1 ชั่วโมง (เวลาไทย) วนตามลำดับนี้: c = การ์ดตรงกลาง, s = การ์ดข้างๆ (เรทปกติ) */
@@ -301,7 +303,7 @@ function renderGacha(){
   $('#bBoost').textContent=hw?'การ์ดฮาโลวีนสุดพิเศษ!':'การ์ดตรงกลาง เรทออกเพิ่มขึ้น!';
   $('#bCards').innerHTML=[b.s[0],b.c,b.s[1]].filter(Boolean).map(id=>{const main=id===b.c,c=CARDS[id],upd=main&&(hw||gcfg().rates.up[id]!==gcfg().rates.base[id]);
     return `<div class="bc${main?' main':''}" style="--c:${RARITY[c.rar]};--k:${main?1:.8}"><div class="bcimg"><img src="${c.img}" alt="${c.name}">${upd?'<span class="rib">เรทอัป ⬆</span>':''}${SV.owned.includes(id)?`<span class="own">มี ×${SV.count[id]}</span>`:''}</div><b>${c.name}</b><div>${rarTag(id)} <em>${pct(r[id])}</em>${upd&&!hw?` <small class="was">ปกติ ${pct(gcfg().rates.base[id])}</small>`:''}</div></div>`}).join('');
-  $('#bDesc').textContent=hw?'ตู้พิเศษอีเว้นท์ฮาโลวีน! ใช้ลูกอม 🍬 สุ่ม · การ์ดอีเว้นท์รวม '+HW.eventRate+'% · การันตีที่ '+HW.pity+' ครั้ง (สุ่มมาแล้ว '+SV.evg.pity+'/'+HW.pity+') · แตะแบนเนอร์เพื่อดูเรททั้งหมด':'ใช้เงินสุ่มการ์ดใหม่! การ์ดตรงกลางมีโอกาสออกสูงกว่าปกติ · แตะแบนเนอร์เพื่อดูรายละเอียดและเรททั้งหมด';
+  $('#bDesc').textContent=hw?'ตู้พิเศษอีเว้นท์ฮาโลวีน! ใช้ลูกอม 🍬 สุ่ม · การ์ดอีเว้นท์รวม '+HW.eventRate+'% · การันตีที่ '+HW.pity+' ครั้ง (สุ่มมาแล้ว '+SV.evg.pity+'/'+HW.pity+') · แตะแบนเนอร์เพื่อดูเรททั้งหมด':'ใช้เงินสุ่มการ์ดใหม่! การ์ดตรงกลางมีโอกาสออกสูงกว่าปกติ · การันตี UR ที่ '+GACHA.pityUR+' ครั้ง (ตอนนี้ '+((SV.gp&&SV.gp.ur)||0)+') · USR ที่ '+GACHA.pityUSR+' ครั้ง (ตอนนี้ '+((SV.gp&&SV.gp.usr)||0)+') · แตะแบนเนอร์เพื่อดูเรททั้งหมด';
   updTimer();
   $('#pullBtn').textContent='สุ่ม 1 ครั้ง · '+gico()+gcost(1);$('#pull10Btn').textContent='สุ่ม 10 ครั้ง · '+gico()+gcost(10);
   const off=hw&&!hwOpen();$('#pullBtn').disabled=pulling||off||gbal()<gcost(1);$('#pull10Btn').disabled=pulling||off||gbal()<gcost(10);
@@ -310,8 +312,17 @@ function renderGacha(){
 function roll(){
   const b=curB(),hw=gMode==='hw';
   if(hw){const E=SV.evg;E.pity=(E.pity||0)+1;if(E.pity>=HW.pity){E.pity=0;return b.c}}   /* การันตี: ครบ HW.pity ครั้งได้การ์ดหน้าตู้ */
-  const e=Object.entries(bannerRates(b)),tot=e.reduce((s,x)=>s+x[1],0);let x=Math.random()*tot,pick=e[0][0];
-  for(const [id,w] of e){if((x-=w)<0){pick=id;break}}
+  const rates=bannerRates(b);
+  const wpick=ids=>{const e=ids.map(id=>[id,rates[id]||0]),tot=e.reduce((s,x)=>s+x[1],0);if(!tot)return ids[Math.floor(Math.random()*ids.length)];let x=Math.random()*tot,p=e[0][0];for(const [id,w] of e){if((x-=w)<0){p=id;break}}return p};
+  let pick=null,P=null;
+  if(!hw){   /* การันตี UR / USR */
+    P=SV.gp=SV.gp||{ur:0,usr:0};P.ur=(P.ur||0)+1;P.usr=(P.usr||0)+1;
+    const pk=r=>GACHA.pool.filter(id=>CARDS[id].rar===r);
+    if(P.usr>=GACHA.pityUSR&&pk('USR').length)pick=wpick(pk('USR'));
+    else if(P.ur>=GACHA.pityUR&&pk('UR').length)pick=wpick(pk('UR'));
+  }
+  if(!pick)pick=wpick(Object.keys(rates));
+  if(P){const r=CARDS[pick].rar;if(r==='USR'){P.usr=0;P.ur=0}else if(r==='UR')P.ur=0}
   if(hw&&HW.pool.includes(pick))SV.evg.pity=0;
   return pick;
 }
