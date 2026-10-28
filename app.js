@@ -96,10 +96,10 @@ function hud(){
 }
 function fan(el,ids){const n=ids.length;el.innerHTML=ids.map((id,i)=>`<img src="${CARDS[id].img}" alt="${CARDS[id].name}" style="--i:${i-(n-1)/2}">`).join('')}
 function go(name){clearAuto();
-  const m={play:'playScr',raid:'raidScr',chal:'chalScr',home:'homeScr',team:'teamScr',stages:'stagesScr',gacha:'gachaScr',inv:'invScr',up:'upScr',lvr:'lvrScr',event:'eventScr',hwstages:'stagesScr',hwgacha:'gachaScr',evboss:'evbossScr',evo:'evoScr',sell:'sellScr',online:'onlineScr',room:'roomScr',friends:'friendsScr',chat:'chatScr',endless:'endlessScr'};
+  const m={play:'playScr',raid:'raidScr',chal:'chalScr',home:'homeScr',team:'teamScr',stages:'stagesScr',gacha:'gachaScr',inv:'invScr',up:'upScr',lvr:'lvrScr',event:'eventScr',hwstages:'stagesScr',hwgacha:'gachaScr',evboss:'evbossScr',evo:'evoScr',sell:'sellScr',online:'onlineScr',room:'roomScr',friends:'friendsScr',chat:'chatScr',endless:'endlessScr',inf:'infScr'};
   if(name==='up')upSel=null;if(name==='evo'){if(!evoKeep)evoSel=null;evoKeep=false}if(name==='stages')sMode='main';if(name==='hwstages')sMode='hw';if(name==='gacha')gMode='main';if(name==='hwgacha')gMode='hw';
   closeModal();show(m[name]);hud();
-  ({evo:renderEvo,sell:renderSell,play:renderPlay,raid:renderRaid,chal:renderChal,home:renderHome,team:renderTeam,stages:renderStages,gacha:renderGacha,inv:renderInv,up:renderUp,lvr:renderLvr,event:renderEvent,hwstages:renderStages,hwgacha:renderGacha,evboss:renderEvBoss,endless:renderEndless,online:()=>Online.hub(),room:()=>Online.room(),friends:()=>Online.friends(),chat:()=>Online.chat()})[name]();
+  ({evo:renderEvo,sell:renderSell,play:renderPlay,raid:renderRaid,chal:renderChal,home:renderHome,team:renderTeam,stages:renderStages,gacha:renderGacha,inv:renderInv,up:renderUp,lvr:renderLvr,event:renderEvent,hwstages:renderStages,hwgacha:renderGacha,evboss:renderEvBoss,endless:renderEndless,inf:renderInf,online:()=>Online.hub(),room:()=>Online.room(),friends:()=>Online.friends(),chat:()=>Online.chat()})[name]();
 }
 document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go)});
 
@@ -422,6 +422,7 @@ function renderPlay(){
   $('#mdStages').textContent='ผ่านแล้ว '+STAGES.filter(s=>SV.cleared[s.id]).length+'/'+STAGES.length+' ด่าน';
   $('#mdRaid').textContent='โอกาสชั่วโมงนี้ '+(RAID_ATTEMPTS-R.used)+'/'+RAID_ATTEMPTS+' · รีเซ็ต '+hourLeft();
   $('#mdChal').textContent='ผ่านแล้ว '+chList().filter(c=>chalState().cleared[c.id]).length+'/'+chList().length+' · รีเซ็ต '+chalLeft();
+  $('#mdInf').textContent='เวฟสูงสุด '+((SV.inf&&SV.inf.best)||0);
 }
 /* --- เรด --- */
 const pctDealt=(R,b)=>(b.maxHp-R.hp)/b.maxHp*100;
@@ -804,6 +805,76 @@ function elEnd(quit,r){
     <div class="reward"><div>🍬 +${candy.toLocaleString()}</div></div><p class="mute">เวฟสูงสุดของคุณ ${E.best}</p>
     <div class="two"><button id="elAgain">เริ่มรอบใหม่</button><button class="sec" id="elBack">กลับ</button></div>`);
   $('#elAgain').onclick=()=>{closeModal();startEndlessRun()};$('#elBack').onclick=()=>go('endless');
+}
+/* ---------- ด่านไม่มีที่สิ้นสุด (โหมดปกติ · ได้เงิน) ----------
+   เวฟต่อเวฟ: ผ่านเวฟไหนได้เงินเวฟนั้นทันที (เก็บไว้แม้แพ้) · เงินโตแบบทวีคูณตามเวฟ (เวฟแรกๆ น้อย ยิ่งไกลยิ่งเยอะ)
+   หลังชนะแต่ละเวฟเลือกบัฟ: POWER ทีม / HP ทีม / ศัตรูแกร่งขึ้น (แลกกับ "ตัวคูณรายได้" เพิ่มขึ้น)
+   ความยากของศัตรู/ตัวเลขบัฟใช้ชุดเดียวกับ EL ด้านบน — ปรับค่าเงินที่ IF */
+const IF={coin:30,growth:1.13,   /* เงินเวฟ w = coin × growth^(w-1) */
+  riskInc:.25,                   /* ศัตรูแกร่งขึ้น 1 ชั้น = รายได้ +25% (บวกต่อชั้น) */
+  bossBonus:2,every:10};         /* เวฟบอส (ทุก every เวฟ) ได้เงิน ×bossBonus */
+const ifState=()=>{SV.inf=SV.inf||{best:0,run:null};return SV.inf};
+const ifMul=risk=>1+IF.riskInc*(risk||0);
+const ifBase=w=>IF.coin*Math.pow(IF.growth,w-1)*(w%IF.every===0?IF.bossBonus:1);
+const ifCoins=(w,risk)=>Math.round(ifBase(w)*ifMul(risk));
+function renderInf(){
+  const E=ifState(),run=E.run,team=SV.team.filter(x=>SV.owned.includes(x)),b=run?run.buf:{p:0,h:0,risk:0},w=run?run.wave:1;
+  const eg=[1,10,20,30,50].map(x=>`เวฟ ${x}: 💰${ifCoins(x,0).toLocaleString()}`).join(' · ');
+  $('#ifRaid').innerHTML=`<div class="rboss"><div class="infbig">♾️</div></div>
+  <div class="rinfo"><h2>♾ ด่านไม่มีที่สิ้นสุด</h2>
+    <div class="rhpt"><b>${run?'เวฟที่ '+run.wave:'ยังไม่ได้เริ่มรอบ'}</b><span>เวฟสูงสุด ${E.best}${run?' · ได้เงินรอบนี้ 💰'+run.coins.toLocaleString():''}</span></div>
+    <div class="rmeta"><span>⚔ POWER ทีม +${Math.round(b.p*100)}%</span><span>❤ HP ทีม +${Math.round(b.h*100)}%</span><span>☠ ศัตรู +${Math.round(b.risk*EL.riskMul*100)}%</span><span>💰 รายได้ ×${ifMul(b.risk).toFixed(2)}</span></div>
+    <div class="ebrule"><b>กติกา</b><br>• ผ่านเวฟไหนได้เงินเวฟนั้นทันที · แพ้เมื่อไหร่รอบนี้จบ (เงินที่ได้แล้วเก็บไว้)<br>• เงินต่อเวฟเพิ่มขึ้นเรื่อยๆ ยิ่งไปไกลยิ่งเยอะ · ทุก ${IF.every} เวฟเป็นเวฟบอส เงิน ×${IF.bossBonus}<br>• หลังชนะแต่ละเวฟ เลือกบัฟ 1 อย่าง: POWER / HP ทีม หรือ <b>ศัตรูแกร่งขึ้น</b> (ศัตรู +${Math.round(EL.riskMul*100)}% ต่อชั้น) เพื่อให้ได้เงิน <b>+${Math.round(IF.riskInc*100)}%</b> ต่อชั้น<br>• เวฟนี้ได้ <b>💰${ifCoins(w,b.risk).toLocaleString()}</b><br><small>ตัวอย่าง (ยังไม่บัฟศัตรู) ${eg}</small></div>
+    <div class="myteam"><span>ทีมของคุณ</span><div>${team.length?team.map(t=>`<img class="th" src="${CARDS[t].img}" alt="${CARDS[t].name}">`).join(''):'<small>ยังไม่มีการ์ดในทีม</small>'}</div><button class="sec small" data-go="team">จัดทีม</button></div>
+    <div class="two"><button id="ifGo">${run?(run.pick?'เลือกบัฟเวฟถัดไป':'สู้เวฟ '+run.wave+' ต่อ'):'เริ่มรอบใหม่'}</button>${run?'<button class="sec" id="ifQuit">จบรอบนี้</button>':''}</div>
+  </div>`;
+  $('#ifGo').disabled=!team.length;
+  $('#ifGo').onclick=()=>{const r=ifState().run;if(!r)startInfRun();else if(r.pick)ifPickModal();else startInfBattle()};
+  if(run)$('#ifQuit').onclick=()=>ifEnd(true);
+}
+function startInfRun(){
+  const team=SV.team.filter(x=>SV.owned.includes(x));if(!team.length){toast('ต้องมีการ์ดในทีมอย่างน้อย 1 ใบ');return go('team')}
+  ifState().run={wave:1,buf:{p:0,h:0,risk:0},coins:0,pick:false};save();startInfBattle();
+}
+function startInfBattle(){
+  const run=ifState().run,team=SV.team.filter(x=>SV.owned.includes(x));
+  if(!team.length){toast('ต้องมีการ์ดในทีมอย่างน้อย 1 ใบ');return go('team')}
+  const en=elEnemies(run.wave),b=run.buf;
+  clearAuto();
+  Battle.start({auto:false,a:team,la:team.map(clv),sa:team.map(cstar),b:en.ids,lb:en.ids.map(()=>en.lv),
+    mulA:{p:1+b.p,h:1+b.h},mulB:{p:1+b.risk*EL.riskMul,h:1+b.risk*EL.riskMul},maxTurns:EL.maxTurns,first:'a',
+    title:'ไม่มีที่สิ้นสุด · เวฟ '+run.wave+(en.boss?' (บอส)':'')+' · ศัตรู Lv.'+en.lv+' · 💰×'+ifMul(b.risk).toFixed(2),
+    onExit:()=>go('inf'),onEnd:r=>finishInfWave(r,run.wave)});
+}
+function finishInfWave(r,w){
+  const E=ifState(),run=E.run;if(!run||run.wave!==w)return;
+  if(!r.win){ifEnd(false,r);return}   /* แพ้ / หมดเวลา → จบรอบ */
+  const got=ifCoins(w,run.buf.risk);
+  SV.coins+=got;run.coins+=got;E.best=Math.max(E.best,w);run.pick=true;save();hud();
+  ifPickModal(`<h2>เวฟ ${w} ผ่าน! 🎉</h2><div class="reward"><div>💰 +${got.toLocaleString()}</div></div><p class="mute">รอบนี้ได้รวม 💰${run.coins.toLocaleString()}</p>`);
+}
+function ifPickModal(head){
+  const run=ifState().run;if(!run)return go('inf');
+  const b=run.buf,w=run.wave;
+  head=head||`<h2>เวฟ ${w} ผ่านแล้ว</h2>`;
+  modal(`${head}<p class="mute">เลือกบัฟสำหรับเวฟที่ ${w+1}</p>
+    <div class="two">
+      <button class="elopt" data-b="p"><b>⚔ POWER ทีม +${Math.round(EL.buffP*100)}%</b><small>ตอนนี้ +${Math.round(b.p*100)}%</small></button>
+      <button class="elopt" data-b="h"><b>❤ HP ทีม +${Math.round(EL.buffH*100)}%</b><small>ตอนนี้ +${Math.round(b.h*100)}%</small></button>
+      <button class="elopt risk" data-b="r"><b>☠ ศัตรูแกร่งขึ้น +${Math.round(EL.riskMul*100)}%</b><small>รายได้ ×${ifMul(b.risk).toFixed(2)} → <b>×${ifMul(b.risk+1).toFixed(2)}</b> · เวฟ ${w+1} ได้ 💰${ifCoins(w+1,b.risk).toLocaleString()} → <b>${ifCoins(w+1,b.risk+1).toLocaleString()}</b></small></button>
+    </div><div class="two" style="margin-top:10px"><button class="sec small" id="ifLater">พักไว้ก่อน (กลับ)</button></div>`);
+  $$('.elopt',$('#mdlBody')).forEach(x=>x.onclick=()=>{
+    const k=x.dataset.b;if(k==='p')b.p+=EL.buffP;else if(k==='h')b.h+=EL.buffH;else b.risk++;
+    run.wave++;run.pick=false;save();closeModal();startInfBattle()});
+  $('#ifLater').onclick=()=>go('inf');
+}
+function ifEnd(quit,r){
+  const E=ifState(),run=E.run;if(!run)return go('inf');
+  const cleared=run.wave-(run.pick?0:1),coins=run.coins;E.run=null;save();hud();
+  modal(`<h2>${quit?'จบรอบ':'การ์ดพ่ายแพ้…'}</h2><p>${quit?'จบรอบที่':(r&&r.timeout?'หมดเวลาที่':'แพ้ที่')} เวฟที่ <b>${run.wave}</b> · ผ่านไปแล้ว <b>${Math.max(0,cleared)}</b> เวฟ</p>
+    <div class="reward"><div>💰 +${coins.toLocaleString()}</div></div><p class="mute">เวฟสูงสุดของคุณ ${E.best}</p>
+    <div class="two"><button id="ifAgain">เริ่มรอบใหม่</button><button class="sec" id="ifBack">กลับ</button></div>`);
+  $('#ifAgain').onclick=()=>{closeModal();startInfRun()};$('#ifBack').onclick=()=>go('inf');
 }
 /* ---------- เควสพัฒนา (Evolution Quest) ---------- */
 /* วัตถุดิบ (ไอเทม) */

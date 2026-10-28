@@ -721,3 +721,10 @@ body{padding:0}
 .elopt small{font-weight:400;opacity:.85;font-size:.78em}
 .elopt.risk{background:linear-gradient(180deg,#ff8da0,#d11a3a);color:#fff;box-shadow:0 4px 0 #6d0a1f}
 #endlessScr .rinfo h2{color:#d9c2ff}
+/* ===== ด่านไม่มีที่สิ้นสุด (โหมดปกติ) ===== */
+.m-inf{--c:#4fd1c5}
+#playScr .modes{grid-template-columns:repeat(4,minmax(0,1fr));max-width:1300px}
+@media (max-width:1000px){#playScr .modes{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px) and (orientation:portrait){#playScr .modes{grid-template-columns:1fr}}
+.infbig{display:flex;align-items:center;justify-content:center;height:100%;font-size:clamp(90px,22vh,180px);line-height:1;filter:drop-shadow(0 0 30px #4fd1c5aa) drop-shadow(0 10px 24px #000a)}
+#infScr .rinfo h2{color:#8fe9df}
