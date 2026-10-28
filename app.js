@@ -129,7 +129,8 @@ const GIFT_CODES={
   /* โค้ดคนเดียวทั้งโลก: srv = ต้องจองที่เซิร์ฟเวอร์ก่อน (ต้องล็อคอินออนไลน์ + รัน redeem.sql) */
   HUTAO:{srv:true,run:()=>{if(!SV.owned.includes('hutao')){SV.owned.push('hutao');SV.count.hutao=1}else SV.count.hutao=(SV.count.hutao||1)+1;SV.lv.hutao=100;return 'ได้รับ ฮูเต๋า เลเวล 100'}},
   GILQUEEN:()=>{if(!SV.owned.includes('gilqueen')){SV.owned.push('gilqueen');SV.count.gilqueen=1}else SV.count.gilqueen=(SV.count.gilqueen||1)+1;SV.lv.gilqueen=100;return 'ได้รับ ราชินีแห่งวีรชน กิลกาเมช เลเวล 100'},
-  HOJIN:()=>{SV.items=SV.items||{};SV.items.hojin=(SV.items.hojin||0)+3;return 'ได้รับ ธรรมจักรแปดซี่ ×3'}
+  HOJIN:()=>{SV.items=SV.items||{};SV.items.hojin=(SV.items.hojin||0)+3;return 'ได้รับ ธรรมจักรแปดซี่ ×3'},
+  FULL:()=>{SV.items=SV.items||{};Object.keys(ITEMS).forEach(k=>{SV.items[k]=(SV.items[k]||0)+999});return 'ได้รับวัตถุดิบอีโวทุกชิ้น ชิ้นละ 999'}
 };
 function codeModal(){
   modal(`<h2>🎁 ใส่โค้ดรับของขวัญ</h2><form class="auth" id="cdF"><input id="cdI" placeholder="พิมพ์โค้ดที่นี่" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="30"><p class="aerr" id="cdE"></p><p class="mute" id="cdOk"></p><div class="two"><button type="submit">รับของขวัญ</button><button type="button" class="sec" id="cdX">ปิด</button></div></form>`);
