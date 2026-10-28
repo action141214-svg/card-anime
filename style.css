@@ -703,3 +703,12 @@ body{padding:0}
   .raid{gap:16px}
   .modes{max-width:100%}
 }
+
+/* ===== การ์ดชุดใหม่: คิราระ / เบจิต้า / คุลา ===== */
+.badge.cx{background:#c9a6ff;color:#1a0a33;box-shadow:0 0 18px #a06cff}.crossed .badge.cx{display:block}
+.badge.fz{background:#c8f1ff;color:#06324a;box-shadow:0 0 18px #6fd6ff}.frozen .badge.fz{display:block}
+.cw .badge.cx{top:auto;bottom:calc(var(--bs)*4.6)}
+.cw .badge.fz{top:auto;bottom:calc(var(--bs)*5.6)}
+.cw.frozen img{filter:saturate(.55) hue-rotate(160deg) brightness(1.12) drop-shadow(0 0 8px #6fd6ff)}
+.kiball{border-radius:50%;background:radial-gradient(circle,#fff 0 18%,#bfe6ff 38%,#2a7bff 64%,transparent 72%);filter:drop-shadow(0 0 8px #4fa8ff) drop-shadow(0 0 16px #2a7bff);will-change:transform}
+.icefx{display:flex;align-items:center;justify-content:center;line-height:1;color:#dff6ff;text-shadow:0 0 14px #6fd6ff,0 0 28px #2a9bff;animation:pop .65s forwards}
