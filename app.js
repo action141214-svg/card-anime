@@ -128,6 +128,7 @@ const GIFT_CODES={
     return 'เงิน +99,999,999 · ลูกอม +999,999,999 · ปลดล็อคการ์ดใหม่ '+n+' ใบ'},
   /* โค้ดคนเดียวทั้งโลก: srv = ต้องจองที่เซิร์ฟเวอร์ก่อน (ต้องล็อคอินออนไลน์ + รัน redeem.sql) */
   HUTAO:{srv:true,run:()=>{if(!SV.owned.includes('hutao')){SV.owned.push('hutao');SV.count.hutao=1}else SV.count.hutao=(SV.count.hutao||1)+1;SV.lv.hutao=100;return 'ได้รับ ฮูเต๋า เลเวล 100'}},
+  GILQUEEN:()=>{if(!SV.owned.includes('gilqueen')){SV.owned.push('gilqueen');SV.count.gilqueen=1}else SV.count.gilqueen=(SV.count.gilqueen||1)+1;SV.lv.gilqueen=100;return 'ได้รับ ราชินีแห่งวีรชน กิลกาเมช เลเวล 100'},
   HOJIN:()=>{SV.items=SV.items||{};SV.items.hojin=(SV.items.hojin||0)+3;return 'ได้รับ ธรรมจักรแปดซี่ ×3'}
 };
 function codeModal(){
