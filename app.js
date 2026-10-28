@@ -41,7 +41,7 @@ const gico=()=>gMode==='hw'?'🍬':'💰';
 const stageList=()=>sMode==='hw'?HW.stages:STAGES;
 const sGo=()=>sMode==='hw'?'hwstages':'stages';
 const inPool=id=>GACHA.pool.includes(id);
-const lockTxt=id=>CARDS[id].endless?'ได้จากด่านไม่มีที่สิ้นสุด (อีเว้นท์) · ทุก 10 เวฟมีโอกาส '+EL.baseRate+'%':CARDS[id].evo?'ได้จากการอีโว (เควสพัฒนา)':HW.pool.includes(id)?'ได้จากตู้ฮาโลวีน (อีเว้นท์)':inPool(id)?(HW.rPool.includes(id)?'ได้จากตู้กาชา / ตู้ฮาโลวีน':'ได้จากตู้กาชา'):'ยังไม่เปิดให้ได้รับ';   // เงินคืนเมื่อได้การ์ดซ้ำ แยกตามระดับ
+const lockTxt=id=>CARDS[id].endless?'ได้จากด่านไม่มีที่สิ้นสุด (อีเว้นท์) · ทุก '+(EL.dropEvery>1?EL.dropEvery+' ':'')+'เวฟมีโอกาส '+EL.baseRate+'%':CARDS[id].evo?'ได้จากการอีโว (เควสพัฒนา)':HW.pool.includes(id)?'ได้จากตู้ฮาโลวีน (อีเว้นท์)':inPool(id)?(HW.rPool.includes(id)?'ได้จากตู้กาชา / ตู้ฮาโลวีน':'ได้จากตู้กาชา'):'ยังไม่เปิดให้ได้รับ';   // เงินคืนเมื่อได้การ์ดซ้ำ แยกตามระดับ
 /* ด่าน: first = รางวัลชนะครั้งแรก, repeat = รางวัลเล่นซ้ำ */
 const STAGES=[
   {id:1,name:'ด่าน 1 · บททดสอบแรก',enemy:['goku'],elv:[1],first:{coins:150,exp:100},repeat:{coins:30,exp:20}},
@@ -726,7 +726,8 @@ setInterval(()=>{if(!$('#eventScr').classList.contains('hidden'))renderEvent()},
 /* ---------- ด่านไม่มีที่สิ้นสุด (อีเว้นท์) ----------
    เวฟต่อเวฟ: ผ่านเวฟละ 🍬 candy อัน · ทุก `every` เวฟ ทอยลุ้นการ์ด drop (baseRate% + riskRate% ต่อชั้น "บัฟศัตรู")
    หลังชนะแต่ละเวฟเลือก 1 อย่าง: POWER ทีม / HP ทีม / ศัตรูแกร่งขึ้น (แลกโอกาสได้การ์ดสูงขึ้น) — ปรับตัวเลขได้ที่ EL */
-const EL={drop:'konan',candy:1,every:10,baseRate:.1,riskRate:.1,maxRate:5,   /* อัตรา = % ต่อการทอย */
+const EL={drop:'konan',candy:1,every:10,dropEvery:1,   /* ทอยลุ้นการ์ดทุก dropEvery เวฟ (every = เวฟบอส) */
+  baseRate:.1,riskRate:.1,maxRate:5,   /* อัตรา = % ต่อการทอย */
   buffP:.15,buffH:.15,riskMul:.1,   /* บัฟทีม +15% ต่อครั้ง · ศัตรู +10% (POWER และ HP) ต่อชั้น */
   lvPer:1.5,bossMul:1.3,maxTurns:50};
 const elState=()=>{SV.endless=SV.endless||{best:0,run:null};return SV.endless};
@@ -747,7 +748,7 @@ function renderEndless(){
   <div class="rinfo"><h2>♾ ด่านไม่มีที่สิ้นสุด</h2>
     <div class="rhpt"><b>${run?'เวฟที่ '+run.wave:'ยังไม่ได้เริ่มรอบ'}</b><span>เวฟสูงสุด ${E.best}${run?' · ได้ลูกอมรอบนี้ 🍬'+run.candy:''}</span></div>
     <div class="rmeta"><span>⚔ POWER ทีม +${Math.round(b.p*100)}%</span><span>❤ HP ทีม +${Math.round(b.h*100)}%</span><span>☠ ศัตรู +${Math.round(b.risk*EL.riskMul*100)}%</span></div>
-    <div class="ebrule"><b>กติกา</b><br>• ผ่านเวฟละ 🍬 ${EL.candy} อัน · แพ้เมื่อไหร่รอบนี้จบ (ลูกอมที่ได้แล้วเก็บไว้)<br>• เวฟแรกๆ ง่าย แล้วยากขึ้นเรื่อยๆ · ทุก ${EL.every} เวฟเป็นเวฟบอส<br>• หลังชนะแต่ละเวฟ เลือกบัฟ 1 อย่าง: POWER / HP ทีม หรือ <b>ศัตรูแกร่งขึ้น</b> เพื่อเพิ่มโอกาสได้การ์ด<br>• ทุก ${EL.every} เวฟทอยลุ้น <b>${c.name}</b> · ตอนนี้ <b>${elRateTxt(rate)}</b> (พื้นฐาน ${EL.baseRate}% + ${EL.riskRate}% ต่อชั้นศัตรู${run?' · '+b.risk+' ชั้น':''})${own?'<br>• คุณมีการ์ดนี้แล้ว (ได้ซ้ำจะนับเป็นการ์ดซ้ำ)':''}</div>
+    <div class="ebrule"><b>กติกา</b><br>• ผ่านเวฟละ 🍬 ${EL.candy} อัน · แพ้เมื่อไหร่รอบนี้จบ (ลูกอมที่ได้แล้วเก็บไว้)<br>• เวฟแรกๆ ง่าย แล้วยากขึ้นเรื่อยๆ · ทุก ${EL.every} เวฟเป็นเวฟบอส<br>• หลังชนะแต่ละเวฟ เลือกบัฟ 1 อย่าง: POWER / HP ทีม หรือ <b>ศัตรูแกร่งขึ้น</b> เพื่อเพิ่มโอกาสได้การ์ด<br>• ทุก ${EL.dropEvery>1?EL.dropEvery+' ':''}เวฟทอยลุ้น <b>${c.name}</b> · ตอนนี้ <b>${elRateTxt(rate)}</b> (พื้นฐาน ${EL.baseRate}% + ${EL.riskRate}% ต่อชั้นศัตรู${run?' · '+b.risk+' ชั้น':''})${own?'<br>• คุณมีการ์ดนี้แล้ว (ได้ซ้ำจะนับเป็นการ์ดซ้ำ)':''}</div>
     <div class="myteam"><span>ทีมของคุณ</span><div>${team.length?team.map(t=>`<img class="th" src="${CARDS[t].img}" alt="${CARDS[t].name}">`).join(''):'<small>ยังไม่มีการ์ดในทีม</small>'}</div><button class="sec small" data-go="team">จัดทีม</button></div>
     <div class="two"><button id="elGo">${!open?'อีเว้นท์จบแล้ว':run?(run.pick?'เลือกบัฟเวฟถัดไป':'สู้เวฟ '+run.wave+' ต่อ'):'เริ่มรอบใหม่'}</button>${run?'<button class="sec" id="elQuit">ยอมแพ้รอบนี้</button>':''}</div>
   </div>`;
@@ -775,7 +776,7 @@ function finishEndlessWave(r,w){
     elEnd(false,r);return}
   SV.candy+=EL.candy;run.candy+=EL.candy;E.best=Math.max(E.best,w);run.pick=true;
   let rollHtml='';
-  if(w%EL.every===0&&!run.rolled){
+  if(w%EL.dropEvery===0&&!run.rolled){
     run.rolled=true;const rate=elRate(run),got=Math.random()*100<rate;
     if(got){const g=grant(EL.drop),c=CARDS[EL.drop];
       rollHtml=`<div class="dropbox"><img src="${c.img}" alt="${c.name}"><div><div class="new">🎉 ได้การ์ด ${c.name}!</div><small>${g.dup?(g.sold?'ซ้ำ ขายคืน 💰'+g.back:'การ์ดซ้ำ +1'):'การ์ดใหม่!'}</small></div></div>`}
