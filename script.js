@@ -64,7 +64,7 @@ const CARDS={
         desc:'ผลลัพธ์ด้านลบไม่มีผล และเปลี่ยนผลลัพธ์ด้านลบเป็นการเพิ่มค่าสเตตัสครั้งละ 15% · สร้างสถานะ "บาดแผลศักดิ์สิทธิ์" ทำให้ไม่สามารถฟื้นฟู HP ได้ และสร้างความเสียหาย 15% ของ HP สูงสุดของศัตรู · ทุกๆ 3 เทิร์นจะฟื้นฟู HP 30% ของ HP สูงสุดของตัวเอง'},
   rimulordboss:{name:'จอมมาร ริมุรุ เทมเพสต์ (บอสเควส เฟส 1)',rar:'USR',evo:true,questOnly:true,img:'rimurulord.jpeg',power:200,hp:10000,color:'#9a5cff',ability:'questboss',
         desc:'บอสเควสพัฒนา เฟส 1 ของจอมมารที่แท้จริง ริมุรุ เทมเพสต์ ไม่มีความสามารถพิเศษ'},
-  truerimuruboss:{name:'จอมมารที่แท้จริง ริมุรุ เทมเพสต์ (บอสเควส เฟส 2)',rar:'LTD',evo:true,questOnly:true,img:'truerimuru.jpeg',power:300,hp:100000,color:'#5fc8ff',ability:'questboss',
+  truerimuruboss:{name:'จอมมารที่แท้จริง ริมุรุ เทมเพสต์ (บอสเควส เฟส 2)',rar:'LTD',evo:true,questOnly:true,img:'truerimuru.jpeg',power:300,hp:50000,color:'#5fc8ff',ability:'questboss',
         desc:'บอสเควสพัฒนา เฟส 2 ของจอมมารที่แท้จริง ริมุรุ เทมเพสต์ ไม่มีความสามารถพิเศษ'},
   slime:{name:'ริมุรุ ร่างสไลม์',rar:'S',img:'slime.jpeg',power:33,hp:250,color:'#5fb6ff',ability:'slime',
         desc:'เมื่อสังหารการ์ดศัตรูใบไหนได้จะทำการแปลงร่างเป็นการ์ดนั้น แล้วคงสเตตัสและความสามารถของการ์ดที่ถูกสังหารได้'},
