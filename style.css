@@ -592,3 +592,114 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 }
 /* จอเตี้ย (มือถือแนวนอน): หน้าเรด/บอสอีเว้นท์เลื่อนลงได้ ปุ่มไม่โดนตัด */
 @media (max-height:520px){#raidScr,#evbossScr{overflow-y:auto}}
+/* =====================================================================
+   v2 — ปรับขนาดตามอุปกรณ์ (มือถือ แนวตั้ง/แนวนอน แท็บเล็ต)
+   ===================================================================== */
+/* 1) บั๊กหลัก: body มี padding safe-area ซ้อนกับ .screen ที่สูง 100dvh → ล่างจอถูกตัด/ปุ่มโดนบัง */
+body{padding:0}
+.screen{height:100vh;height:100dvh;height:var(--app-h,100dvh)}  /* --app-h ตั้งโดย fit.js (รองรับคีย์บอร์ดมือถือ) */
+.modal{padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+.panel{max-height:calc(var(--app-h,100dvh) - 24px)}
+.tip{max-height:calc(var(--app-h,100dvh) - 20px);overflow:auto}
+@media (max-width:760px),(max-height:520px){
+  #toast{bottom:auto;top:calc(10px + env(safe-area-inset-top,0px));transform:translate(-50%,-30px)}
+  #toast.on{transform:translate(-50%,0)}
+}
+/* จอสัมผัส: ไม่ให้ hover ค้าง / ปุ่มเล็กกดง่ายขึ้น */
+@media (hover:none){.gcard:hover,.mode:hover,.evq:hover,.ctile:hover,.mbtn:hover,button.upslot:hover{transform:none}}
+@media (pointer:coarse){button.mini{min-height:34px;padding:4px 10px}.ibtn{width:38px;height:38px}}
+
+/* 2) ป้ายสถานะบนการ์ด (ชา/เผาไหม้/พิษ ฯลฯ): เดิมใช้ px คงที่ ซ้อนกันและบังการ์ดบนมือถือ → สเกลตามความกว้างการ์ด */
+.cw{container-type:inline-size}
+.cw .badge{--bs:11cqw;left:50%;font-size:clamp(8px,6cqw,14px);line-height:1.35;padding:0 .7em;max-width:94cqw;overflow:hidden;text-overflow:ellipsis}
+.cw .badge.pb{top:2.5cqw}
+.cw .badge.lock{top:calc(2.5cqw + var(--bs))}
+.cw .badge.zp{top:calc(2.5cqw + var(--bs)*2)}
+.cw .badge.bl{top:calc(2.5cqw + var(--bs)*3)}
+.cw .badge.ch{top:calc(2.5cqw + var(--bs)*4)}
+.cw .badge.bn{top:calc(2.5cqw + var(--bs)*5)}
+.cw .badge.ps{top:calc(2.5cqw + var(--bs)*6)}
+.cw .badge.bd{top:calc(2.5cqw + var(--bs)*7)}
+.cw .badge.tb{top:auto;bottom:calc(var(--bs)*1.6)}
+.cw .badge.pz{top:auto;bottom:calc(var(--bs)*2.6)}
+.cw .badge.sv{top:auto;bottom:calc(var(--bs)*3.6)}
+.fgr{font-size:clamp(9px,5cqw,14px);gap:4px;padding:1px 8px 1px 4px}
+.fgr svg{width:clamp(16px,9cqw,26px);height:auto}
+
+/* 3) มือถือแนวตั้ง */
+@media (max-width:760px) and (orientation:portrait){
+  /* หน้าต่อสู้: ให้การ์ดได้พื้นที่มากสุด บันทึกเตี้ยลง */
+  #battleScr .top{align-items:flex-start;flex-wrap:wrap}
+  #battleScr .ctl{gap:4px}
+  #battleScr .ctl button{padding:4px 9px;font-size:.78rem;min-height:36px}
+  #battleScr .stage{grid-template-rows:minmax(0,1fr) clamp(88px,16dvh,150px);gap:6px}
+  #battleScr .fighter{gap:4px}
+  #battleScr .stat{width:100%;padding:3px 6px}
+  #battleScr .num{font-size:1.15em}
+  #battleScr .line{gap:3px}
+  #battleScr .lu{height:clamp(26px,5dvh,44px)}
+  #log{font-size:.8em;padding:5px}
+  .stg-name{display:block;max-width:60vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* หน้าที่เนื้อหายาว: เลื่อนลงได้แทนที่จะโดนตัด */
+  #stagesScr,#chalScr,#eventScr,#evbossScr,#raidScr,#evoScr,#gachaScr{overflow-y:auto;overflow-x:hidden}
+  #gachaScr .gbanner{flex:none;min-height:min(46dvh,360px)}
+  #stagesScr .stages,#chalScr .stages{flex:none;overflow:visible}
+  .tslots{gap:6px}.tslot{min-height:56px}
+  .pullbar button.price{min-width:0;flex:1 1 140px;padding:8px 14px}
+  .myteam{flex-wrap:wrap}
+  .panel{padding:16px 14px}
+  .r10{gap:6px}
+}
+/* 4) จอเตี้ย (มือถือแนวนอน) */
+@media (max-height:520px){
+  .screen:not(#battleScr){overflow-y:auto;overflow-x:hidden}
+  .top{gap:6px}
+  button{min-height:38px;padding:5px 16px}
+  button.small{min-height:34px;padding:4px 12px}
+  .tinfo small{font-size:.75em}
+  .modes{align-content:start;gap:10px}
+  .mode{min-height:0;padding:10px 8px;gap:4px;flex-direction:row;text-align:left}
+  .mode .mi{font-size:38px}
+  .mode small{font-size:11px;line-height:1.35}
+  .ontiles .mode{min-height:0}
+  /* เรด/บอส */
+  .raid{flex:none;min-height:0;align-items:start}
+  .rboss{height:min(68dvh,300px)}
+  /* ด่าน: การ์ดมีความกว้าง/สูงพอ เลื่อนดูได้ */
+  .stages{overflow:auto}
+  .stg{flex:0 0 min(46vw,340px);min-height:230px}
+  /* กาชา */
+  #gachaScr .gbanner{flex:1 0 210px}
+  .reveal{height:min(54dvh,240px)}
+  .rt10 img{height:clamp(60px,15dvh,100px)}
+  /* หน้าต่างข้อมูลการ์ด */
+  .panel:has(.info){width:min(96vw,720px)}
+  .iimg img{height:min(76dvh,300px)}
+  .info{gap:12px}
+  /* แชท */
+  .chatlog{min-height:90px}
+}
+/* แนวนอนแคบ: หน้าหลัก 4 คอลัมน์ x 2 แถว กันปุ่ม 8 ใบเบียด */
+@media (max-height:520px) and (orientation:landscape){
+  #homeScr .menu{flex:none;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-content:start}
+  #homeScr .mbtn{display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center;text-align:left;min-height:62px;padding:6px 10px}
+  #homeScr .mbtn span{grid-row:1/3;font-size:28px}
+  #homeScr .mbtn b{font-size:1em;align-self:end}
+  #homeScr .mbtn small{font-size:.68em;align-self:start;line-height:1.2}
+  #homeScr .bar{flex:none}
+  /* หน้าต่อสู้แนวนอน */
+  #battleScr .top{flex-wrap:nowrap}
+  #battleScr .ctl{flex-wrap:nowrap;gap:4px}
+  #battleScr .ctl button{padding:3px 10px;font-size:.8rem;min-height:32px}
+  #battleScr .stage{grid-template-columns:1fr minmax(140px,24%) 1fr;gap:8px}
+  #battleScr .fighter{gap:3px}
+  #battleScr .stat{width:min(100%,300px)}
+  #battleScr .lu{height:clamp(24px,9dvh,38px)}
+  #log{font-size:.78em}
+  .top h1{display:block;font-size:1.05rem}
+}
+/* แท็บเล็ต: กันข้อความล้น */
+@media (min-width:761px) and (max-width:1100px){
+  .raid{gap:16px}
+  .modes{max-width:100%}
+}

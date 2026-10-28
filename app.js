@@ -180,10 +180,10 @@ function tutorial(withGift){
     const st=TUT[i],sp=$('.spot',c),tip=$('.tip',c);
     $('h3',c).textContent=st.t;$('p',c).textContent=st.x;$('#cNext').textContent=i===TUT.length-1?(withGift?'รับของขวัญ':'จบ'):'ถัดไป';
     const el=st.sel&&document.querySelector('#homeScr '+st.sel);
-    if(el){const r=el.getBoundingClientRect(),pd=8;
+    if(el){el.scrollIntoView({block:'center',inline:'nearest'});const r=el.getBoundingClientRect(),pd=8;
       sp.style.cssText=`display:block;left:${r.left-pd}px;top:${r.top-pd}px;width:${r.width+pd*2}px;height:${r.height+pd*2}px`;
       const below=r.bottom+tip.offsetHeight+24<innerHeight;
-      tip.style.cssText=`left:${Math.max(10,Math.min(innerWidth-tip.offsetWidth-10,r.left+r.width/2-tip.offsetWidth/2))}px;top:${below?r.bottom+16:Math.max(10,r.top-tip.offsetHeight-16)}px;transform:none`;
+      tip.style.cssText=`left:${Math.max(10,Math.min(innerWidth-tip.offsetWidth-10,r.left+r.width/2-tip.offsetWidth/2))}px;top:${Math.max(10,Math.min(innerHeight-tip.offsetHeight-10,below?r.bottom+16:r.top-tip.offsetHeight-16))}px;transform:none`;
     }else{sp.style.display='none';tip.style.cssText='left:50%;top:50%;transform:translate(-50%,-50%)'}
   }
   window.addEventListener('resize',draw);
