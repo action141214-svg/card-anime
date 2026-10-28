@@ -96,10 +96,10 @@ function hud(){
 }
 function fan(el,ids){const n=ids.length;el.innerHTML=ids.map((id,i)=>`<img src="${CARDS[id].img}" alt="${CARDS[id].name}" style="--i:${i-(n-1)/2}">`).join('')}
 function go(name){clearAuto();
-  const m={play:'playScr',raid:'raidScr',chal:'chalScr',home:'homeScr',team:'teamScr',stages:'stagesScr',gacha:'gachaScr',inv:'invScr',up:'upScr',lvr:'lvrScr',event:'eventScr',hwstages:'stagesScr',hwgacha:'gachaScr',evboss:'evbossScr',evo:'evoScr',sell:'sellScr',online:'onlineScr',room:'roomScr',friends:'friendsScr',chat:'chatScr',endless:'endlessScr',inf:'infScr'};
+  const m={play:'playScr',raid:'raidScr',chal:'chalScr',home:'homeScr',team:'teamScr',stages:'stagesScr',gacha:'gachaScr',inv:'invScr',up:'upScr',lvr:'lvrScr',event:'eventScr',hwstages:'stagesScr',hwgacha:'gachaScr',evboss:'evbossScr',evo:'evoScr',sell:'sellScr',online:'onlineScr',room:'roomScr',friends:'friendsScr',chat:'chatScr',endless:'endlessScr',inf:'infScr',tough:'toughScr'};
   if(name==='up')upSel=null;if(name==='evo'){if(!evoKeep)evoSel=null;evoKeep=false}if(name==='stages')sMode='main';if(name==='hwstages')sMode='hw';if(name==='gacha')gMode='main';if(name==='hwgacha')gMode='hw';
   closeModal();show(m[name]);hud();
-  ({evo:renderEvo,sell:renderSell,play:renderPlay,raid:renderRaid,chal:renderChal,home:renderHome,team:renderTeam,stages:renderStages,gacha:renderGacha,inv:renderInv,up:renderUp,lvr:renderLvr,event:renderEvent,hwstages:renderStages,hwgacha:renderGacha,evboss:renderEvBoss,endless:renderEndless,inf:renderInf,online:()=>Online.hub(),room:()=>Online.room(),friends:()=>Online.friends(),chat:()=>Online.chat()})[name]();
+  ({evo:renderEvo,sell:renderSell,play:renderPlay,raid:renderRaid,chal:renderChal,home:renderHome,team:renderTeam,stages:renderStages,gacha:renderGacha,inv:renderInv,up:renderUp,lvr:renderLvr,event:renderEvent,hwstages:renderStages,hwgacha:renderGacha,evboss:renderEvBoss,endless:renderEndless,inf:renderInf,tough:renderTough,online:()=>Online.hub(),room:()=>Online.room(),friends:()=>Online.friends(),chat:()=>Online.chat()})[name]();
 }
 document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go)});
 
@@ -423,7 +423,38 @@ function renderPlay(){
   $('#mdRaid').textContent='โอกาสชั่วโมงนี้ '+(RAID_ATTEMPTS-R.used)+'/'+RAID_ATTEMPTS+' · รีเซ็ต '+hourLeft();
   $('#mdChal').textContent='ผ่านแล้ว '+chList().filter(c=>chalState().cleared[c.id]).length+'/'+chList().length+' · รีเซ็ต '+chalLeft();
   $('#mdInf').textContent='เวฟสูงสุด '+((SV.inf&&SV.inf.best)||0);
+  $('#mdTough').textContent='ดาวสะสม '+toughStars()+'/'+TOUGH.length*3+' ⭐';
 }
+/* ---------- ด่านท้าทาย (เฉพาะ UI — ยังไม่เชื่อมระบบต่อสู้/รางวัล) ----------
+   TOUGH = รายการด่าน · enemy/elv = ศัตรู (ตัวอย่าง) · rule = เงื่อนไขพิเศษของด่าน · objs = ภารกิจเก็บดาว 3 ข้อ · reward = รางวัล
+   ความคืบหน้าอ่านจาก SV.tough = {stars:{ด่าน:จำนวนดาว}} (ยังไม่มีโค้ดที่เขียนค่านี้ — ไว้ต่อภายหลัง) */
+const TOUGH_DIFF={1:{k:'easy',label:'ง่าย',sk:1},2:{k:'easy',label:'พอสู้ได้',sk:2},3:{k:'mid',label:'ปานกลาง',sk:3},4:{k:'mid',label:'ยาก',sk:4},5:{k:'hard',label:'โหด',sk:5},6:{k:'hell',label:'นรก',sk:6}};
+const TOUGH=[
+  {id:1,name:'บททดสอบแรก',d:1,rec:10,enemy:['goku','zenitsu'],elv:[10,10],rule:'จำกัด 15 เทิร์น',objs:['ชนะด่าน','ชนะภายใน 10 เทิร์น','ไม่มีการ์ดถูกกำจัด'],reward:{coins:500,exp:300}},
+  {id:2,name:'ศัตรูเสริมพลัง',d:2,rec:20,enemy:['yuji','naruto','ino'],elv:[18,18,18],rule:'ศัตรูได้ POWER +20% ทุกตัว',objs:['ชนะด่าน','ชนะภายใน 12 เทิร์น','มีการ์ดรอดอย่างน้อย 3 ใบ'],reward:{coins:900,exp:500}},
+  {id:3,name:'ทีมเล็กใจใหญ่',d:3,rec:30,enemy:['kirito','ichigo'],elv:[30,30],rule:'ใส่การ์ดได้สูงสุด 2 ใบ',objs:['ชนะด่าน','ชนะภายใน 10 เทิร์น','การ์ดทั้งหมดรอด'],reward:{coins:1500,exp:800}},
+  {id:4,name:'ห้ามการ์ดระดับสูง',d:4,rec:40,enemy:['gekko','megumi','chahaein'],elv:[40,40,40],rule:'ห้ามใช้การ์ดระดับ SSR ขึ้นไป',objs:['ชนะด่าน','ชนะภายใน 14 เทิร์น','ไม่มีการ์ดถูกกำจัด'],reward:{coins:2500,exp:1200}},
+  {id:5,name:'กำแพงเหล็ก',d:5,rec:60,enemy:['kurapika','gil','hutao','alucard'],elv:[55,55,55,55],rule:'ศัตรูฟื้นฟู HP 5% ทุกเทิร์น',objs:['ชนะด่าน','ชนะภายใน 16 เทิร์น','มีการ์ดรอดอย่างน้อย 2 ใบ'],reward:{coins:4000,exp:2000},bonus:'🎁 ไอเทมพิเศษ'},
+  {id:6,name:'ด่านสุดท้าย',d:6,rec:80,enemy:['isaac','okarun','luffy','gengar'],elv:[80,80,80,80],rule:'จำกัด 20 เทิร์น · ศัตรูได้ POWER +30%',objs:['ชนะด่าน','ชนะภายใน 15 เทิร์น','ไม่มีการ์ดถูกกำจัด'],reward:{coins:8000,exp:4000},bonus:'🎁 การ์ด/ไอเทมหายาก'}
+];
+const toughSt=()=>(SV.tough&&SV.tough.stars)||{};
+const toughStars=()=>TOUGH.reduce((s,t)=>s+(toughSt()[t.id]||0),0);
+function renderTough(){
+  const st=toughSt(),done=TOUGH.filter(t=>(st[t.id]||0)>0).length;
+  $('#thInfo').textContent='ผ่านแล้ว '+done+'/'+TOUGH.length+' ด่าน · ดาวสะสม '+toughStars()+'/'+TOUGH.length*3+' ⭐';
+  $('#thList').innerHTML=TOUGH.map(t=>{
+    const df=TOUGH_DIFF[t.d],stars=st[t.id]||0,locked=t.id>1&&!(st[t.id-1]>0),en=t.enemy.filter(id=>CARDS[id]);
+    return `<div class="tcard d-${df.k}${locked?' lock':''}">
+      ${locked?`<div class="lockbox"><span>🔒</span><b>ผ่านด่าน ${t.id-1} ก่อน</b></div>`:''}
+      <div class="thd"><div><div class="no">ด่าน ${t.id}</div><h2>${t.name}</h2></div><span class="diff d-${df.k}">${'💀'.repeat(df.sk>3?3:df.sk)}${df.sk>3?'+':''} ${df.label}</span></div>
+      <div class="tens">${en.map((id,i)=>`<div class="gmini sm" style="--c:${CARDS[id].color}"><img src="${CARDS[id].img}" alt=""><b>${CARDS[id].name}</b><small>Lv.${t.elv[i]||1}</small></div>`).join('')}</div>
+      <div class="rule">⚠ ${t.rule}</div>
+      <ul class="objs">${t.objs.map((o,i)=>`<li class="${stars>i?'ok':''}"><span class="s">${stars>i?'★':'☆'}</span>${o}</li>`).join('')}</ul>
+      <div class="rw"><div class="hot">รางวัลด่าน: 💰${t.reward.coins.toLocaleString()} · EXP ${t.reward.exp.toLocaleString()}${t.bonus?' · '+t.bonus:''}</div><div class="mute">แนะนำเลเวล ${t.rec}+</div></div>
+      <button data-th="${t.id}" ${locked?'disabled':''}>ท้าทาย</button></div>`}).join('');
+}
+$('#thList').onclick=e=>{const b=e.target.closest('[data-th]');if(!b||b.disabled)return;toast('🚧 ด่านท้าทายยังเป็นหน้าตัวอย่าง — ยังเข้าเล่นไม่ได้')};
+
 /* --- เรด --- */
 const pctDealt=(R,b)=>(b.maxHp-R.hp)/b.maxHp*100;
 function renderRaid(){

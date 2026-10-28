@@ -138,8 +138,16 @@
     <button class="mode m-stage" data-go="stages"><span class="mi">⚔️</span><b>เล่นด่าน</b><small>ผ่านด่านตามลำดับ รับ EXP และเงิน<br>ชนะครั้งแรกได้รางวัลเยอะ</small><em id="mdStages"></em></button>
     <button class="mode m-raid" data-go="raid"><span class="mi">🐉</span><b>ลงเรด</b><small>รุมบอสยักษ์ HP สะสมข้ามรอบ<br>รีเซ็ตทุก 1 ชั่วโมง</small><em id="mdRaid"></em></button>
     <button class="mode m-chal" data-go="chal"><span class="mi">🏆</span><b>ลงชาเลนจ์</b><small>ภารกิจพิเศษ 3 ระดับ ง่าย / ปานกลาง / ยาก<br>เปลี่ยนศัตรูใหม่ทุก 30 นาที</small><em id="mdChal"></em></button>
+    <button class="mode m-tough" data-go="tough"><span class="mi">🔥</span><b>ด่านท้าทาย</b><small>ด่านโหดพิเศษ มีเงื่อนไขจำกัด<br>ทำภารกิจเก็บดาว รับรางวัลหายาก</small><em id="mdTough"></em></button>
     <button class="mode m-inf" data-go="inf"><span class="mi">♾️</span><b>ด่านไม่มีที่สิ้นสุด</b><small>สู้เวฟต่อเวฟ ยิ่งไปไกลยิ่งได้เงินเยอะ<br>เลือกบัฟได้ · บัฟศัตรูเพื่อเพิ่มรายได้</small><em id="mdInf"></em></button>
   </div>
+</section>
+
+<!-- ด่านท้าทาย (หน้าตัวอย่าง UI) -->
+<section class="screen hidden" id="toughScr">
+  <header class="top"><button class="sec small" data-go="play">← กลับ</button><h1>ด่านท้าทาย 🔥</h1><div class="coin">💰 <b class="coinN">0</b></div></header>
+  <div class="tinfo"><span id="thInfo"></span><small>🚧 หน้าตัวอย่าง — ยังเข้าเล่นไม่ได้ (ทำ UI ก่อน)</small></div>
+  <div class="tgrid" id="thList"></div>
 </section>
 
 <!-- ด่านไม่มีที่สิ้นสุด (โหมดปกติ · ได้เงิน) -->

@@ -723,7 +723,7 @@ body{padding:0}
 #endlessScr .rinfo h2{color:#d9c2ff}
 /* ===== ด่านไม่มีที่สิ้นสุด (โหมดปกติ) ===== */
 .m-inf{--c:#4fd1c5}
-#playScr .modes{grid-template-columns:repeat(4,minmax(0,1fr));max-width:1300px}
+#playScr .modes{grid-template-columns:repeat(5,minmax(0,1fr));max-width:1500px}
 @media (max-width:1000px){#playScr .modes{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:760px) and (orientation:portrait){#playScr .modes{grid-template-columns:1fr}}
 .infbig{display:flex;align-items:center;justify-content:center;height:100%;font-size:clamp(90px,22vh,180px);line-height:1;filter:drop-shadow(0 0 30px #4fd1c5aa) drop-shadow(0 10px 24px #000a)}
@@ -732,3 +732,24 @@ body{padding:0}
 /* จำนวนผู้เล่นออนไลน์ */
 .oncount{display:block;margin-top:2px;color:#7dffb0}.oncount b{font-family:Kanit;color:#fff}
 #onCnt{font-family:Kanit;font-size:.9em}
+/* ===== ด่านท้าทาย (UI) ===== */
+.m-tough{--c:#ff7a3d}
+.tgrid{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:clamp(10px,1.6vw,20px);align-content:start;padding:2px 2px 12px}
+.tcard{position:relative;display:flex;flex-direction:column;gap:9px;background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:14px;min-width:0}
+.tcard.d-easy{border-color:#2a8f5a}.tcard.d-mid{border-color:#a8741a}.tcard.d-hard{border-color:#a8283f}.tcard.d-hell{border-color:#8a2be2}
+.tcard .thd{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.tcard h2{margin:0;font-family:Kanit;font-size:1.2em;line-height:1.25}
+.tcard .no{font:700 .8em Kanit;color:var(--gold)}
+.diff.d-hell{background:#8a2be2;color:#fff;box-shadow:0 0 12px #8a2be288}
+.tcard .tens{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-start}
+.tcard .tens .gmini{width:clamp(64px,22%,92px);height:auto;font-size:.72em}
+.tcard .tens .gmini img,.tcard .tens .gmini.sm img{width:100%;height:auto;aspect-ratio:687/1024}
+.tcard .tens .gmini b{line-height:1.2}
+.tcard .objs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:.9em}
+.tcard .objs li{display:flex;gap:8px;align-items:center}
+.tcard .objs li .s{color:#6b6f86;font-size:1.1em}.tcard .objs li.ok .s{color:#ffcf4a}
+.tcard .rw{font-size:.9em}
+.tcard.lock>*:not(.lockbox){opacity:.38;filter:grayscale(.6)}
+.lockbox{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#05071088;border-radius:14px;text-align:center;font-family:Kanit;z-index:2;pointer-events:none}
+.lockbox span{font-size:2.4em}
+.tcard button{margin-top:auto}
