@@ -4,9 +4,9 @@ const MAX_TEAM=4;
 /* ตู้กาชา: สุ่มได้ทุกใบรวมถึงตัวซ้ำ (น้ำหนัก = % ที่ออก) — ปรับทีหลังได้ */
 const GACHA={cost:100,cost10:900,
   /* การ์ดที่สุ่มได้ในตู้ (LTD ยังไม่เปิดให้สุ่ม — ซาสึเกะจะหาวิธีได้รับภายหลัง) */
-  pool:['goku','zenitsu','yuji','naruto','sasukekid','gekko','ino','ichigo','kirito','megumi','gil','kurapika'],
+  pool:['goku','zenitsu','yuji','naruto','sasukekid','gekko','ino','ichigo','kirito','megumi','gil','kurapika','shuna','chahaein','reze','kdash'],
   /* เรทออก % : base = ปกติ, up = ตอนเป็นการ์ดเรทอัป (การ์ด R ที่เหลือแบ่งเท่าๆ กัน) */
-  rates:{base:{kirito:15,ichigo:15,megumi:5,gil:2,kurapika:0.1},up:{kirito:30,ichigo:30,megumi:10,gil:5,kurapika:0.5}},
+  rates:{base:{kirito:15,ichigo:15,megumi:5,gil:2,kurapika:0.1,shuna:8,chahaein:4,reze:1.5,kdash:0.1},up:{kirito:30,ichigo:30,megumi:10,gil:5,kurapika:0.5,shuna:8,chahaein:4,reze:1.5,kdash:0.1}},
   dup:{R:20,S:40,SR:55,SSR:70,UR:90,USR:130,LTD:180},
   /* ตู้เดียว เรทอัปเปลี่ยนทุก 1 ชั่วโมง (เวลาไทย) วนตามลำดับนี้: c = การ์ดตรงกลาง, s = การ์ดข้างๆ (เรทปกติ) */
   rotation:[{c:'kurapika',s:['yuji','kirito']},{c:'gil',s:['zenitsu','kirito']},{c:'kirito',s:['goku','gil']},

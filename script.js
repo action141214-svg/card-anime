@@ -22,6 +22,14 @@ const CARDS={
         desc:'เมื่อการ์ดใบนี้โจมตีจะสร้างสถานะ "เลือดไหล" และสถานะ "ติดพิษ" ซึ่งสร้างความเสียหาย 10% ของ POWER ปัจจุบัน'},
   mahoraga:{name:'จักรพรรดิดาบแปดทิศ ปรวาณบดีกระบัด มโหรากา',rar:'USR',evo:true,img:'mahoraga.jpeg',power:35,hp:420,color:'#e8e2c8',ability:'wheel',
         desc:'การปรับตัวของมโหรากา ทุกๆ เทิร์นกงล้อจะหมุนหนึ่งครั้งและสุ่มการเพิ่มค่าสเตตัสให้ตนเอง: เพิ่ม 50 POWER / ฟื้นฟู HP 20% ของ HP ที่เสียไป / ต้านทานสถานะด้านลบ (ได้จากการอีโวฟุชิงุโระ เมงุมิ)'},
+  reze:{name:'ปีศาจระเบิด เรเซ่',rar:'UR',img:'reze.jpeg',power:30,hp:370,color:'#e0463a',ability:'bomb',
+        desc:'เมื่อการ์ดใบนี้โจมตีมีโอกาส 50% ที่จะโจมตีรูปแบบ "ระเบิด" ทำให้สร้างความเสียหาย 2 เท่า และมีโอกาส 45% ทำให้ศัตรูติดสถานะ "มึนงง" ไม่สามารถโจมตีในเทิร์นนั้นได้ และหากการ์ดใบนี้ถูกทำลายจะระเบิดพร้อมสร้างความเสียหาย 5 เท่าของ POWER'},
+  shuna:{name:'ชูนะ',rar:'S',img:'shuna.jpeg',power:30,hp:290,color:'#ff7eb6',ability:'shuna',
+        desc:'เมื่อนำเข้าทีมการ์ดใบนี้จะเพิ่ม 25% ของ HP และ 40% ของ POWER สูงสุดให้กับการ์ดในทีม แต่หากการ์ดนี้ถูกทำลายผลลัพธ์ด้านบวกนี้จะหายทันที'},
+  chahaein:{name:'ชา แฮ อิน',rar:'SR',img:'cha.jpeg',power:40,hp:400,color:'#e24b5b',ability:'boss3',
+        desc:'สร้างความเสียหาย 3 เท่าให้กับ BOSS'},
+  kdash:{name:'เค แดช',rar:'USR',img:'k.jpeg',power:36,hp:420,color:'#ff5a2a',ability:'pflame',
+        desc:'การควบคุมไฟได้อย่างชำนาญทำให้สถานะเผาไหม้ต่างๆ ไม่มีผลกับการ์ดใบนี้ สร้างสถานะ "ไฟบริสุทธิ์" ใส่ศัตรูสร้างความเสียหาย 15% ของ HP สูงสุด และลด POWER ลงทันที 15% เมื่อลงสนาม'},
   sasukekid:{name:'อุจิวะ ซาสึเกะ (ร่างเด็ก)',rar:'R',img:'sasuke_kid.jpeg',power:25,hp:250,color:'#4a6fd8',ability:'fireball',
         desc:'ปล่อยคาถาเพลิง สร้างความเสียหาย 20% ของ POWER ปัจจุบัน และทำให้ศัตรูติดสถานะ "เผาไหม้" สร้างความเสียหาย 10% ของ HP สูงสุดของศัตรู'},
   ino:{name:'ยามานากะ อิโนะ',rar:'R',img:'ino.jpeg',power:27,hp:290,color:'#c9a6ff',ability:'ino',
@@ -57,7 +65,7 @@ const CARDS={
 /* ลำดับระดับการ์ด จากน้อยไปมาก */
 const R_ORDER=['R','S','SR','SSR','UR','USR','LTD'];
 const rIdx=r=>R_ORDER.indexOf(r);
-const ID={mahoraga:{p:'#mhP',h:'#mhH'},sasukecurse:{p:'#scP',h:'#scH'},sasukekid:{p:'#kdP',h:'#kdH'},naruto1:{p:'#n1P',h:'#n1H'},ino:{p:'#inP',h:'#inH'},gekko:{p:'#qP',h:'#qH'},naruto:{p:'#wP',h:'#wH'},ichigo:{p:'#oP',h:'#oH'},megumi:{p:'#mP',h:'#mH'},yuji:{p:'#yP',h:'#yH'},goku:{p:'#gP',h:'#gH'},zenitsu:{p:'#zP',h:'#zH'},kirito:{p:'#kP',h:'#kH'},gil:{p:'#iP',h:'#iH'},kurapika:{p:'#rP',h:'#rH'},sasuke:{p:'#sP',h:'#sH'},hutao:{p:'#hP',h:'#hH'},luffy:{p:'#fP',h:'#fH'},gengar:{p:'#eP',h:'#eH'},alucard:{p:'#aP',h:'#aH'},isaac:{p:'#xP',h:'#xH'},okarun:{p:'#uP',h:'#uH'}};
+const ID={reze:{p:'#rzP',h:'#rzH'},shuna:{p:'#shP',h:'#shH'},chahaein:{p:'#chP',h:'#chH'},kdash:{p:'#kyP',h:'#kyH'},mahoraga:{p:'#mhP',h:'#mhH'},sasukecurse:{p:'#scP',h:'#scH'},sasukekid:{p:'#kdP',h:'#kdH'},naruto1:{p:'#n1P',h:'#n1H'},ino:{p:'#inP',h:'#inH'},gekko:{p:'#qP',h:'#qH'},naruto:{p:'#wP',h:'#wH'},ichigo:{p:'#oP',h:'#oH'},megumi:{p:'#mP',h:'#mH'},yuji:{p:'#yP',h:'#yH'},goku:{p:'#gP',h:'#gH'},zenitsu:{p:'#zP',h:'#zH'},kirito:{p:'#kP',h:'#kH'},gil:{p:'#iP',h:'#iH'},kurapika:{p:'#rP',h:'#rH'},sasuke:{p:'#sP',h:'#sH'},hutao:{p:'#hP',h:'#hH'},luffy:{p:'#fP',h:'#fH'},gengar:{p:'#eP',h:'#eH'},alucard:{p:'#aP',h:'#aH'},isaac:{p:'#xP',h:'#xH'},okarun:{p:'#uP',h:'#uH'}};
 
 /* อาวุธ Gate of Babylon (SVG หันไปทางขวา) */
 const WEAPONS=[
@@ -92,20 +100,24 @@ function setFighter(k){
 function startBattle(opts){
   OPT=opts;FIXED=!!opts.online;RNG=opts.seed!=null?mulberry(opts.seed>>>0):null;if(opts.online){speed=1;$('#speedBtn').textContent='ความเร็ว x1'}
   run++;paused=false;$('#pauseBtn').textContent='หยุด';$('#fx').innerHTML='';$('#autoBtn').classList.toggle('hidden',!opts.auto);
-  C={gr:num('#gr')/100,zc:num('#zc')/100,kh:num('#kh')/100,ki:Math.max(1,num('#ki')),gc:num('#gc'),gd:num('#gd'),nh:num('#nh')/100,rm:num('#rm'),lb:num('#lb')/100,lc:num('#lc')/100,ym:num('#ym'),gm:num('#oM'),gn:Math.max(1,num('#oN')),sd:num('#mD')/100,sn:num('#mN')/100,se:num('#mE'),sr:num('#mR')/100,bd:num('#hB')/100,bt:Math.max(1,num('#hT')),gh:num('#hG')/100,pc:num('#fC')/100,gx:num('#eG')/100,ab:num('#aB')/100,kf:num('#kdF')/100,sv:num('#scV')/100,sc:num('#scC')/100,st:Math.max(1,num('#scT')),kb:num('#kdB')/100,kt:Math.max(1,num('#kdT')),xn:num('#xN'),xk:num('#xK'),xm:num('#xM'),ot:num('#uT')/100,od:num('#uD')/100,nr:num('#wR')/100,gk:num('#qR')/100,ni:Math.max(1,Math.round(num('#inI'))),nx:num('#inX'),n1h:num('#n1h')/100,n1c:num('#n1c')/100,wp:num('#mhW'),wr:num('#mhR')/100};
+  C={gr:num('#gr')/100,zc:num('#zc')/100,kh:num('#kh')/100,ki:Math.max(1,num('#ki')),gc:num('#gc'),gd:num('#gd'),nh:num('#nh')/100,rm:num('#rm'),lb:num('#lb')/100,lc:num('#lc')/100,ym:num('#ym'),gm:num('#oM'),gn:Math.max(1,num('#oN')),sd:num('#mD')/100,sn:num('#mN')/100,se:num('#mE'),sr:num('#mR')/100,bd:num('#hB')/100,bt:Math.max(1,num('#hT')),gh:num('#hG')/100,pc:num('#fC')/100,gx:num('#eG')/100,ab:num('#aB')/100,kf:num('#kdF')/100,sv:num('#scV')/100,sc:num('#scC')/100,st:Math.max(1,num('#scT')),kb:num('#kdB')/100,kt:Math.max(1,num('#kdT')),xn:num('#xN'),xk:num('#xK'),xm:num('#xM'),ot:num('#uT')/100,od:num('#uD')/100,nr:num('#wR')/100,gk:num('#qR')/100,ni:Math.max(1,Math.round(num('#inI'))),nx:num('#inX'),n1h:num('#n1h')/100,n1c:num('#n1c')/100,wp:num('#mhW'),wr:num('#mhR')/100,zb:num('#rzB')/100,zm:num('#rzM'),zs:num('#rzS')/100,rb:num('#rzX'),shh:num('#shA')/100,shp:num('#shB')/100,cm:num('#chM'),kyd:num('#kyD')/100,kyt:Math.max(1,num('#kyT')),kyr:num('#kyR')/100};
   const mk=(lvs,sts)=>(id,i)=>{const l=(lvs&&lvs[i])||1,sr=(sts&&sts[i])||1,s=statAt(id,l,sr);return{id,lv:l,star:sr,p:s.p,hp:s.hp,max:s.hp,para:false,sealed:false,lightning:false,miss:false,burn:0,burnDmg:0,sev:0,poss:false,bleed:false,hb:0,ps:0,turbo:false,fg:null,t:0}};
   let first=opts.first||$('#first').value;if(first==='r')first=RR()<.5?'a':'b';
   S={a:null,b:null,roster:{a:opts.a.map(mk(opts.la,opts.sa)),b:opts.b.map(mk(opts.lb,opts.sb))},idx:{a:0,b:0},turn:first,n:1,over:false};
-  if(opts.bossHp){const r=S.roster.b[0];r.max=opts.bossHp.max;r.hp=opts.bossHp.cur;
+  if(opts.bossHp){const r=S.roster.b[0];r.max=opts.bossHp.max;r.hp=opts.bossHp.cur;r.boss=true;
     if(opts.noHeal)r.noHeal=true;   /* เควสพัฒนา: บอสไม่ฟื้นฟู HP */
     if(opts.bossP!=null)r.p=opts.bossP;   /* อีเว้นท์: กำหนด POWER บอสเอง */
     if(opts.bossSafe){r.safe=true;r.base=statAt(r.id,r.lv).hp}   /* บอส HP มหาศาล: กันจุดตายทันที / เลือดไหลที่คิดจาก HP สูงสุด */
   }   /* เรด: บอสมี HP สะสมข้ามรอบ */
+  const sbLogs=[];
+  for(const k of['a','b']){const sh=S.roster[k].find(r=>r.id==='shuna');if(!sh)continue;
+    S.roster[k].forEach(r=>{if(r===sh||r.boss)return;const h=Math.round(r.max*C.shh),p=Math.round(r.p*C.shp*10)/10;r.max+=h;r.hp+=h;r.p=Math.round((r.p+p)*10)/10;r.sb={h,p}});
+    sbLogs.push([k,'🌸 ชูนะเสริมพลังให้ทีม: HP +'+Math.round(C.shh*100)+'% · POWER +'+Math.round(C.shp*100)+'% (หายเมื่อชูนะถูกกำจัด)'])}
   S.a=S.roster.a[0];S.b=S.roster.b[0];
   $('#teamA').innerHTML=sideHtml('a');$('#teamB').innerHTML=sideHtml('b');
   setFighter('a');setFighter('b');$('#stgName').textContent=opts.title||'';
   $('#log').innerHTML='';show('battleScr');
-  log('เริ่มการต่อสู้! '+nm(S.turn)+' โจมตีก่อน','sys');render();loop(run);
+  log('เริ่มการต่อสู้! '+nm(S.turn)+' โจมตีก่อน','sys');sbLogs.forEach(x=>log(x[1],x[0]));render();loop(run);
 }
 const endInfo=()=>{const sm=(k,f)=>S.roster[k].reduce((s,r)=>s+f(r),0);return{winner:S.winner||null,hpA:sm('a',r=>Math.max(0,r.hp)),hpB:sm('b',r=>Math.max(0,r.hp)),maxA:sm('a',r=>r.max),maxB:sm('b',r=>r.max)}};
 /* โอคารุน: โอกาสหลบการโจมตี */
@@ -121,8 +133,19 @@ function gmaxPurify(k){
   log('✦ '+nm(k)+' แปลงสถานะด้านลบ '+n+' อย่างเป็น POWER +'+add+' (เป็น '+s.p+')',k);
   if(cw){floatTxt(cw,'+'+add,'heal');cw.classList.remove('gold');void cw.offsetWidth;cw.classList.add('gold');setTimeout(()=>cw.classList.remove('gold'),1400)}
 }
+/* เค แดช: ไม่ติดสถานะเผาไหม้ / ลด POWER ตอนลงสนาม */
+function pflameImmune(k){const s=S&&S[k];if(!s||s.hp<=0||CARDS[s.id].ability!=='pflame'||!(s.burn>0))return;
+  s.burn=0;s.burnDmg=0;log('🛡 '+nm(k)+' ไม่ได้รับผลของสถานะเผาไหม้',k);const cw=$('#f'+k+' .cw');if(cw)floatTxt(cw,'IMMUNE','sm')}
+function enterField(k){const s=S&&S[k];if(!s||s.entered||s.hp<=0)return;s.entered=true;
+  if(CARDS[s.id].ability==='pflame'){const d=Math.round(s.p*C.kyr*10)/10;s.p=Math.max(1,Math.round((s.p-d)*10)/10);log('🔥 '+nm(k)+' ลงสนาม POWER ลดลง '+d+' (เหลือ '+s.p+')',k)}}
+/* ชูนะ: ถูกกำจัด → บัฟของทีมหายทันที */
+function shunaFade(k){let n=0;S.roster[k].forEach(r=>{if(!r.sb)return;r.p=Math.max(1,Math.round((r.p-r.sb.p)*10)/10);r.max=Math.max(1,r.max-r.sb.h);r.hp=Math.min(r.hp,r.max);r.sb=null;n++});
+  if(n)log('🌸 ชูนะถูกกำจัด! ผลเสริมพลังของทีมหายไป',k);render()}
+function bombFx(ak,dk){const dw=$('#f'+dk+' .cw'),r=dw.getBoundingClientRect();
+  for(const [dx,dy,sz] of [[0,0,260],[-.25,.15,150],[.25,-.15,150]]){const x=fxEl('bfx',r.left+r.width*(.5+dx),r.top+r.height*(.5+dy),sz,sz);setTimeout(()=>x.remove(),600)}
+  dw.classList.remove('bflash');void dw.offsetWidth;dw.classList.add('bflash')}
 function render(){
-  if(S&&!S.over){gmaxPurify('a');gmaxPurify('b')}
+  if(S&&!S.over){gmaxPurify('a');gmaxPurify('b');for(const k of['a','b']){pflameImmune(k);enterField(k)}}
   for(const k of['a','b']){const s=S[k],f=$('#f'+k),pc=Math.max(0,s.hp/s.max*100);
     const fl=$('.fill',f);fl.style.width=pc+'%';fl.classList.toggle('low',pc<30);
     $('.hpt',f).textContent='HP '+Math.max(0,Math.ceil(s.hp)).toLocaleString()+' / '+s.max.toLocaleString();
@@ -198,7 +221,7 @@ function getsugaFx(ak,dk){
 /* ---------- คุราปิก้า: สุ่มนิ้ว (โอกาสเท่ากัน 20% ต่อนิ้ว) ---------- */
 const FN=['นิ้วโป้ง','นิ้วชี้','นิ้วกลาง','นิ้วนาง','นิ้วก้อย'];
 const FD=['ฟื้นฟู HP','ขโมยความสามารถ','ผนึกความสามารถศัตรู','ลบสถานะด้านลบ','โจมตีซ้ำ'];
-const AN={wheel:'ธรรมจักร (กงล้อหมุนสุ่มเสริมพลัง)',kyuubi:'จักระจิ้งจอก (ฟื้นฟู HP + ชะงัก)',getsuga:'เกตสึกะ (ดาเมจ ×3)',shiki:'ทศฉายา (เรียกชิกิกามิ)',upset:'ล้มยักษ์ (ดาเมจเพิ่มใส่ศัตรูระดับสูงกว่า)',lightning:'สายฟ้า',grow:'POWER เพิ่มขึ้น',paralyze:'ทำให้ชา',heal:'ฟื้นฟู HP',gate:'Gate of Babylon',ghost:'ผีเมาช่วยโจมตี',possess:'เข้าสิง (ศัตรูมีโอกาสโจมตีตัวเอง)',gmax:'แปลงสถานะลบเป็น POWER',double:'โจมตี 2 ครั้ง + เลือดไหล',scythe:'สุ่มการโจมตี 3 รูปแบบ',turbo:'สัญลักษณ์เทอร์โบ'};
+const AN={bomb:'ระเบิด (ดาเมจ ×2 + มึนงง)',shuna:'เสริมพลังทีม',boss3:'ดาเมจ ×3 ใส่บอส',pflame:'ไฟบริสุทธิ์',wheel:'ธรรมจักร (กงล้อหมุนสุ่มเสริมพลัง)',kyuubi:'จักระจิ้งจอก (ฟื้นฟู HP + ชะงัก)',getsuga:'เกตสึกะ (ดาเมจ ×3)',shiki:'ทศฉายา (เรียกชิกิกามิ)',upset:'ล้มยักษ์ (ดาเมจเพิ่มใส่ศัตรูระดับสูงกว่า)',lightning:'สายฟ้า',grow:'POWER เพิ่มขึ้น',paralyze:'ทำให้ชา',heal:'ฟื้นฟู HP',gate:'Gate of Babylon',ghost:'ผีเมาช่วยโจมตี',possess:'เข้าสิง (ศัตรูมีโอกาสโจมตีตัวเอง)',gmax:'แปลงสถานะลบเป็น POWER',double:'โจมตี 2 ครั้ง + เลือดไหล',scythe:'สุ่มการโจมตี 3 รูปแบบ',turbo:'สัญลักษณ์เทอร์โบ'};
 /* ไอคอนมือ: นิ้วที่ใช้ในเทิร์นนั้นจะเรืองสีทอง */
 function handSvg(i,sz=40){
   const F=[['M10 66 L22 56 L36 84 L22 92Z','',''],['M24 16h12a2 2 0 0 1 2 2v44H22V18a2 2 0 0 1 2-2z'],['M38 8h12a2 2 0 0 1 2 2v52H36V10a2 2 0 0 1 2-2z'],['M52 14h12a2 2 0 0 1 2 2v46H50V16a2 2 0 0 1 2-2z'],['M66 28h11a2 2 0 0 1 2 2v32H64V30a2 2 0 0 1 2-2z']];
@@ -225,9 +248,10 @@ async function hit(ak,dk,mult=1){
   if(dodges(dk)){S.lb=0;S.up=false;floatTxt(dw,'หลบ!','miss');log('💨 '+nm(dk)+' หลบการโจมตีได้!',dk);aw.classList.remove('lungea','lungeb');render();return 0}
   let tb=0;if(a.turbo&&!S.noAb&&CARDS[a.id].ability==='turbo'){tb=Math.round(a.p*C.ot);a.turbo=false;log('⚡ สัญลักษณ์เทอร์โบ! ดาเมจเพิ่ม +'+tb,ak)}
   const bonus=d.lightning?Math.round(a.p*C.lb):0;S.lb=bonus;const up=CARDS[a.id].ability==='upset'&&!S.noAb&&rIdx(CARDS[d.id].rar)>rIdx(CARDS[a.id].rar);S.up=up;
-  const dmg=Math.round(a.p*mult*(up?C.ym:1))+bonus+tb;d.hp-=dmg;
+  const bm=(d.boss&&!S.noAb&&CARDS[a.id].ability==='boss3')?C.cm:1;if(bm>1)log('⚔ '+nm(ak)+' ดาเมจ ×'+C.cm+' ใส่บอส!',ak);
+  const dmg=Math.round(a.p*mult*(up?C.ym:1)*bm)+bonus+tb;d.hp-=dmg;
   if(up){const r=dw.getBoundingClientRect(),x=fxEl('bfx',r.left+r.width/2,r.top+r.height/2,200,200);setTimeout(()=>x.remove(),550);dw.classList.remove('bflash');void dw.offsetWidth;dw.classList.add('bflash')}
-  floatTxt(dw,'-'+dmg,up||mult>=3?'crit':bonus?'zp':'');dw.classList.remove('hit');void dw.offsetWidth;dw.classList.add('hit');aw.classList.remove('lungea','lungeb');
+  floatTxt(dw,'-'+dmg,up||mult>=3||bm>1?'crit':bonus?'zp':'');dw.classList.remove('hit');void dw.offsetWidth;dw.classList.add('hit');aw.classList.remove('lungea','lungeb');
   render();return dmg;
 }
 function boltFx(ak,dk){
@@ -280,6 +304,7 @@ async function applyAb(name,ak,dk,opt={}){
   else if(name==='sevpara'){await sevAb(ak,dk)}
   else if(name==='ino'){await inoAb(ak,dk)}
   else if(name==='wheel'){if(opt.force)await wheelAb(ak)}
+  else if(name==='pflame'){await pflameAb(ak,dk)}
   else if(name==='turbo'){if(!a.turbo){a.turbo=true;log('⚡ '+nm(ak)+' ติดสัญลักษณ์เทอร์โบ! การโจมตีครั้งถัดไปดาเมจเพิ่ม '+Math.round(C.ot*100)+'% ของ POWER ปัจจุบัน',ak)}render()}
   else if(name==='heal'&&(opt.force||a.t%C.ki===0))heal(ak,C.kh);
 }
@@ -388,8 +413,10 @@ async function ghostAb(ak,dk){
   if(mode===0){
     await fly();
     const sp=fxEl('spark',tx,ty,160,160);setTimeout(()=>sp.remove(),500);dw.classList.remove('burnfx');void dw.offsetWidth;dw.classList.add('burnfx');
-    D.burn=C.bt;D.burnDmg=Math.max(D.burnDmg||0,Math.round(Math.min(D.max,statAt(D.id,D.lv,D.star).hp)*C.bd));render();   /* เผา % ของ HP สูงสุดศัตรู (บอส HP มหาศาลคิดจาก HP ปกติของการ์ดบอส) */
+    if(CARDS[D.id].ability==='pflame'){log('🛡 '+nm(dk)+' ไม่ติดสถานะเผาไหม้',ak)}else{
+    D.burnTx=null;D.burn=C.bt;D.burnDmg=Math.max(D.burnDmg||0,Math.round(Math.min(D.max,statAt(D.id,D.lv,D.star).hp)*C.bd));render();   /* เผา % ของ HP สูงสุดศัตรู (บอส HP มหาศาลคิดจาก HP ปกติของการ์ดบอส) */
     log('🔥 '+nm(dk)+' ติดสถานะเผาไหม้ ('+C.bt+' เทิร์น เสีย HP '+D.burnDmg+' ต่อเทิร์น = '+Math.round(C.bd*100)+'% ของ HP สูงสุด)',ak);await sl(400);
+    }
   }else{
     for(let i=0;i<2&&D.hp>0;i++){
       await fly(i?30:-30);
@@ -432,6 +459,12 @@ async function sevAb(ak,dk){
   await sl(450);
 }
 /* ซาสึเกะ (ร่างเด็ก): คาถาเพลิง — ลูกไฟดาเมจ % ของ POWER + เผาไหม้ % ของ HP สูงสุดศัตรู */
+async function pflameAb(ak,dk){
+  const D=S[dk],dw=$('#f'+dk+' .cw');if(D.hp<=0)return;
+  dw.classList.remove('burnfx');void dw.offsetWidth;dw.classList.add('burnfx');
+  D.burnTx='ไฟบริสุทธิ์';D.burn=Math.max(D.burn,C.kyt);D.burnDmg=Math.max(D.burnDmg||0,Math.round((D.base||D.max)*C.kyd));render();
+  log('🔥 '+nm(dk)+' ติดสถานะไฟบริสุทธิ์ ('+C.kyt+' เทิร์น เสีย HP '+D.burnDmg+' ต่อเทิร์น = '+Math.round(C.kyd*100)+'% ของ HP สูงสุด)',ak);await sl(350);
+}
 async function fireballAb(ak,dk){
   const A=S[ak],D=S[dk],aw=$('#f'+ak+' .cw'),dw=$('#f'+dk+' .cw'),ar=aw.getBoundingClientRect(),dr=dw.getBoundingClientRect();
   const sx=ar.left+ar.width/2,sy=ar.top+ar.height*.45,tx=dr.left+dr.width/2,ty=dr.top+dr.height*.5;
@@ -445,7 +478,8 @@ async function fireballAb(ak,dk){
   dealSummon(ak,dk,dmg,'🔥 คาถาเพลิง');
   if(D.hp<=0)return;
   dw.classList.remove('burnfx');void dw.offsetWidth;dw.classList.add('burnfx');
-  D.burn=Math.max(D.burn,C.kt);D.burnDmg=Math.max(D.burnDmg||0,Math.round((D.base||D.max)*C.kb));render();
+  if(CARDS[D.id].ability==='pflame'){log('🛡 '+nm(dk)+' ไม่ติดสถานะเผาไหม้',ak);return}
+  D.burnTx=null;D.burn=Math.max(D.burn,C.kt);D.burnDmg=Math.max(D.burnDmg||0,Math.round((D.base||D.max)*C.kb));render();
   log('🔥 '+nm(dk)+' ติดสถานะเผาไหม้ ('+C.kt+' เทิร์น เสีย HP '+D.burnDmg+' ต่อเทิร์น = '+Math.round(C.kb*100)+'% ของ HP สูงสุด)',ak);await sl(350);
 }
 async function gekkoAb(ak,dk){
@@ -500,18 +534,29 @@ async function handleKO(dk,ak){
     render();await sl(600);return false;
   }
   $('#f'+dk+' .cw').classList.add('ko');log('💀 '+nm(dk)+' ถูกกำจัด!','sys');render();await sl(800);
-  S.idx[dk]++;
-  if(S.idx[dk]>=S.roster[dk].length){
-    S.over=true;S.winner=ak;render();log((OPT.names?OPT.names[ak]:(ak==='a'?'ฝั่งผู้เล่น':'ฝั่งศัตรู'))+' ชนะ!','sys');await sl(700);
-    if(S&&S.over&&OPT.onEnd)OPT.onEnd({...endInfo(),win:ak==='a',turns:S.n,left:S.roster.a.filter(x=>x.hp>0).length,bossHp:Math.max(0,S.roster.b[0].hp)});return true}
-  S[dk]=S.roster[dk][S.idx[dk]];setFighter(dk);setFighter(ak);log('▶ '+nm(dk)+' ลงสนาม!','sys');return false;
+  const ab0=CARDS[dd.id].ability;let xko=false;
+  if(ab0==='shuna')shunaFade(dk);
+  if(ab0==='bomb'){const x=S[ak];if(x&&x.hp>0){   /* เรเซ่: ถูกกำจัด → ระเบิดพร้อมดาเมจ 5 เท่าของ POWER */
+    const bd=Math.round(dd.p*C.rb);bombFx(dk,ak);x.hp-=bd;floatTxt($('#f'+ak+' .cw'),'-'+bd,'crit');
+    log('💥 '+nm(dk)+' ระเบิดตัวเอง! สร้างความเสียหาย '+bd+' ('+C.rb+' เท่าของ POWER)',dk);render();await sl(700);
+    if(x.hp<=0){xko=true;$('#f'+ak+' .cw').classList.add('ko');log('💀 '+nm(ak)+' ถูกกำจัด!','sys');render();await sl(600);if(CARDS[x.id].ability==='shuna')shunaFade(ak)}}}
+  const finish=async w=>{
+    S.over=true;S.winner=w;render();log((OPT.names?OPT.names[w]:(w==='a'?'ฝั่งผู้เล่น':'ฝั่งศัตรู'))+' ชนะ!','sys');await sl(700);
+    if(S&&S.over&&OPT.onEnd)OPT.onEnd({...endInfo(),win:w==='a',turns:S.n,left:S.roster.a.filter(x=>x.hp>0).length,bossHp:Math.max(0,S.roster.b[0].hp)});return true};
+  S.idx[dk]++;let xOut=false;
+  if(xko){S.idx[ak]++;xOut=S.idx[ak]>=S.roster[ak].length}
+  const dOut=S.idx[dk]>=S.roster[dk].length;
+  if(dOut||xOut)return finish(xOut?dk:ak);   /* ระเบิดพาไปด้วยทั้งคู่ → ฝั่งเรเซ่ชนะ */
+  S[dk]=S.roster[dk][S.idx[dk]];setFighter(dk);
+  if(xko)S[ak]=S.roster[ak][S.idx[ak]];
+  setFighter(ak);log('▶ '+nm(dk)+' ลงสนาม!','sys');if(xko)log('▶ '+nm(ak)+' ลงสนาม!','sys');return false;
 }
 async function doTurn(){
   const ak=S.turn,dk=ak==='a'?'b':'a',a=S[ak],d=S[dk],ac=CARDS[a.id];
   a.t++;
   if(a.burn>0){   /* เผาไหม้: เสีย HP ต้นเทิร์นของการ์ดที่ติดสถานะ */
     const bd=a.burnDmg,cw=$('#f'+ak+' .cw');a.hp-=bd;a.burn--;floatTxt(cw,'-'+bd,'sm');cw.classList.remove('hit');void cw.offsetWidth;cw.classList.add('hit');
-    log('🔥 '+nm(ak)+' ถูกเผาไหม้ -'+bd+' (เหลือ HP '+Math.max(0,Math.ceil(a.hp))+')',dk);render();await sl(450);
+    log('🔥 '+nm(ak)+' ถูก'+(a.burnTx||'เผาไหม้')+' -'+bd+' (เหลือ HP '+Math.max(0,Math.ceil(a.hp))+')',dk);render();await sl(450);
     if(a.hp<=0){if(await handleKO(ak,dk))return;S.turn=dk;S.n++;render();return}
   }
   if(a.bleed){   /* เลือดไหล: เสีย HP % ของ HP สูงสุด ต้นเทิร์นของการ์ดที่ติดสถานะ */
@@ -559,7 +604,10 @@ async function doTurn(){
     const gf=big?getsugaFx(ak,dk):null;
     let imode=0;if(!sealed&&ac.ability==='scythe'){const rr=RR()*100;imode=rr<C.xk?2:rr<C.xk+C.xn?1:0;if(imode===2&&(a.safe||d.safe))imode=1}   // 0 ปกติ / 1 เฉียดจุดตาย / 2 จุดตาย
     if(imode)await scytheFx(ak,dk,imode);
-    const dmg=imode===2?await deathStrike(ak,dk):await hit(ak,dk,big?C.gm:(imode===1?C.xm:1));if(gf)await gf;
+    const boom=!sealed&&ac.ability==='bomb'&&!imode&&RR()<C.zb;
+    if(boom){bombFx(ak,dk);log('💥 '+nm(ak)+' โจมตีแบบระเบิด!',ak)}
+    const dmg=imode===2?await deathStrike(ak,dk):await hit(ak,dk,big?C.gm:(imode===1?C.xm:(boom?C.zm:1)));if(gf)await gf;
+    if(boom&&d.hp>0&&RR()<C.zs){d.para=true;log('😵 '+nm(dk)+' ติดสถานะมึนงง! ไม่สามารถโจมตีในเทิร์นถัดไปได้',ak);floatTxt($('#f'+dk+' .cw'),'มึนงง','sm')}
     log('เทิร์น '+S.n+' · '+nm(ak)+' โจมตี '+dmg+(S.up?' (ศัตรูระดับสูงกว่า ×'+C.ym+'!)':'')+(big?' (月牙天衝 ×'+C.gm+'!)':'')+(imode===1?' (เฉียดจุดตาย ×'+C.xm+')':imode===2?' (จุดตาย! ตายทันที)':'')+(S.lb?' (รวมสายฟ้า +'+S.lb+')':'')+' (เหลือ HP '+Math.max(0,Math.ceil(d.hp))+')',ak);
     if(d.hp>0){
       if(finger!==null)await fingerAct(finger,ak,dk);
