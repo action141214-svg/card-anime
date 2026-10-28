@@ -41,7 +41,7 @@ const gico=()=>gMode==='hw'?'🍬':'💰';
 const stageList=()=>sMode==='hw'?HW.stages:STAGES;
 const sGo=()=>sMode==='hw'?'hwstages':'stages';
 const inPool=id=>GACHA.pool.includes(id);
-const lockTxt=id=>CARDS[id].evo?'ได้จากการอีโว (เควสพัฒนา)':HW.pool.includes(id)?'ได้จากตู้ฮาโลวีน (อีเว้นท์)':inPool(id)?(HW.rPool.includes(id)?'ได้จากตู้กาชา / ตู้ฮาโลวีน':'ได้จากตู้กาชา'):'ยังไม่เปิดให้ได้รับ';   // เงินคืนเมื่อได้การ์ดซ้ำ แยกตามระดับ
+const lockTxt=id=>CARDS[id].endless?'ได้จากด่านไม่มีที่สิ้นสุด (อีเว้นท์) · ทุก 10 เวฟมีโอกาส '+EL.baseRate+'%':CARDS[id].evo?'ได้จากการอีโว (เควสพัฒนา)':HW.pool.includes(id)?'ได้จากตู้ฮาโลวีน (อีเว้นท์)':inPool(id)?(HW.rPool.includes(id)?'ได้จากตู้กาชา / ตู้ฮาโลวีน':'ได้จากตู้กาชา'):'ยังไม่เปิดให้ได้รับ';   // เงินคืนเมื่อได้การ์ดซ้ำ แยกตามระดับ
 /* ด่าน: first = รางวัลชนะครั้งแรก, repeat = รางวัลเล่นซ้ำ */
 const STAGES=[
   {id:1,name:'ด่าน 1 · บททดสอบแรก',enemy:['goku'],elv:[1],first:{coins:150,exp:100},repeat:{coins:30,exp:20}},
@@ -96,10 +96,10 @@ function hud(){
 }
 function fan(el,ids){const n=ids.length;el.innerHTML=ids.map((id,i)=>`<img src="${CARDS[id].img}" alt="${CARDS[id].name}" style="--i:${i-(n-1)/2}">`).join('')}
 function go(name){clearAuto();
-  const m={play:'playScr',raid:'raidScr',chal:'chalScr',home:'homeScr',team:'teamScr',stages:'stagesScr',gacha:'gachaScr',inv:'invScr',up:'upScr',lvr:'lvrScr',event:'eventScr',hwstages:'stagesScr',hwgacha:'gachaScr',evboss:'evbossScr',evo:'evoScr',sell:'sellScr',online:'onlineScr',room:'roomScr',friends:'friendsScr',chat:'chatScr'};
+  const m={play:'playScr',raid:'raidScr',chal:'chalScr',home:'homeScr',team:'teamScr',stages:'stagesScr',gacha:'gachaScr',inv:'invScr',up:'upScr',lvr:'lvrScr',event:'eventScr',hwstages:'stagesScr',hwgacha:'gachaScr',evboss:'evbossScr',evo:'evoScr',sell:'sellScr',online:'onlineScr',room:'roomScr',friends:'friendsScr',chat:'chatScr',endless:'endlessScr'};
   if(name==='up')upSel=null;if(name==='evo'){if(!evoKeep)evoSel=null;evoKeep=false}if(name==='stages')sMode='main';if(name==='hwstages')sMode='hw';if(name==='gacha')gMode='main';if(name==='hwgacha')gMode='hw';
   closeModal();show(m[name]);hud();
-  ({evo:renderEvo,sell:renderSell,play:renderPlay,raid:renderRaid,chal:renderChal,home:renderHome,team:renderTeam,stages:renderStages,gacha:renderGacha,inv:renderInv,up:renderUp,lvr:renderLvr,event:renderEvent,hwstages:renderStages,hwgacha:renderGacha,evboss:renderEvBoss,online:()=>Online.hub(),room:()=>Online.room(),friends:()=>Online.friends(),chat:()=>Online.chat()})[name]();
+  ({evo:renderEvo,sell:renderSell,play:renderPlay,raid:renderRaid,chal:renderChal,home:renderHome,team:renderTeam,stages:renderStages,gacha:renderGacha,inv:renderInv,up:renderUp,lvr:renderLvr,event:renderEvent,hwstages:renderStages,hwgacha:renderGacha,evboss:renderEvBoss,endless:renderEndless,online:()=>Online.hub(),room:()=>Online.room(),friends:()=>Online.friends(),chat:()=>Online.chat()})[name]();
 }
 document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go)});
 
@@ -215,7 +215,7 @@ function renderTeam(){
     d.innerHTML=`<div class="cimg"><img src="${c.img}" alt="${c.name}">${pos>=0?`<span class="tag">ลำดับ ${pos+1}</span>`:''}${own?'':`<span class="lockov">🔒<small>${lockTxt(id)}</small></span>`}<button class="ibtn" data-info="${id}" aria-label="ดูความสามารถของ ${c.name}">i</button></div>
       <div class="cinfo"><b>${c.name}</b><div class="cmeta">${rarTag(id)} <span>Lv.${l}</span>${own?` <em class="stars">${cstar(id)}★</em>`:''}${own&&SV.count[id]>1?` <em class="cnt">×${SV.count[id]}</em>`:''}</div><div class="cstat">POWER ${s.p} · HP ${s.hp}</div></div>`;
     const act=()=>{
-      if(!own)return toast(HW.pool.includes(id)?'การ์ดนี้ได้จากตู้ฮาโลวีน (อีเว้นท์) เท่านั้น':inPool(id)?'การ์ดนี้ยังล็อกอยู่ ต้องสุ่มจากตู้กาชา'+(HW.rPool.includes(id)?' หรือตู้ฮาโลวีน':''):'การ์ดนี้ยังไม่เปิดให้ได้รับ (จะมีวิธีได้รับภายหลัง)');
+      if(!own)return toast(CARDS[id].endless?'การ์ดนี้ได้จากด่านไม่มีที่สิ้นสุด (อีเว้นท์) เท่านั้น':HW.pool.includes(id)?'การ์ดนี้ได้จากตู้ฮาโลวีน (อีเว้นท์) เท่านั้น':inPool(id)?'การ์ดนี้ยังล็อกอยู่ ต้องสุ่มจากตู้กาชา'+(HW.rPool.includes(id)?' หรือตู้ฮาโลวีน':''):'การ์ดนี้ยังไม่เปิดให้ได้รับ (จะมีวิธีได้รับภายหลัง)');
       if(pos>=0)SV.team.splice(pos,1);else if(SV.team.length<MAX_TEAM)SV.team.push(id);else return toast('ทีมเต็ม '+MAX_TEAM+' ใบแล้ว');
       save();renderTeam()};
     d.onclick=e=>{if(e.target.closest('[data-info]')){e.stopPropagation();showInfo(id)}else act()};
@@ -224,7 +224,7 @@ function renderTeam(){
   }
 }
 /* ปุ่ม i: ดูความสามารถของการ์ด */
-const MORE={kirara:['แสตก "กลุ่มดาวกางเขนใต้" เพิ่ม 1 ทุกครั้งที่โจมตี (สูงสุด 5) และหายเมื่อศัตรูถูกกำจัด','แต่ละแสตก = อุปสรรค 1 ชิ้นพุ่งใส่ สุ่ม: 🚗 รถยนต์ 70% POWER','🪨 ก้อนหิน 40% POWER + โอกาส 40% มึนงง (โจมตีไม่ได้ 1 เทิร์น)','🗡️ ของมีคม 55% POWER + เลือดไหล 5% ของ HP สูงสุดศัตรู'],garo:['โจมตี 2 ครั้งต่อเทิร์น','โอกาส 40% หลบการโจมตีที่เข้ามาแต่ละครั้ง'],vegeta:['หลังโจมตีปกติ ปล่อยกระสุนพลังสุ่ม 2-5 ลูก','กระสุนแต่ละลูกสร้างความเสียหาย 60% ของ POWER ปัจจุบัน'],kula:['โอกาส 60% ติดสถานะ "ผลึกน้ำแข็ง" ❄','ศัตรูถูกแช่แข็ง โจมตีไม่ได้ 1 เทิร์น','ผลึกตกค้าง 2 เทิร์น เสีย HP 60% ของ POWER คุลาต่อเทิร์น'],mahoraga:['ทุกเทิร์น กงล้อธรรมจักรหมุน 1 ครั้ง แล้วสุ่มได้ 1 อย่าง (โอกาสเท่ากัน):','☸ เพิ่ม POWER +50','☸ ฟื้นฟู HP 20% ของ HP ที่เสียไป','☸ ต้านทานสถานะด้านลบทุกชนิด (ล้างสถานะที่ติดอยู่และกันสถานะใหม่จนถึงเทิร์นถัดไปของตน)'],sasukecurse:['ทุกครั้งที่โจมตี ศัตรูจะติดสถานะ "ชาขั้นรุนแรง" (⚡) นาน 3 เทิร์น (ต่ออายุทุกครั้งที่โจมตี)','ต้นเทิร์นของศัตรู: ถูกไฟฟ้าช็อต เสีย HP 10% ของ HP สูงสุดของศัตรู 1 ครั้ง','และมีโอกาส 50% ที่ศัตรูจะโจมตีไม่ได้ในเทิร์นนั้น','ลบสถานะได้ด้วยนิ้วนางของคุราปิก้า (โอคารุนไม่ได้รับผล)'],sasukekid:['ทุกครั้งที่โจมตี ปล่อยคาถาเพลิง ลูกไฟสร้างความเสียหาย 20% ของ POWER ปัจจุบัน','ศัตรูติดสถานะ "เผาไหม้" (🔥) เสีย HP 10% ของ HP สูงสุดของศัตรู ต้นเทิร์นทุกเทิร์น นาน 3 เทิร์น','ลบสถานะได้ด้วยนิ้วนางของคุราปิก้า'],ino:['ทุกๆ 2 เทิร์นของอิโนะ (เทิร์นที่ 2, 4, 6 …) จะย้ายร่างศัตรู','ศัตรูที่ถูกย้ายร่างโจมตีตัวเอง เสีย HP 2 เท่าของ POWER ปัจจุบันของตัวมันเอง','ใช้หลังการโจมตีปกติ · ถูกผนึกความสามารถแล้วใช้ไม่ได้'],gekko:['เมื่อโจมตี จะสร้างสถานะ "เลือดไหล" และ "ติดพิษ" ใส่ศัตรู','แต่ละสถานะทำให้เสีย HP 10% ของ POWER ปัจจุบันของเก็กโค ต่อเทิร์น (ต้นเทิร์นของศัตรู)','ไม่ซ้อนทับ — โจมตีซ้ำเพียงอัปเดตดาเมจให้เท่ากับค่าสูงสุด · หายเมื่อถูกล้างสถานะ'],naruto:['เมื่อถูกกำจัดครั้งแรก จะเรียกร่างแยกลงสนามแทนทันที (ฟื้น HP เต็มตามสเตตัสร่างแยก)','ร่างแยกมี POWER และ HP ลดลง 10% ของสเตตัสทั้งหมด (ปรับได้ในหน้าปรับค่าทดลอง)','ร่างแยกถูกกำจัดแล้วไม่เรียกซ้ำอีก'],okarun:['มีโอกาส 30% หลบการโจมตี (รวมการโจมตีจากผู้ช่วยหรือความสามารถของศัตรู) หลบแล้วไม่โดนดาเมจ','ไม่ได้รับผลของสถานะด้านลบทุกชนิด (ชา ผนึก สายฟ้า เผาไหม้ เข้าสิง เลือดไหล ฯลฯ)','เมื่อโจมตีจะติดสัญลักษณ์เทอร์โบ (⚡) ทำให้การโจมตีครั้งถัดไปดาเมจเพิ่ม 30% ของ POWER ปัจจุบัน'],isaac:['ทุกครั้งที่โจมตีสุ่ม 1 ใน 3 รูปแบบ (ตั้งค่าโอกาสได้ในหน้าปรับค่าทดลอง ค่าเริ่มต้นประมาณ 1 ใน 3 เท่ากัน)','โจมตีปกติ: ดาเมจเท่า POWER','โจมตีเฉียดจุดตาย: ดาเมจ 2 เท่าของ POWER ปัจจุบัน','โจมตีจุดตาย: ศัตรูตายทันที'],alucard:['โจมตีได้ 2 ครั้งใน 1 เทิร์น (ครั้งที่ 2 ต่อจากครั้งแรกทันที)','เมื่อโจมตี ศัตรูติดสถานะ "เลือดไหล" (🩸) เสีย HP 5% ของ HP สูงสุดของศัตรู ต้นเทิร์นทุกเทิร์น จนกว่าจะถูกลบสถานะหรือตาย'],gengar:['เมื่อติดสถานะด้านลบ (ชา / ผนึก / สายฟ้า / สับสน / เผาไหม้ / เข้าสิง) จะล้างสถานะนั้นทันที','ทุกสถานะที่ล้างได้ เพิ่ม POWER ให้ตัวเอง 10% ของ POWER ปัจจุบัน'],luffy:['ทุกครั้งที่โจมตี ศัตรูจะติดสถานะ "เข้าสิง" (ป้าย 👻)','ในเทิร์นถัดไปของศัตรู มีโอกาส 50% ที่จะโจมตีตัวเอง (ดาเมจเท่า POWER ของตัวเอง) แทนการโจมตีปกติ','สถานะหมดลงเมื่อถึงเทิร์นของศัตรู ไม่ว่าจะโจมตีตัวเองหรือไม่'],hutao:['ทุกครั้งที่โจมตี เรียกผีเมาช่วยโจมตี สุ่ม 1 ใน 2 รูปแบบ (50%)','เผาไหม้: ติดสถานะเผาไหม้ เสีย HP ต้นเทิร์นของศัตรู 15% ของ HP สูงสุดของศัตรู นาน 3 เทิร์น','ผีตัวเล็ก: โจมตี 2 ครั้ง ครั้งละ 10% ของ POWER ปัจจุบัน'],ichigo:['ทุกๆ 2 เทิร์น การโจมตีครั้งถัดไป (ครั้งที่ 3, 6, 9 …) สร้างดาเมจ 3 เท่าของ POWER ปัจจุบัน','การ์ดจะมีป้าย "พลังสะสม ×3" เมื่อการโจมตีครั้งหน้าคือท่าไม้ตาย (เกตสึกะ เท็นโช)'],megumi:['สุนัข (Divine Dogs): สร้างดาเมจ 50% ของ POWER ปัจจุบัน','นกฮูก (Nue): มีโอกาส 50% ทำให้ศัตรูติดชาในเทิร์นนั้น','กบ (Toad): ลิ้นพันศัตรู ทำให้โจมตีได้อีกครั้ง','คชสาร (Max Elephant): สร้างดาเมจ 2 เท่าของ POWER ปัจจุบัน','กระต่าย (Rabbit Escape): มีโอกาส 50% ทำให้ศัตรูโจมตีไม่โดน','ทุกเทิร์นสุ่มเรียก 1 ตัว ตัวละ 20% เท่ากัน'],kurapika:['นิ้วโป้ง: ฟื้นฟู HP 10% ของ HP ทั้งหมด','นิ้วชี้: ขโมยความสามารถของการ์ดศัตรูมาใช้ในเทิร์นนั้น','นิ้วกลาง: ผนึกความสามารถของศัตรู (ใช้ไม่ได้ในเทิร์นของเขา)','นิ้วนาง: ลบสถานะด้านลบ','นิ้วก้อย: โจมตีซ้ำ ดาเมจ 2 เท่าของ POWER','ทุกครั้งที่โจมตีสุ่มนิ้วที่ใช้ นิ้วละ 20% เท่ากัน']};
+const MORE={konan:['เพิ่ม HP และ POWER +20% ให้การ์ดอีเว้นท์ฮาโลวีนในทีม (รวมตัวเอง)','ทุกครั้งที่โจมตี สุ่มกระดาษ 1 ใน 2 แบบ (แบบละ 50%)','📜 ลดความเสียหาย: POWER ศัตรูลด 20% ของ POWER สูงสุด จนจบการโจมตีครั้งถัดไป','💥 ระเบิด: 20% ของ POWER ปัจจุบันใส่การ์ดใบที่สองของฝ่ายตรงข้าม (ถ้าไม่มีก็ไม่มีผล)'],kirara:['แสตก "กลุ่มดาวกางเขนใต้" เพิ่ม 1 ทุกครั้งที่โจมตี (สูงสุด 5) และหายเมื่อศัตรูถูกกำจัด','แต่ละแสตก = อุปสรรค 1 ชิ้นพุ่งใส่ สุ่ม: 🚗 รถยนต์ 70% POWER','🪨 ก้อนหิน 40% POWER + โอกาส 40% มึนงง (โจมตีไม่ได้ 1 เทิร์น)','🗡️ ของมีคม 55% POWER + เลือดไหล 5% ของ HP สูงสุดศัตรู'],garo:['โจมตี 2 ครั้งต่อเทิร์น','โอกาส 40% หลบการโจมตีที่เข้ามาแต่ละครั้ง'],vegeta:['หลังโจมตีปกติ ปล่อยกระสุนพลังสุ่ม 2-5 ลูก','กระสุนแต่ละลูกสร้างความเสียหาย 60% ของ POWER ปัจจุบัน'],kula:['โอกาส 60% ติดสถานะ "ผลึกน้ำแข็ง" ❄','ศัตรูถูกแช่แข็ง โจมตีไม่ได้ 1 เทิร์น','ผลึกตกค้าง 2 เทิร์น เสีย HP 60% ของ POWER คุลาต่อเทิร์น'],mahoraga:['ทุกเทิร์น กงล้อธรรมจักรหมุน 1 ครั้ง แล้วสุ่มได้ 1 อย่าง (โอกาสเท่ากัน):','☸ เพิ่ม POWER +50','☸ ฟื้นฟู HP 20% ของ HP ที่เสียไป','☸ ต้านทานสถานะด้านลบทุกชนิด (ล้างสถานะที่ติดอยู่และกันสถานะใหม่จนถึงเทิร์นถัดไปของตน)'],sasukecurse:['ทุกครั้งที่โจมตี ศัตรูจะติดสถานะ "ชาขั้นรุนแรง" (⚡) นาน 3 เทิร์น (ต่ออายุทุกครั้งที่โจมตี)','ต้นเทิร์นของศัตรู: ถูกไฟฟ้าช็อต เสีย HP 10% ของ HP สูงสุดของศัตรู 1 ครั้ง','และมีโอกาส 50% ที่ศัตรูจะโจมตีไม่ได้ในเทิร์นนั้น','ลบสถานะได้ด้วยนิ้วนางของคุราปิก้า (โอคารุนไม่ได้รับผล)'],sasukekid:['ทุกครั้งที่โจมตี ปล่อยคาถาเพลิง ลูกไฟสร้างความเสียหาย 20% ของ POWER ปัจจุบัน','ศัตรูติดสถานะ "เผาไหม้" (🔥) เสีย HP 10% ของ HP สูงสุดของศัตรู ต้นเทิร์นทุกเทิร์น นาน 3 เทิร์น','ลบสถานะได้ด้วยนิ้วนางของคุราปิก้า'],ino:['ทุกๆ 2 เทิร์นของอิโนะ (เทิร์นที่ 2, 4, 6 …) จะย้ายร่างศัตรู','ศัตรูที่ถูกย้ายร่างโจมตีตัวเอง เสีย HP 2 เท่าของ POWER ปัจจุบันของตัวมันเอง','ใช้หลังการโจมตีปกติ · ถูกผนึกความสามารถแล้วใช้ไม่ได้'],gekko:['เมื่อโจมตี จะสร้างสถานะ "เลือดไหล" และ "ติดพิษ" ใส่ศัตรู','แต่ละสถานะทำให้เสีย HP 10% ของ POWER ปัจจุบันของเก็กโค ต่อเทิร์น (ต้นเทิร์นของศัตรู)','ไม่ซ้อนทับ — โจมตีซ้ำเพียงอัปเดตดาเมจให้เท่ากับค่าสูงสุด · หายเมื่อถูกล้างสถานะ'],naruto:['เมื่อถูกกำจัดครั้งแรก จะเรียกร่างแยกลงสนามแทนทันที (ฟื้น HP เต็มตามสเตตัสร่างแยก)','ร่างแยกมี POWER และ HP ลดลง 10% ของสเตตัสทั้งหมด (ปรับได้ในหน้าปรับค่าทดลอง)','ร่างแยกถูกกำจัดแล้วไม่เรียกซ้ำอีก'],okarun:['มีโอกาส 30% หลบการโจมตี (รวมการโจมตีจากผู้ช่วยหรือความสามารถของศัตรู) หลบแล้วไม่โดนดาเมจ','ไม่ได้รับผลของสถานะด้านลบทุกชนิด (ชา ผนึก สายฟ้า เผาไหม้ เข้าสิง เลือดไหล ฯลฯ)','เมื่อโจมตีจะติดสัญลักษณ์เทอร์โบ (⚡) ทำให้การโจมตีครั้งถัดไปดาเมจเพิ่ม 30% ของ POWER ปัจจุบัน'],isaac:['ทุกครั้งที่โจมตีสุ่ม 1 ใน 3 รูปแบบ (ตั้งค่าโอกาสได้ในหน้าปรับค่าทดลอง ค่าเริ่มต้นประมาณ 1 ใน 3 เท่ากัน)','โจมตีปกติ: ดาเมจเท่า POWER','โจมตีเฉียดจุดตาย: ดาเมจ 2 เท่าของ POWER ปัจจุบัน','โจมตีจุดตาย: ศัตรูตายทันที'],alucard:['โจมตีได้ 2 ครั้งใน 1 เทิร์น (ครั้งที่ 2 ต่อจากครั้งแรกทันที)','เมื่อโจมตี ศัตรูติดสถานะ "เลือดไหล" (🩸) เสีย HP 5% ของ HP สูงสุดของศัตรู ต้นเทิร์นทุกเทิร์น จนกว่าจะถูกลบสถานะหรือตาย'],gengar:['เมื่อติดสถานะด้านลบ (ชา / ผนึก / สายฟ้า / สับสน / เผาไหม้ / เข้าสิง) จะล้างสถานะนั้นทันที','ทุกสถานะที่ล้างได้ เพิ่ม POWER ให้ตัวเอง 10% ของ POWER ปัจจุบัน'],luffy:['ทุกครั้งที่โจมตี ศัตรูจะติดสถานะ "เข้าสิง" (ป้าย 👻)','ในเทิร์นถัดไปของศัตรู มีโอกาส 50% ที่จะโจมตีตัวเอง (ดาเมจเท่า POWER ของตัวเอง) แทนการโจมตีปกติ','สถานะหมดลงเมื่อถึงเทิร์นของศัตรู ไม่ว่าจะโจมตีตัวเองหรือไม่'],hutao:['ทุกครั้งที่โจมตี เรียกผีเมาช่วยโจมตี สุ่ม 1 ใน 2 รูปแบบ (50%)','เผาไหม้: ติดสถานะเผาไหม้ เสีย HP ต้นเทิร์นของศัตรู 15% ของ HP สูงสุดของศัตรู นาน 3 เทิร์น','ผีตัวเล็ก: โจมตี 2 ครั้ง ครั้งละ 10% ของ POWER ปัจจุบัน'],ichigo:['ทุกๆ 2 เทิร์น การโจมตีครั้งถัดไป (ครั้งที่ 3, 6, 9 …) สร้างดาเมจ 3 เท่าของ POWER ปัจจุบัน','การ์ดจะมีป้าย "พลังสะสม ×3" เมื่อการโจมตีครั้งหน้าคือท่าไม้ตาย (เกตสึกะ เท็นโช)'],megumi:['สุนัข (Divine Dogs): สร้างดาเมจ 50% ของ POWER ปัจจุบัน','นกฮูก (Nue): มีโอกาส 50% ทำให้ศัตรูติดชาในเทิร์นนั้น','กบ (Toad): ลิ้นพันศัตรู ทำให้โจมตีได้อีกครั้ง','คชสาร (Max Elephant): สร้างดาเมจ 2 เท่าของ POWER ปัจจุบัน','กระต่าย (Rabbit Escape): มีโอกาส 50% ทำให้ศัตรูโจมตีไม่โดน','ทุกเทิร์นสุ่มเรียก 1 ตัว ตัวละ 20% เท่ากัน'],kurapika:['นิ้วโป้ง: ฟื้นฟู HP 10% ของ HP ทั้งหมด','นิ้วชี้: ขโมยความสามารถของการ์ดศัตรูมาใช้ในเทิร์นนั้น','นิ้วกลาง: ผนึกความสามารถของศัตรู (ใช้ไม่ได้ในเทิร์นของเขา)','นิ้วนาง: ลบสถานะด้านลบ','นิ้วก้อย: โจมตีซ้ำ ดาเมจ 2 เท่าของ POWER','ทุกครั้งที่โจมตีสุ่มนิ้วที่ใช้ นิ้วละ 20% เท่ากัน']};
 function showInfo(id){
   const c=CARDS[id],own=SV.owned.includes(id),l=clv(id),s=statAt(id,l,cstar(id));
   modal(`<div class="info"><div class="iimg" style="--c:${c.color}"><img src="${c.img}" alt="${c.name}"></div><div class="itxt"><h2>${c.name} ${rarTag(id)}</h2>
@@ -670,10 +670,12 @@ function renderEvent(){
   const E=evState();
   $('#evStages').textContent='บอสวันนี้: '+CARDS[evCard()].name+' · ดาเมจรวม '+Math.round(E.dealt).toLocaleString();
   $('#evGacha').textContent='การ์ดอีเว้นท์ '+HW.pool.length+' ใบ · 🍬 '+SV.candy.toLocaleString();
+  $('#evEndless').textContent='เวฟสูงสุด '+((SV.endless&&SV.endless.best)||0);
 }
 const soon=()=>toast('เร็วๆ นี้ 🎃');
 $('#evBtnStages').onclick=()=>EVENT_OPEN?go('evboss'):soon();
 $('#evBtnGacha').onclick=()=>EVENT_OPEN?go('hwgacha'):soon();
+$('#evBtnEndless').onclick=()=>EVENT_OPEN?go('endless'):soon();
 
 /* --- ด่านบอสอีเว้นท์ --- */
 function renderEvBoss(){
@@ -719,6 +721,90 @@ function finishEvBoss(r,day0,hp0,team){
 }
 setInterval(()=>{if(!$('#eventScr').classList.contains('hidden'))renderEvent()},30000);
 
+
+/* ---------- ด่านไม่มีที่สิ้นสุด (อีเว้นท์) ----------
+   เวฟต่อเวฟ: ผ่านเวฟละ 🍬 candy อัน · ทุก `every` เวฟ ทอยลุ้นการ์ด drop (baseRate% + riskRate% ต่อชั้น "บัฟศัตรู")
+   หลังชนะแต่ละเวฟเลือก 1 อย่าง: POWER ทีม / HP ทีม / ศัตรูแกร่งขึ้น (แลกโอกาสได้การ์ดสูงขึ้น) — ปรับตัวเลขได้ที่ EL */
+const EL={drop:'konan',candy:1,every:10,baseRate:.1,riskRate:.1,maxRate:5,   /* อัตรา = % ต่อการทอย */
+  buffP:.15,buffH:.15,riskMul:.1,   /* บัฟทีม +15% ต่อครั้ง · ศัตรู +10% (POWER และ HP) ต่อชั้น */
+  lvPer:1.5,bossMul:1.3,maxTurns:50};
+const elState=()=>{SV.endless=SV.endless||{best:0,run:null};return SV.endless};
+const elRate=run=>Math.min(EL.maxRate,EL.baseRate+EL.riskRate*(run?run.buf.risk:0));
+const elRateTxt=r=>(Math.round(r*100)/100)+'%';
+function elEnemies(w){
+  const tier=Math.min(6,Math.floor((w-1)/8)),boss=w%EL.every===0;
+  const n=Math.min(4,(w<=4?1:w<=12?2:w<=30?3:4)+(boss&&w>4?1:0));
+  const pool=Object.keys(CARDS).filter(id=>!CARDS[id].evo&&!CARDS[id].endless&&rIdx(CARDS[id].rar)<=tier),ids=[];
+  while(ids.length<Math.min(n,pool.length)){const c=pool[Math.floor(Math.random()*pool.length)];if(!ids.includes(c))ids.push(c)}
+  const lv=Math.max(1,Math.round(1+(w-1)*EL.lvPer*(boss?EL.bossMul:1)));
+  return{ids,lv,boss};
+}
+function renderEndless(){
+  const E=elState(),run=E.run,team=SV.team.filter(x=>SV.owned.includes(x)),c=CARDS[EL.drop],open=hwOpen(),own=SV.owned.includes(EL.drop);
+  const rate=elRate(run||{buf:{risk:0}}),b=run?run.buf:{p:0,h:0,risk:0};
+  $('#elRaid').innerHTML=`<div class="rboss"><img src="${c.img}" alt="${c.name}" style="border-color:#b48cff;box-shadow:0 0 44px #b48cff77,0 14px 40px #000a"></div>
+  <div class="rinfo"><h2>♾ ด่านไม่มีที่สิ้นสุด</h2>
+    <div class="rhpt"><b>${run?'เวฟที่ '+run.wave:'ยังไม่ได้เริ่มรอบ'}</b><span>เวฟสูงสุด ${E.best}${run?' · ได้ลูกอมรอบนี้ 🍬'+run.candy:''}</span></div>
+    <div class="rmeta"><span>⚔ POWER ทีม +${Math.round(b.p*100)}%</span><span>❤ HP ทีม +${Math.round(b.h*100)}%</span><span>☠ ศัตรู +${Math.round(b.risk*EL.riskMul*100)}%</span></div>
+    <div class="ebrule"><b>กติกา</b><br>• ผ่านเวฟละ 🍬 ${EL.candy} อัน · แพ้เมื่อไหร่รอบนี้จบ (ลูกอมที่ได้แล้วเก็บไว้)<br>• เวฟแรกๆ ง่าย แล้วยากขึ้นเรื่อยๆ · ทุก ${EL.every} เวฟเป็นเวฟบอส<br>• หลังชนะแต่ละเวฟ เลือกบัฟ 1 อย่าง: POWER / HP ทีม หรือ <b>ศัตรูแกร่งขึ้น</b> เพื่อเพิ่มโอกาสได้การ์ด<br>• ทุก ${EL.every} เวฟทอยลุ้น <b>${c.name}</b> · ตอนนี้ <b>${elRateTxt(rate)}</b> (พื้นฐาน ${EL.baseRate}% + ${EL.riskRate}% ต่อชั้นศัตรู${run?' · '+b.risk+' ชั้น':''})${own?'<br>• คุณมีการ์ดนี้แล้ว (ได้ซ้ำจะนับเป็นการ์ดซ้ำ)':''}</div>
+    <div class="myteam"><span>ทีมของคุณ</span><div>${team.length?team.map(t=>`<img class="th" src="${CARDS[t].img}" alt="${CARDS[t].name}">`).join(''):'<small>ยังไม่มีการ์ดในทีม</small>'}</div><button class="sec small" data-go="team">จัดทีม</button></div>
+    <div class="two"><button id="elGo">${!open?'อีเว้นท์จบแล้ว':run?(run.pick?'เลือกบัฟเวฟถัดไป':'สู้เวฟ '+run.wave+' ต่อ'):'เริ่มรอบใหม่'}</button>${run?'<button class="sec" id="elQuit">ยอมแพ้รอบนี้</button>':''}</div>
+  </div>`;
+  $('#elGo').disabled=!open||!team.length;
+  $('#elGo').onclick=()=>{if(!hwOpen())return toast('อีเว้นท์จบแล้ว');const r=elState().run;if(!r)startEndlessRun();else if(r.pick)elPickModal();else startEndlessBattle()};
+  if(run)$('#elQuit').onclick=()=>{elEnd(true)};
+}
+function startEndlessRun(){
+  const team=SV.team.filter(x=>SV.owned.includes(x));if(!team.length){toast('ต้องมีการ์ดในทีมอย่างน้อย 1 ใบ');return go('team')}
+  elState().run={wave:1,buf:{p:0,h:0,risk:0},candy:0,pick:false,rolled:false};save();startEndlessBattle();
+}
+function startEndlessBattle(){
+  const E=elState(),run=E.run,team=SV.team.filter(x=>SV.owned.includes(x));
+  if(!team.length){toast('ต้องมีการ์ดในทีมอย่างน้อย 1 ใบ');return go('team')}
+  const en=elEnemies(run.wave),b=run.buf;
+  clearAuto();
+  Battle.start({auto:false,a:team,la:team.map(clv),sa:team.map(cstar),b:en.ids,lb:en.ids.map(()=>en.lv),
+    mulA:{p:1+b.p,h:1+b.h},mulB:{p:1+b.risk*EL.riskMul,h:1+b.risk*EL.riskMul},maxTurns:EL.maxTurns,first:'a',
+    title:'ไม่มีที่สิ้นสุด · เวฟ '+run.wave+(en.boss?' (บอส)':'')+' · ศัตรู Lv.'+en.lv,
+    onExit:()=>go('endless'),onEnd:r=>finishEndlessWave(r,run.wave)});
+}
+function finishEndlessWave(r,w){
+  const E=elState(),run=E.run;if(!run||run.wave!==w)return;
+  if(!r.win){   /* แพ้ / หมดเวลา → จบรอบ */
+    elEnd(false,r);return}
+  SV.candy+=EL.candy;run.candy+=EL.candy;E.best=Math.max(E.best,w);run.pick=true;
+  let rollHtml='';
+  if(w%EL.every===0&&!run.rolled){
+    run.rolled=true;const rate=elRate(run),got=Math.random()*100<rate;
+    if(got){const g=grant(EL.drop),c=CARDS[EL.drop];
+      rollHtml=`<div class="dropbox"><img src="${c.img}" alt="${c.name}"><div><div class="new">🎉 ได้การ์ด ${c.name}!</div><small>${g.dup?(g.sold?'ซ้ำ ขายคืน 💰'+g.back:'การ์ดซ้ำ +1'):'การ์ดใหม่!'}</small></div></div>`}
+    else rollHtml=`<p class="mute">🎲 ทอยลุ้น ${CARDS[EL.drop].name} (${elRateTxt(rate)}) · ไม่ได้ในรอบนี้</p>`;
+  }
+  save();hud();elPickModal(`<h2>เวฟ ${w} ผ่าน! 🎃</h2><div class="reward"><div>🍬 +${EL.candy}</div></div>${rollHtml}`);
+}
+function elPickModal(head){
+  const run=elState().run;if(!run)return go('endless');
+  const b=run.buf,w=run.wave;
+  head=head||`<h2>เวฟ ${w} ผ่านแล้ว</h2>`;
+  modal(`${head}<p class="mute">เลือกบัฟสำหรับเวฟที่ ${w+1}</p>
+    <div class="two">
+      <button class="elopt" data-b="p"><b>⚔ POWER ทีม +${Math.round(EL.buffP*100)}%</b><small>ตอนนี้ +${Math.round(b.p*100)}%</small></button>
+      <button class="elopt" data-b="h"><b>❤ HP ทีม +${Math.round(EL.buffH*100)}%</b><small>ตอนนี้ +${Math.round(b.h*100)}%</small></button>
+      <button class="elopt risk" data-b="r"><b>☠ ศัตรูแกร่งขึ้น +${Math.round(EL.riskMul*100)}%</b><small>โอกาสได้ ${CARDS[EL.drop].name} ${elRateTxt(elRate(run))} → <b>${elRateTxt(elRate({buf:{risk:b.risk+1}}))}</b></small></button>
+    </div><div class="two" style="margin-top:10px"><button class="sec small" id="elLater">พักไว้ก่อน (กลับ)</button></div>`);
+  $$('.elopt',$('#mdlBody')).forEach(x=>x.onclick=()=>{
+    const k=x.dataset.b;if(k==='p')b.p+=EL.buffP;else if(k==='h')b.h+=EL.buffH;else b.risk++;
+    run.wave++;run.pick=false;run.rolled=false;save();closeModal();startEndlessBattle()});
+  $('#elLater').onclick=()=>go('endless');
+}
+function elEnd(quit,r){
+  const E=elState(),run=E.run;if(!run)return go('endless');
+  const cleared=run.wave-1,candy=run.candy;E.run=null;save();hud();
+  modal(`<h2>${quit?'จบรอบ':'การ์ดพ่ายแพ้…'}</h2><p>${quit?'ยอมแพ้':(r&&r.timeout?'หมดเวลา':'แพ้ที่')} เวฟที่ <b>${run.wave}</b> · ผ่านไปแล้ว <b>${cleared}</b> เวฟ</p>
+    <div class="reward"><div>🍬 +${candy.toLocaleString()}</div></div><p class="mute">เวฟสูงสุดของคุณ ${E.best}</p>
+    <div class="two"><button id="elAgain">เริ่มรอบใหม่</button><button class="sec" id="elBack">กลับ</button></div>`);
+  $('#elAgain').onclick=()=>{closeModal();startEndlessRun()};$('#elBack').onclick=()=>go('endless');
+}
 /* ---------- เควสพัฒนา (Evolution Quest) ---------- */
 /* วัตถุดิบ (ไอเทม) */
 const ITEMS={hojin:{name:'ธรรมจักรแปดซี่',img:'hojin.jpeg',rar:'UR',color:'#ffc93d',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้ EVOLUTION ให้กับการ์ดฟุชิงุโระ เมงุมิ'},sealc:{name:'อักขระต้องคำสาป',img:'sasuke_seal.jpeg',rar:'S',color:'#a06cff',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดอุจิวะ ซาสึเกะ (ร่างเด็ก)'},seal9:{name:'ตราประทับ 9 หาง',img:'narutoevo.jpeg',rar:'S',color:'#ffcf4a',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดอุซึมากิ นารูโตะ'}};

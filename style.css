@@ -712,3 +712,12 @@ body{padding:0}
 .cw.frozen img{filter:saturate(.55) hue-rotate(160deg) brightness(1.12) drop-shadow(0 0 8px #6fd6ff)}
 .kiball{border-radius:50%;background:radial-gradient(circle,#fff 0 18%,#bfe6ff 38%,#2a7bff 64%,transparent 72%);filter:drop-shadow(0 0 8px #4fa8ff) drop-shadow(0 0 16px #2a7bff);will-change:transform}
 .icefx{display:flex;align-items:center;justify-content:center;line-height:1;color:#dff6ff;text-shadow:0 0 14px #6fd6ff,0 0 28px #2a9bff;animation:pop .65s forwards}
+
+/* ===== โคนัน + ด่านไม่มีที่สิ้นสุด ===== */
+.m-endl{--c:#b48cff}
+#eventScr .modes{grid-template-columns:repeat(3,minmax(0,1fr));max-width:1100px}
+@media (max-width:760px) and (orientation:portrait){#eventScr .modes{grid-template-columns:1fr}}
+.elopt{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1 1 150px;padding:10px 12px;min-height:64px}
+.elopt small{font-weight:400;opacity:.85;font-size:.78em}
+.elopt.risk{background:linear-gradient(180deg,#ff8da0,#d11a3a);color:#fff;box-shadow:0 4px 0 #6d0a1f}
+#endlessScr .rinfo h2{color:#d9c2ff}
