@@ -109,12 +109,26 @@ async function syncSave(){
 }
 function onSave(){if(sb&&me)scheduleUpload(2500)}
 function scheduleUpload(ms){clearTimeout(saveT);saveT=setTimeout(uploadSave,ms)}
+let saveOkShown=false,lastSaveMsg='';   /* แจ้งสถานะเซฟบนจอ (เปิด F12 ไม่ได้ก็เห็นว่าเซฟขึ้นเซิร์ฟเวอร์ไหม) */
 async function uploadSave(){
   if(!sb||!me||saving)return;
   saving=true;
-  try{const r=await sb.from('saves').upsert({user_id:me.id,data:SV,updated_at:new Date().toISOString()});if(r&&r.error)throw r.error}
-  catch(e){scheduleUpload(8000)}
+  try{
+    /* เขียนเซฟผ่านฟังก์ชัน save_game บนเซิร์ฟเวอร์ (ตรวจความผิดปกติ) — ไม่เขียนตารางตรงๆ แล้ว */
+    const r=await sb.rpc('save_game',{p:SV});if(r&&r.error)throw r.error;
+    const s=r&&r.data;
+    if(s==='ok'||s==='flag'){lastSaveMsg='';if(!saveOkShown){saveOkShown=true;toast('☁ เซฟขึ้นเซิร์ฟเวอร์แล้ว')}}
+    else if(s==='invalid'&&lastSaveMsg!=='invalid'){lastSaveMsg='invalid';toast('เซิร์ฟเวอร์ไม่รับเซฟ (รูปแบบข้อมูลผิดปกติ)')}
+    if(s==='reject')await restoreCloud();            /* เซิร์ฟเวอร์ปฏิเสธเซฟที่เพิ่มของผิดปกติ → กู้เซฟล่าสุดที่ถูกต้อง */
+    else if(s==='throttled')scheduleUpload(3000);    /* เซฟถี่เกิน → ลองใหม่ทีหลัง */
+  }catch(e){const m=(e&&(e.message||e.code))||String(e);if(m!==lastSaveMsg){lastSaveMsg=m;toast('เซฟขึ้นเซิร์ฟเวอร์ไม่สำเร็จ: '+m)}scheduleUpload(8000)}
   saving=false;
+}
+async function restoreCloud(){
+  try{
+    const {data}=await sb.from('saves').select('data').eq('user_id',me.id).maybeSingle();
+    if(data&&data.data){localStorage.setItem(KEY,JSON.stringify(data.data));toast('เซฟไม่ผ่านการตรวจสอบ กู้คืนเซฟล่าสุดจากเซิร์ฟเวอร์แล้ว');setTimeout(()=>location.reload(),1200)}
+  }catch(e){}
 }
 addEventListener('pagehide',()=>{if(me&&saveT){clearTimeout(saveT);uploadSave()}});
 addEventListener('visibilitychange',()=>{if(document.hidden&&me&&saveT){clearTimeout(saveT);uploadSave()}});

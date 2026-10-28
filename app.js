@@ -123,16 +123,12 @@ $('#howBtn').onclick=()=>tutorial(false);
 /* ---------- โค้ดของขวัญ ---------- */
 const GIFT_CODES={
   RELEASE:()=>{SV.coins=(SV.coins||0)+10000;SV.candy=(SV.candy||0)+3000;return 'เงิน +10,000 · ลูกอม +3,000'},
-  DEV:()=>{SV.coins=(SV.coins||0)+99999999;SV.candy=(SV.candy||0)+999999999;let n=0;
-    Object.keys(CARDS).filter(id=>!CARDS[id].questOnly).forEach(id=>{if(!SV.owned.includes(id)){SV.owned.push(id);SV.count[id]=1;n++}});
-    return 'เงิน +99,999,999 · ลูกอม +999,999,999 · ปลดล็อคการ์ดใหม่ '+n+' ใบ'},
   /* โค้ดคนเดียวทั้งโลก: srv = ต้องจองที่เซิร์ฟเวอร์ก่อน (ต้องล็อคอินออนไลน์ + รัน redeem.sql) */
   HUTAO:{srv:true,run:()=>{if(!SV.owned.includes('hutao')){SV.owned.push('hutao');SV.count.hutao=1}else SV.count.hutao=(SV.count.hutao||1)+1;SV.lv.hutao=100;return 'ได้รับ ฮูเต๋า เลเวล 100'}},
   GILQUEEN:()=>{if(!SV.owned.includes('gilqueen')){SV.owned.push('gilqueen');SV.count.gilqueen=1}else SV.count.gilqueen=(SV.count.gilqueen||1)+1;SV.lv.gilqueen=100;return 'ได้รับ ราชินีแห่งวีรชน กิลกาเมช เลเวล 100'},
   HOJIN:()=>{SV.items=SV.items||{};SV.items.hojin=(SV.items.hojin||0)+3;return 'ได้รับ ธรรมจักรแปดซี่ ×3'},
   CC:()=>{if(!SV.owned.includes('cc')){SV.owned.push('cc');SV.count.cc=1}else SV.count.cc=(SV.count.cc||1)+1;SV.lv.cc=Math.max(SV.lv.cc||1,100);SV.star=SV.star||{};SV.star.cc=Math.max(SV.star.cc||1,5);return 'ได้รับ ซีซี เลเวล 100 · 5 ดาว'},
   RIMURU:()=>{if(!SV.owned.includes('rimuru')){SV.owned.push('rimuru');SV.count.rimuru=1}else SV.count.rimuru=(SV.count.rimuru||1)+1;SV.lv.rimuru=Math.max(SV.lv.rimuru||1,100);SV.star=SV.star||{};SV.star.rimuru=Math.max(SV.star.rimuru||1,5);return 'ได้รับ ริมุรุ เทมเพสต์ เลเวล 100 · 5 ดาว'},
-  FULL:()=>{SV.items=SV.items||{};Object.keys(ITEMS).forEach(k=>{SV.items[k]=(SV.items[k]||0)+999});return 'ได้รับวัตถุดิบอีโวทุกชิ้น ชิ้นละ 999'}
 };
 function codeModal(){
   modal(`<h2>🎁 ใส่โค้ดรับของขวัญ</h2><form class="auth" id="cdF"><input id="cdI" placeholder="พิมพ์โค้ดที่นี่" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="30"><p class="aerr" id="cdE"></p><p class="mute" id="cdOk"></p><div class="two"><button type="submit">รับของขวัญ</button><button type="button" class="sec" id="cdX">ปิด</button></div></form>`);
