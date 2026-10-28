@@ -70,7 +70,8 @@ const lvrReady=()=>LVR_LIST.filter(l=>lvOf(SV.exp)>=l&&!SV.lvClaimed[l]);
 const clv=id=>SV.lv[id]||1;
 const cstar=id=>Math.min(STAR_MAX,Math.max(1,SV.star[id]||1));
 const starTxt=n=>'★'.repeat(n)+'☆'.repeat(STAR_MAX-n);
-const starCost=id=>STAR_COST[cstar(id)-1];
+const STAR_FLAT=['USR','LTD'];   /* ระดับที่อัพดาวใช้การ์ดซ้ำดาวละ 1 ใบ (ระดับอื่นใช้ STAR_COST ใน script.js: 1,1,2,3,4) */
+const starCost=id=>STAR_FLAT.includes(CARDS[id].rar)?1:STAR_COST[cstar(id)-1];
 const cardStat=id=>{const s=statAt(id,clv(id),cstar(id));return 'Lv.'+clv(id)+' · '+cstar(id)+'★ · POWER '+s.p+' · HP '+s.hp};
 /* ราคาอัปเลเวล: เริ่ม 20 เงิน เพิ่ม ~4.5% ต่อเลเวล คูณตามระดับการ์ด */
 const UP_RM={R:1,S:1.5,SR:1.75,SSR:2,UR:2.25,USR:2.5,LTD:3};
