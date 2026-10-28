@@ -129,6 +129,7 @@ const GIFT_CODES={
   GILQUEEN:()=>{if(!SV.owned.includes('gilqueen')){SV.owned.push('gilqueen');SV.count.gilqueen=1}else SV.count.gilqueen=(SV.count.gilqueen||1)+1;SV.lv.gilqueen=100;return 'ได้รับ ราชินีแห่งวีรชน กิลกาเมช เลเวล 100'},
   HOJIN:()=>{SV.items=SV.items||{};SV.items.hojin=(SV.items.hojin||0)+3;return 'ได้รับ ธรรมจักรแปดซี่ ×3'},
   CC:()=>{if(!SV.owned.includes('cc')){SV.owned.push('cc');SV.count.cc=1}else SV.count.cc=(SV.count.cc||1)+1;SV.lv.cc=Math.max(SV.lv.cc||1,100);SV.star=SV.star||{};SV.star.cc=Math.max(SV.star.cc||1,5);return 'ได้รับ ซีซี เลเวล 100 · 5 ดาว'},
+  LORD:()=>{if(!SV.owned.includes('rimulord')){SV.owned.push('rimulord');SV.count.rimulord=1;SV.lv.rimulord=1}else SV.count.rimulord=(SV.count.rimulord||1)+1;SV.star=SV.star||{};SV.star.rimulord=Math.max(SV.star.rimulord||1,6);return 'ได้รับ จอมมาร ริมุรุ เทมเพสต์ 6 ดาว'},
   RIMURU:()=>{if(!SV.owned.includes('rimuru')){SV.owned.push('rimuru');SV.count.rimuru=1}else SV.count.rimuru=(SV.count.rimuru||1)+1;SV.lv.rimuru=Math.max(SV.lv.rimuru||1,100);SV.star=SV.star||{};SV.star.rimuru=Math.max(SV.star.rimuru||1,5);return 'ได้รับ ริมุรุ เทมเพสต์ เลเวล 100 · 5 ดาว'},
 };
 function codeModal(){
