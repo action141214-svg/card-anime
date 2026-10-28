@@ -75,7 +75,7 @@ const cardStat=id=>{const s=statAt(id,clv(id),cstar(id));return 'Lv.'+clv(id)+' 
 /* ราคาอัปเลเวล: เริ่ม 20 เงิน เพิ่ม ~4.5% ต่อเลเวล คูณตามระดับการ์ด */
 const UP_RM={R:1,S:1.5,SR:1.75,SSR:2,UR:2.25,USR:2.5,LTD:3};
 /* เรียงการ์ดตามระดับ จากน้อยไปมาก (R > S > SR > SSR > UR > USR > LTD) */
-const SORTED=Object.keys(CARDS).sort((x,y)=>rIdx(CARDS[x].rar)-rIdx(CARDS[y].rar));
+const SORTED=Object.keys(CARDS).filter(id=>!CARDS[id].questOnly).sort((x,y)=>rIdx(CARDS[x].rar)-rIdx(CARDS[y].rar));
 const upCost=id=>Math.round(20*Math.pow(1.045,clv(id)-1)*UP_RM[CARDS[id].rar]);
 function upPlan(id,n){let l=clv(id),c=0,k=0;while(k<n&&l<LV_MAX){c+=Math.round(20*Math.pow(1.045,l-1)*UP_RM[CARDS[id].rar]);l++;k++}return{k,c}}
 function upAffordable(id,n){let l=clv(id),c=0,k=0;while(k<n&&l<LV_MAX){const x=Math.round(20*Math.pow(1.045,l-1)*UP_RM[CARDS[id].rar]);if(c+x>SV.coins)break;c+=x;l++;k++}return{k,c}}
@@ -124,7 +124,7 @@ $('#howBtn').onclick=()=>tutorial(false);
 const GIFT_CODES={
   RELEASE:()=>{SV.coins=(SV.coins||0)+10000;SV.candy=(SV.candy||0)+3000;return 'เงิน +10,000 · ลูกอม +3,000'},
   DEV:()=>{SV.coins=(SV.coins||0)+99999999;SV.candy=(SV.candy||0)+999999999;let n=0;
-    Object.keys(CARDS).forEach(id=>{if(!SV.owned.includes(id)){SV.owned.push(id);SV.count[id]=1;n++}});
+    Object.keys(CARDS).filter(id=>!CARDS[id].questOnly).forEach(id=>{if(!SV.owned.includes(id)){SV.owned.push(id);SV.count[id]=1;n++}});
     return 'เงิน +99,999,999 · ลูกอม +999,999,999 · ปลดล็อคการ์ดใหม่ '+n+' ใบ'},
   /* โค้ดคนเดียวทั้งโลก: srv = ต้องจองที่เซิร์ฟเวอร์ก่อน (ต้องล็อคอินออนไลน์ + รัน redeem.sql) */
   HUTAO:{srv:true,run:()=>{if(!SV.owned.includes('hutao')){SV.owned.push('hutao');SV.count.hutao=1}else SV.count.hutao=(SV.count.hutao||1)+1;SV.lv.hutao=100;return 'ได้รับ ฮูเต๋า เลเวล 100'}},
@@ -879,7 +879,7 @@ function ifEnd(quit,r){
 }
 /* ---------- เควสพัฒนา (Evolution Quest) ---------- */
 /* วัตถุดิบ (ไอเทม) */
-const ITEMS={hojin:{name:'ธรรมจักรแปดซี่',img:'hojin.jpeg',rar:'UR',color:'#ffc93d',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้ EVOLUTION ให้กับการ์ดฟุชิงุโระ เมงุมิ'},sealc:{name:'อักขระต้องคำสาป',img:'sasuke_seal.jpeg',rar:'S',color:'#a06cff',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดอุจิวะ ซาสึเกะ (ร่างเด็ก)'},seal9:{name:'ตราประทับ 9 หาง',img:'narutoevo.jpeg',rar:'S',color:'#ffcf4a',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดอุซึมากิ นารูโตะ'}};
+const ITEMS={hojin:{name:'ธรรมจักรแปดซี่',img:'hojin.jpeg',rar:'UR',color:'#ffc93d',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้ EVOLUTION ให้กับการ์ดฟุชิงุโระ เมงุมิ'},sealc:{name:'อักขระต้องคำสาป',img:'sasuke_seal.jpeg',rar:'S',color:'#a06cff',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดอุจิวะ ซาสึเกะ (ร่างเด็ก)'},sword:{name:'ดาบของชา แฮ อิน',img:'swordcha.jpeg',rar:'SSR',color:'#e24b5b',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดชา แฮ อิน'},seal9:{name:'ตราประทับ 9 หาง',img:'narutoevo.jpeg',rar:'S',color:'#ffcf4a',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดอุซึมากิ นารูโตะ'}};
 const itemN=k=>SV.items[k]||0;
 /* เควสพัฒนา: from = การ์ดที่อีโว, to = การ์ดหลังอีโว, need = เงื่อนไข, boss = ด่านเควส (ชนะได้เงิน + มีโอกาสดรอปวัตถุดิบ) */
 const EVOS=[{from:'naruto',to:'naruto1',need:{cards:50,items:{seal9:1},coins:10000},
@@ -887,7 +887,9 @@ const EVOS=[{from:'naruto',to:'naruto1',need:{cards:50,items:{seal9:1},coins:100
   {from:'sasukekid',to:'sasukecurse',need:{cards:50,items:{sealc:1},coins:10000},
   boss:{card:'sasukecurse',name:'ซาสึเกะ ร่างอักขระ',hp:1000,power:60,lv:1,coins:100,drops:[{item:'sealc',rate:.05}]}},
   {from:'megumi',to:'mahoraga',need:{cards:50,items:{hojin:3},coins:100000},
-  boss:{card:'mahoraga',name:'มโหรากา',hp:5000,power:150,lv:1,coins:100,drops:[{item:'hojin',rate:.01}]}}];
+  boss:{card:'mahoraga',name:'มโหรากา',hp:5000,power:150,lv:1,coins:100,drops:[{item:'hojin',rate:.01}]}},
+  {from:'chahaein',to:'chaevo',need:{cards:50,items:{sword:1},coins:20000000},
+  boss:{card:'chaboss',name:'เริงระบำเจ้าหญิงดาบ ชา แฮ อิน',hp:10000,power:150,lv:1,coins:100,drops:[{item:'sword',rate:.01}]}}];
 let evoSel=null,evoKeep=false;
 const evoOk=e=>(SV.count[e.from]||0)>=e.need.cards&&Object.entries(e.need.items).every(([k,n])=>itemN(k)>=n)&&SV.coins>=e.need.coins;
 function renderEvo(){
