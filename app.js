@@ -21,7 +21,7 @@ const TH_OFFSET=7*3600000,HOUR=3600000;
 const slotNow=()=>Math.floor((Date.now()+TH_OFFSET)/HOUR)%GACHA.rotation.length;
 const thClock=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
 /* ===== อีเว้นท์ฮาโลวีน (แก้เวลาจบ / เรท / ด่านได้ที่นี่) ===== */
-const HW={end:Date.UTC(2026,10,1)-7*3600000,   /* จบเที่ยงคืนวันที่ 1 พ.ย. 2026 (เวลาไทย) */
+const HW={end:Date.UTC(2026,10,11)-7*3600000,   /* หมดวันที่ 10 พ.ย. 2026 (จบเที่ยงคืนต่อวันที่ 11 · เวลาไทย) */
   pool:['hutao','luffy','gengar','alucard','isaac','okarun'],   /* การ์ดอีเว้นท์ (ออกจากตู้ฮาโลวีน + หมุนเป็นบอสรายวัน) */
   rates:{base:{},up:{}},   /* (ไม่ใช้แล้ว — เรทตู้ฮาโลวีนคำนวณจาก eventRate / upShare ด้านล่าง) */
   rPool:Object.keys(CARDS).filter(id=>CARDS[id].rar==='R'),   /* การ์ดระดับ R ที่อยู่ในตู้ */
