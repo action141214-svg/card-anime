@@ -142,10 +142,16 @@ function askName(force){
 }
 
 /* ---------------- Realtime: ออนไลน์ / คำเชิญ / เพื่อน ---------------- */
+/* จำนวนผู้เล่นออนไลน์ (นับจาก presence ของห้อง 'lobby' · 1 บัญชี = 1 คน แม้เปิดหลายแท็บ) — อัปเดตที่ปุ่มหน้าหลักและหน้าออนไลน์ */
+function updOnCount(){
+  const n=onlineIds.size,live=!!(me&&lobbyCh);
+  const hb=document.getElementById('onCnt');if(hb)hb.textContent=live?' 🟢'+n:'';
+  const hh=document.getElementById('onHubCnt');if(hh)hh.textContent=n;
+}
 function startRealtime(){
   stopRealtime();
   lobbyCh=sb.channel('lobby',{config:{presence:{key:me.id}}});
-  lobbyCh.on('presence',{event:'sync'},()=>{onlineIds=new Set(Object.keys(lobbyCh.presenceState()));if(cur()==='friendsScr')renderFriends()});
+  lobbyCh.on('presence',{event:'sync'},()=>{onlineIds=new Set(Object.keys(lobbyCh.presenceState()));updOnCount();if(cur()==='friendsScr')renderFriends()});
   lobbyCh.subscribe(st=>{if(st==='SUBSCRIBED')lobbyCh.track({name:me.name||me.username})});
   userCh=sb.channel('user-'+me.id);
   userCh.on('broadcast',{event:'invite'},m=>onInvite(m.payload)).subscribe();
@@ -153,7 +159,7 @@ function startRealtime(){
   frCh.on('postgres_changes',{event:'*',schema:'public',table:'friendships'},()=>loadFriends()).subscribe();
   loadFriends();
 }
-function stopRealtime(){[lobbyCh,userCh,frCh,chatCh].forEach(c=>{if(c)try{sb.removeChannel(c)}catch(e){}});lobbyCh=userCh=frCh=chatCh=null}
+function stopRealtime(){[lobbyCh,userCh,frCh,chatCh].forEach(c=>{if(c)try{sb.removeChannel(c)}catch(e){}});lobbyCh=userCh=frCh=chatCh=null;onlineIds=new Set();updOnCount()}
 function onInvite(p){
   if(!p||!/^\d{6}$/.test(p.code||'')||R)return;
   if(!$('#battleScr').classList.contains('hidden'))return;
@@ -253,7 +259,7 @@ function hub(){
   if(!sb){b.innerHTML=`<div class="box onmsg"><h2>ยังไม่ได้ตั้งค่าเซิร์ฟเวอร์</h2><p>ใส่ค่า Supabase ในไฟล์ <b>js/config.js</b> แล้วโหลดเกมใหม่ (ดูขั้นตอนใน README.md)</p></div>`;return}
   if(!me){b.innerHTML=`<div class="box onmsg"><h2>ยังไม่ได้เข้าสู่ระบบ</h2><p>ต้องล็อคอินก่อนจึงจะเล่นออนไลน์ได้</p><button id="onLogin">เข้าสู่ระบบ</button></div>`;$('#onLogin').onclick=()=>openAuth(()=>hub());return}
   const pend=FR.rows.filter(r=>r.status==='pending'&&r.addressee===me.id).length;
-  b.innerHTML=`<div class="box onprof"><div><b class="nm">${esc(me.name||me.username)}</b><small>ไอดี: ${esc(me.username)} · ☁ เซฟบนเซิร์ฟเวอร์อัตโนมัติ</small></div><div class="two"><button class="sec small" id="onRn">✏ เปลี่ยนชื่อ</button><button class="sec small" id="onOut">ออกจากระบบ</button></div></div>
+  b.innerHTML=`<div class="box onprof"><div><b class="nm">${esc(me.name||me.username)}</b><small>ไอดี: ${esc(me.username)} · ☁ เซฟบนเซิร์ฟเวอร์อัตโนมัติ</small><small class=\"oncount\">🟢 ผู้เล่นออนไลน์ตอนนี้ <b id=\"onHubCnt\">${onlineIds.size}</b> คน</small></div><div class="two"><button class="sec small" id="onRn">✏ เปลี่ยนชื่อ</button><button class="sec small" id="onOut">ออกจากระบบ</button></div></div>
     <div class="ontiles">
       <button class="mode m-stage" id="onCreate"><span class="mi">🚪</span><b>สร้างห้อง</b><small>ได้เลขห้อง 6 หลัก<br>ส่งให้เพื่อนเข้ามาสู้</small></button>
       <div class="mode m-raid onjoin"><span class="mi">🔑</span><b>เข้าห้อง</b><input id="onCode" inputmode="numeric" maxlength="6" placeholder="เลขห้อง 6 หลัก" autocomplete="off"><button id="onJoin">เข้าห้อง</button></div>

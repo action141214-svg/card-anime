@@ -728,3 +728,7 @@ body{padding:0}
 @media (max-width:760px) and (orientation:portrait){#playScr .modes{grid-template-columns:1fr}}
 .infbig{display:flex;align-items:center;justify-content:center;height:100%;font-size:clamp(90px,22vh,180px);line-height:1;filter:drop-shadow(0 0 30px #4fd1c5aa) drop-shadow(0 10px 24px #000a)}
 #infScr .rinfo h2{color:#8fe9df}
+
+/* จำนวนผู้เล่นออนไลน์ */
+.oncount{display:block;margin-top:2px;color:#7dffb0}.oncount b{font-family:Kanit;color:#fff}
+#onCnt{font-family:Kanit;font-size:.9em}
