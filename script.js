@@ -46,8 +46,8 @@ const CARDS={
         desc:'ทุกเทิร์นสุ่ม 1 ใน 5 นิ้ว (นิ้วละ 20%): ฟื้นฟู / ขโมย / ผนึก / ลบสถานะลบ / โจมตีซ้ำ x2'},
   sasuke:{name:'อุจิวะ ซาสึเกะ',rar:'LTD',img:'sasuke.jpeg',power:45,hp:450,color:'#a06cff',ability:'lightning',
         desc:'ติดสถานะสายฟ้าให้ศัตรู (รับดาเมจเพิ่ม 20% ของ POWER ผู้โจมตี) และมีโอกาส 45% ทำให้ชา'},
-  gil:{name:'กิลกาเมช',rar:'UR',img:'gil.jpeg',power:20,hp:210,color:'#ffcf4a',ability:'gate',
-        desc:'เมื่อโจมตี เรียกอาวุธจาก Gate of Babylon มาโจมตีแบบสุ่ม 3 ครั้ง ครั้งละ 10 ดาเมจ'},
+  gil:{name:'กิลกาเมช',rar:'UR',img:'gil.jpeg',power:34,hp:350,color:'#ffcf4a',ability:'gate',
+        desc:'เมื่อการ์ดใบนี้โจมตี จะเรียกอาวุธมาโจมตีแบบสุ่ม ทำความเสียหาย 75% ของ POWER ปัจจุบัน โจมตี 3 ครั้ง'},
   /* ===== การ์ดอีเว้นท์ฮาโลวีน ===== */
   hutao:{name:'ฮูเต๋า',rar:'LTD',event:'halloween',img:'hutao.jpeg',power:40,hp:400,color:'#ff6b3d',ability:'ghost',
         desc:'ทุกครั้งที่โจมตีเรียกผีเมาช่วยโจมตี สุ่ม 2 รูปแบบ: ให้สถานะเผาไหม้ (เสีย 15% ของ HP สูงสุดศัตรู ต่อเทิร์น) / เรียกผีตัวเล็กโจมตี 2 ครั้ง (ครั้งละ 10% ของ POWER ปัจจุบัน)'},
@@ -100,7 +100,7 @@ function setFighter(k){
 function startBattle(opts){
   OPT=opts;FIXED=!!opts.online;RNG=opts.seed!=null?mulberry(opts.seed>>>0):null;if(opts.online){speed=1;$('#speedBtn').textContent='ความเร็ว x1'}
   run++;paused=false;$('#pauseBtn').textContent='หยุด';$('#fx').innerHTML='';$('#autoBtn').classList.toggle('hidden',!opts.auto);
-  C={gr:num('#gr')/100,zc:num('#zc')/100,kh:num('#kh')/100,ki:Math.max(1,num('#ki')),gc:num('#gc'),gd:num('#gd'),nh:num('#nh')/100,rm:num('#rm'),lb:num('#lb')/100,lc:num('#lc')/100,ym:num('#ym'),gm:num('#oM'),gn:Math.max(1,num('#oN')),sd:num('#mD')/100,sn:num('#mN')/100,se:num('#mE'),sr:num('#mR')/100,bd:num('#hB')/100,bt:Math.max(1,num('#hT')),gh:num('#hG')/100,pc:num('#fC')/100,gx:num('#eG')/100,ab:num('#aB')/100,kf:num('#kdF')/100,sv:num('#scV')/100,sc:num('#scC')/100,st:Math.max(1,num('#scT')),kb:num('#kdB')/100,kt:Math.max(1,num('#kdT')),xn:num('#xN'),xk:num('#xK'),xm:num('#xM'),ot:num('#uT')/100,od:num('#uD')/100,nr:num('#wR')/100,gk:num('#qR')/100,ni:Math.max(1,Math.round(num('#inI'))),nx:num('#inX'),n1h:num('#n1h')/100,n1c:num('#n1c')/100,wp:num('#mhW'),wr:num('#mhR')/100,zb:num('#rzB')/100,zm:num('#rzM'),zs:num('#rzS')/100,rb:num('#rzX'),shh:num('#shA')/100,shp:num('#shB')/100,cm:num('#chM'),kyd:num('#kyD')/100,kyt:Math.max(1,num('#kyT')),kyr:num('#kyR')/100};
+  C={gr:num('#gr')/100,zc:num('#zc')/100,kh:num('#kh')/100,ki:Math.max(1,num('#ki')),gc:num('#gc'),gd:num('#gd')/100,nh:num('#nh')/100,rm:num('#rm'),lb:num('#lb')/100,lc:num('#lc')/100,ym:num('#ym'),gm:num('#oM'),gn:Math.max(1,num('#oN')),sd:num('#mD')/100,sn:num('#mN')/100,se:num('#mE'),sr:num('#mR')/100,bd:num('#hB')/100,bt:Math.max(1,num('#hT')),gh:num('#hG')/100,pc:num('#fC')/100,gx:num('#eG')/100,ab:num('#aB')/100,kf:num('#kdF')/100,sv:num('#scV')/100,sc:num('#scC')/100,st:Math.max(1,num('#scT')),kb:num('#kdB')/100,kt:Math.max(1,num('#kdT')),xn:num('#xN'),xk:num('#xK'),xm:num('#xM'),ot:num('#uT')/100,od:num('#uD')/100,nr:num('#wR')/100,gk:num('#qR')/100,ni:Math.max(1,Math.round(num('#inI'))),nx:num('#inX'),n1h:num('#n1h')/100,n1c:num('#n1c')/100,wp:num('#mhW'),wr:num('#mhR')/100,zb:num('#rzB')/100,zm:num('#rzM'),zs:num('#rzS')/100,rb:num('#rzX'),shh:num('#shA')/100,shp:num('#shB')/100,cm:num('#chM'),kyd:num('#kyD')/100,kyt:Math.max(1,num('#kyT')),kyr:num('#kyR')/100};
   const mk=(lvs,sts)=>(id,i)=>{const l=(lvs&&lvs[i])||1,sr=(sts&&sts[i])||1,s=statAt(id,l,sr);return{id,lv:l,star:sr,p:s.p,hp:s.hp,max:s.hp,para:false,sealed:false,lightning:false,miss:false,burn:0,burnDmg:0,sev:0,poss:false,bleed:false,hb:0,ps:0,turbo:false,fg:null,t:0}};
   let first=opts.first||$('#first').value;if(first==='r')first=RR()<.5?'a':'b';
   S={a:null,b:null,roster:{a:opts.a.map(mk(opts.la,opts.sa)),b:opts.b.map(mk(opts.lb,opts.sb))},idx:{a:0,b:0},turn:first,n:1,over:false};
@@ -170,7 +170,7 @@ async function gate(ak,dk){
   aw.classList.add('gold');setTimeout(()=>aw.classList.remove('gold'),1400);
   const bn=fxEl('banner',ar.left+ar.width/2,Math.max(30,ar.top+ar.height*.12),260,40,'<small>王の財宝</small>Gate of Babylon');
   setTimeout(()=>bn.remove(),1500);
-  const n=C.gc;log('✦ Gate of Babylon! '+nm(ak)+' เรียกอาวุธ '+n+' เล่ม','gold');
+  const n=C.gc;log('✦ Gate of Babylon! '+nm(ak)+' เรียกอาวุธ '+n+' เล่ม (เล่มละ '+Math.round(C.gd*100)+'% ของ POWER ปัจจุบัน)','gold');
   let total=0;
   const jobs=[];
   for(let i=0;i<n;i++)jobs.push((async()=>{
@@ -188,7 +188,8 @@ async function gate(ak,dk){
     w.animate([{opacity:1},{opacity:0}],{duration:200/speed,fill:'forwards'});setTimeout(()=>w.remove(),200/speed);
     const sp=fxEl('spark',tx,ty,90,90);setTimeout(()=>sp.remove(),500);
     if(D.hp<=0)return;
-    if(dodges(dk)){floatTxt(dw,'หลบ!','miss',rnd(25,75));return}D.hp-=C.gd;total+=C.gd;floatTxt(dw,'-'+C.gd,'sm',rnd(25,75));
+    if(dodges(dk)){floatTxt(dw,'หลบ!','miss',rnd(25,75));return}const gdm=Math.max(1,Math.round(A.p*C.gd));   /* ดาเมจต่ออาวุธ = % ของ POWER ปัจจุบันของกิลกาเมช */
+     D.hp-=gdm;total+=gdm;floatTxt(dw,'-'+gdm,'sm',rnd(25,75));
     dw.classList.remove('hit');void dw.offsetWidth;dw.classList.add('hit');render();
   })());
   await Promise.all(jobs);await sl(200);
