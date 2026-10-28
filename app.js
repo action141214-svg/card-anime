@@ -53,8 +53,8 @@ const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 let SV;
 
 /* ---------- เซฟ ---------- */
-function fresh(){return{v:1,coins:300,exp:0,curve:2,owned:[],count:{},lv:{},lvClaimed:{},raid:{slot:null,boss:0,hp:null,used:0,dealt:0,claimed:{}},chal:{slot:null,cleared:{}},autoSell:false,team:[],cleared:{},started:false,candy:0,ev:{day:null,hp:null,dealt:0,runs:0,candy:0},evg:{pity:0},items:{},evoQ:{},star:{}}}
-function load(){try{SV=JSON.parse(localStorage.getItem(KEY))}catch(e){SV=null}if(!SV||SV.v!==1)SV=fresh();SV.count=SV.count||{};SV.lv=SV.lv||{};SV.lvClaimed=SV.lvClaimed||{};SV.raid=SV.raid||{slot:null,boss:0,hp:null,used:0,dealt:0,claimed:{}};SV.chal=SV.chal||{slot:null,cleared:{}};SV.owned.forEach(id=>{SV.count[id]=SV.count[id]||1});SV.autoSell=!!SV.autoSell;SV.auto=SV.auto||'off';SV.candy=SV.candy||0;SV.ev=SV.ev||{day:null,hp:null,dealt:0,runs:0,candy:0};SV.evg=SV.evg||{pity:0};SV.items=SV.items||{};SV.evoQ=SV.evoQ||{};SV.star=SV.star||{};
+function fresh(){return{v:1,coins:300,exp:0,curve:2,owned:[],count:{},lv:{},lvClaimed:{},raid:{slot:null,boss:0,hp:null,used:0,dealt:0,claimed:{}},chal:{slot:null,cleared:{}},autoSell:false,team:[],cleared:{},started:false,candy:0,ev:{day:null,hp:null,dealt:0,runs:0,candy:0},evg:{pity:0},items:{},evoQ:{},evoWin:{},star:{}}}
+function load(){try{SV=JSON.parse(localStorage.getItem(KEY))}catch(e){SV=null}if(!SV||SV.v!==1)SV=fresh();SV.count=SV.count||{};SV.lv=SV.lv||{};SV.lvClaimed=SV.lvClaimed||{};SV.raid=SV.raid||{slot:null,boss:0,hp:null,used:0,dealt:0,claimed:{}};SV.chal=SV.chal||{slot:null,cleared:{}};SV.owned.forEach(id=>{SV.count[id]=SV.count[id]||1});SV.autoSell=!!SV.autoSell;SV.auto=SV.auto||'off';SV.candy=SV.candy||0;SV.ev=SV.ev||{day:null,hp:null,dealt:0,runs:0,candy:0};SV.evg=SV.evg||{pity:0};SV.items=SV.items||{};SV.evoQ=SV.evoQ||{};SV.evoWin=SV.evoWin||{};SV.star=SV.star||{};
   if(SV.curve!==2){SV.exp=0;SV.curve=2;save()}   /* สูตร EXP ใหม่: รีเซ็ตเลเวลผู้เล่นเป็น Lv.1 (เงิน การ์ด และด่านที่ผ่านยังอยู่) */
 }
 function save(){try{SV.savedAt=Date.now();localStorage.setItem(KEY,JSON.stringify(SV))}catch(e){}if(window.Online)Online.onSave()}
@@ -922,7 +922,7 @@ function ifEnd(quit,r){
 }
 /* ---------- เควสพัฒนา (Evolution Quest) ---------- */
 /* วัตถุดิบ (ไอเทม) */
-const ITEMS={hojin:{name:'ธรรมจักรแปดซี่',img:'hojin.jpeg',rar:'UR',color:'#ffc93d',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้ EVOLUTION ให้กับการ์ดฟุชิงุโระ เมงุมิ'},sealc:{name:'อักขระต้องคำสาป',img:'sasuke_seal.jpeg',rar:'S',color:'#a06cff',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดอุจิวะ ซาสึเกะ (ร่างเด็ก)'},sword:{name:'ดาบของชา แฮ อิน',img:'swordcha.jpeg',rar:'SSR',color:'#e24b5b',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดชา แฮ อิน'},shisu:{name:'หน้ากากของชิสุ',img:'shisu.jpeg',rar:'SR',color:'#cfd8ff',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดริมุรุ ร่างสไลม์'},seal9:{name:'ตราประทับ 9 หาง',img:'narutoevo.jpeg',rar:'S',color:'#ffcf4a',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดอุซึมากิ นารูโตะ'}};
+const ITEMS={hojin:{name:'ธรรมจักรแปดซี่',img:'hojin.jpeg',rar:'UR',color:'#ffc93d',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้ EVOLUTION ให้กับการ์ดฟุชิงุโระ เมงุมิ'},sealc:{name:'อักขระต้องคำสาป',img:'sasuke_seal.jpeg',rar:'S',color:'#a06cff',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดอุจิวะ ซาสึเกะ (ร่างเด็ก)'},sword:{name:'ดาบของชา แฮ อิน',img:'swordcha.jpeg',rar:'SSR',color:'#e24b5b',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดชา แฮ อิน'},shisu:{name:'หน้ากากของชิสุ',img:'shisu.jpeg',rar:'SR',color:'#cfd8ff',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดริมุรุ ร่างสไลม์'},rsword:{name:'ดาบของจอมมารริมุรุ',img:'swordrimuru.jpeg',rar:'USR',color:'#8a5cff',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION จอมมาร ริมุรุ เทมเพสต์'},seal9:{name:'ตราประทับ 9 หาง',img:'narutoevo.jpeg',rar:'S',color:'#ffcf4a',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดอุซึมากิ นารูโตะ'}};
 const itemN=k=>SV.items[k]||0;
 /* เควสพัฒนา: from = การ์ดที่อีโว, to = การ์ดหลังอีโว, need = เงื่อนไข, boss = ด่านเควส (ชนะได้เงิน + มีโอกาสดรอปวัตถุดิบ) */
 const EVOS=[{from:'naruto',to:'naruto1',need:{cards:50,items:{seal9:1},coins:10000},
@@ -937,7 +937,13 @@ const EVOS=[{from:'naruto',to:'naruto1',need:{cards:50,items:{seal9:1},coins:100
   boss:{card:'slime',count:4,name:'ริมุรุ ร่างสไลม์ ×4',hp:5000,power:100,lv:1,coins:100,drops:[{item:'shisu',rate:.005}]}},
   /* need.more = การ์ดอื่นที่ต้องใช้เพิ่ม · need.kills = สังหารศัตรูสะสม (ไม่ถูกใช้หมดไป) · grant = ดาว/เลเวลของการ์ดที่ได้ */
   {from:'rimuru',to:'rimulord',need:{cards:5,more:{slime:50},items:{shisu:10},kills:10000,coins:200000000},grant:{lv:1,star:6},
-  boss:{card:'rimuruboss',name:'ริมุรุ ร่าง SSR',hp:30000,power:150,lv:1,coins:100,drops:[{item:'shisu',rate:.005}]}}];
+  boss:{card:'rimuruboss',name:'ริมุรุ ร่าง SSR',hp:30000,power:150,lv:1,coins:100,drops:[{item:'shisu',rate:.005}]}},
+  /* บอส 2 เฟส: เฟส 1 ตายแล้วเปลี่ยนเป็นเฟส 2 · drops: first = โอกาสออกเมื่อชนะครั้งแรก (rate = ครั้งต่อๆ ไป) · safe = กันจุดตายทันที */
+  {from:'rimulord',to:'truerimuru',need:{cards:5,more:{slime:100,rimuru:10},items:{shisu:20,rsword:1},kills:20000,coins:1000000000},grant:{lv:1,star:6},
+  boss:{card:'rimulordboss',name:'จอมมาร ริมุรุ เทมเพสต์ (เฟส 1)',hp:10000,power:200,lv:1,coins:100,safe:true,
+    phase2:{card:'truerimuruboss',name:'จอมมารที่แท้จริง ริมุรุ เทมเพสต์ (เฟส 2)',hp:100000,power:300},
+    drops:[{item:'shisu',rate:.1},{item:'rsword',rate:.005,first:1}]}}];
+const evDropRate=(e,d)=>(d.first!=null&&!SV.evoWin[e.from])?d.first:d.rate;   /* โอกาสออกตอนนี้ (ชนะครั้งแรกอาจได้โอกาสพิเศษ) */
 let evoSel=null,evoKeep=false,questTab='char';
 /* หน้า "เควส" มี 2 แท็บ: เควสตัวละคร (char) และ เควสพัฒนา (evo) */
 function renderQuest(){
@@ -976,7 +982,7 @@ function renderEvo(){
         ${row('เงิน 💰',SV.coins,e.need.coins)}</ul>
         <button id="evoDo" ${ok?'':'disabled'}>🧬 อีโวการ์ด</button></div>
       <div class="box"><b>ด่านเควส: ${b.name}</b>
-        <div class="evboss"><img src="${bc.img}" alt="${bc.name}"><div><div>${b.count>1?b.count+' ตัว · ':''}HP <b>${b.hp.toLocaleString()}</b>${b.count>1?' ต่อตัว':''} · POWER <b>${b.power}</b></div><div>ชนะได้ 💰${b.coins} ทุกครั้ง</div>${b.drops.map(d=>`<div class="drop"><img src="${ITEMS[d.item].img}" alt=""> ${ITEMS[d.item].name} โอกาสออก ${+(d.rate*100).toFixed(1)}% · มี ×${itemN(d.item)}</div>`).join('')}</div></div>
+        <div class="evboss"><img src="${bc.img}" alt="${bc.name}"><div><div>${b.phase2?'เฟส 1 · ':''}${b.count>1?b.count+' ตัว · ':''}HP <b>${b.hp.toLocaleString()}</b>${b.count>1?' ต่อตัว':''} · POWER <b>${b.power}</b></div>${b.phase2?`<div>➜ เฟส 2 · ${CARDS[b.phase2.card].name} · HP <b>${b.phase2.hp.toLocaleString()}</b> · POWER <b>${b.phase2.power}</b></div>`:''}<div>ชนะได้ 💰${b.coins} ทุกครั้ง</div>${b.drops.map(d=>{const r=evDropRate(e,d);return `<div class="drop"><img src="${ITEMS[d.item].img}" alt=""> ${ITEMS[d.item].name} โอกาสออก ${+(r*100).toFixed(2)}%${d.first!=null?(SV.evoWin[e.from]?'':' (ชนะครั้งแรก · หลังจากนั้น '+(+(d.rate*100).toFixed(2))+'%)'):''} · มี ×${itemN(d.item)}</div>`}).join('')}</div></div>
         <button id="evoPlay">⚔ เล่นด่านเควส</button></div>
     </div></div>`;
   $('#evoDo').onclick=()=>confirmEvolve(e);$('#evoPlay').onclick=()=>startEvoQuest(e);
@@ -988,19 +994,19 @@ function startEvoQuest(e){
   const team=SV.team.filter(x=>SV.owned.includes(x));
   if(!team.length){toast('ต้องมีการ์ดในทีมอย่างน้อย 1 ใบ');return go('team')}
   const b=e.boss;clearAuto();setAutoBtn();
-  Battle.start({auto:true,a:team,la:team.map(clv),sa:team.map(cstar),...(b.count>1?{b:Array(b.count).fill(b.card),lb:Array(b.count).fill(b.lv),fixB:{hp:b.hp,p:b.power}}:{b:[b.card],lb:[b.lv],bossHp:{max:b.hp,cur:b.hp},bossP:b.power}),noHeal:true,title:'เควสพัฒนา · '+b.name,first:'a',
+  Battle.start({auto:true,a:team,la:team.map(clv),sa:team.map(cstar),...(b.count>1?{b:Array(b.count).fill(b.card),lb:Array(b.count).fill(b.lv),fixB:{hp:b.hp,p:b.power}}:{b:[b.card],lb:[b.lv],bossHp:{max:b.hp,cur:b.hp},bossP:b.power,...(b.phase2?{phase2:b.phase2}:{}),...(b.safe?{bossSafe:true}:{})}),noHeal:true,title:'เควสพัฒนา · '+b.name,first:'a',
     onExit:()=>{evoKeep=true;go('evo')},onEnd:r=>finishEvoQuest(e,r)});
 }
 function finishEvoQuest(e,r){
   const b=e.boss,back=()=>{evoKeep=true;go('evo')};
   if(!r.win){
-    modal(`<h2>พ่ายแพ้…</h2><p>${b.name} (HP ${b.hp.toLocaleString()} · POWER ${b.power}) แข็งแกร่งเกินไป ลองอัปเลเวลการ์ดหรือจัดทีมใหม่</p>${SV.auto!=='off'?'<p class="mute">ออโต้หยุดเพราะแพ้</p>':''}<div class="two"><button id="rAgain">ลองใหม่</button><button class="sec" id="rTeam">จัดทีม</button><button class="sec" id="rBack">กลับ</button></div>`);
+    modal(`<h2>พ่ายแพ้…</h2><p>${b.name} (HP ${b.hp.toLocaleString()} · POWER ${b.power}${b.phase2?' → เฟส 2 HP '+b.phase2.hp.toLocaleString()+' · POWER '+b.phase2.power:''}) แข็งแกร่งเกินไป ลองอัปเลเวลการ์ดหรือจัดทีมใหม่</p>${SV.auto!=='off'?'<p class="mute">ออโต้หยุดเพราะแพ้</p>':''}<div class="two"><button id="rAgain">ลองใหม่</button><button class="sec" id="rTeam">จัดทีม</button><button class="sec" id="rBack">กลับ</button></div>`);
     $('#rAgain').onclick=()=>{closeModal();startEvoQuest(e)};$('#rTeam').onclick=()=>go('team');$('#rBack').onclick=back;return}
-  SV.coins+=b.coins;const got=[];
-  b.drops.forEach(d=>{if(Math.random()<d.rate){SV.items[d.item]=itemN(d.item)+1;got.push(d.item)}});save();hud();
+  SV.coins+=b.coins;const got=[],rates=b.drops.map(d=>evDropRate(e,d));   /* คิดโอกาสก่อนบันทึกว่าชนะครั้งแรกแล้ว */
+  b.drops.forEach((d,i)=>{if(Math.random()<rates[i]){SV.items[d.item]=itemN(d.item)+1;got.push(d.item)}});SV.evoWin[e.from]=true;save();hud();
   const au=SV.auto!=='off';
   modal(`<h2>ผ่านเควส! 🎉</h2><p>${b.name} · ใช้ ${r.turns} เทิร์น</p><div class="reward"><div>💰 +${b.coins}</div></div>
-    ${got.length?got.map(k=>`<div class="dropbox"><img src="${ITEMS[k].img}" alt=""><div><b>ได้รับ ${ITEMS[k].name}!</b><br><small>มีทั้งหมด ×${itemN(k)}</small></div></div>`).join(''):`<p class="mute">ไม่ได้วัตถุดิบรอบนี้ (โอกาสออก ${+(b.drops[0].rate*100).toFixed(1)}% ต่อรอบ)</p>`}
+    ${got.length?got.map(k=>`<div class="dropbox"><img src="${ITEMS[k].img}" alt=""><div><b>ได้รับ ${ITEMS[k].name}!</b><br><small>มีทั้งหมด ×${itemN(k)}</small></div></div>`).join(''):`<p class="mute">ไม่ได้วัตถุดิบรอบนี้ (${b.drops.map((d,i)=>ITEMS[d.item].name+' '+(+(rates[i]*100).toFixed(2))+'%').join(' · ')})</p>`}
     ${au?'<p class="mute" id="autoLine"></p>':''}<div class="two"><button id="rAgain">สู้อีกครั้ง</button>${au?'<button class="sec" id="autoStop">หยุดออโต้</button>':''}<button class="sec" id="rBack">กลับ</button></div>`);
   $('#rAgain').onclick=()=>{closeModal();startEvoQuest(e)};$('#rBack').onclick=back;
   if(au){$('#autoStop').onclick=autoStop;autoRun('สู้อีกครั้ง',()=>startEvoQuest(e))}
