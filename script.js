@@ -54,7 +54,7 @@ const CARDS={
         desc:'ทุกเทิร์นสุ่ม 1 ใน 5 นิ้ว (นิ้วละ 20%): ฟื้นฟู / ขโมย / ผนึก / ลบสถานะลบ / โจมตีซ้ำ x2'},
   sasuke:{name:'อุจิวะ ซาสึเกะ',rar:'LTD',img:'sasuke.jpeg',power:45,hp:450,color:'#a06cff',ability:'lightning',
         desc:'ติดสถานะสายฟ้าให้ศัตรู (รับดาเมจเพิ่ม 20% ของ POWER ผู้โจมตี) และมีโอกาส 45% ทำให้ชา'},
-  gilqueen:{name:'ราชินีแห่งวีรชน กิลกาเมช',rar:'LTD',img:'gilqueen.jpeg',power:45,hp:500,color:'#ff4a3a',ability:'gate2',
+  gilqueen:{name:'ราชินีแห่งวีรชน กิลกาเมช',rar:'LTD',img:'gilqueen.jpeg',power:65.525,hp:500,color:'#ff4a3a',ability:'gate2',
         desc:'โจมตีพร้อมเรียกอาวุธมาโจมตีสร้างความเสียหาย 80% ของ POWER และมีโอกาส 50% หลังถูกทำลายใช้ดาบผ่าโลกสร้างความเสียหาย 3 เท่า (รับจากเควสตัวละคร)'},
   gil:{name:'กิลกาเมช',rar:'UR',img:'gil.jpeg',power:34,hp:350,color:'#ffcf4a',ability:'gate',
         desc:'เมื่อการ์ดใบนี้โจมตี จะเรียกอาวุธมาโจมตีแบบสุ่ม ทำความเสียหายเล่มละประมาณ 190% ของ POWER ปัจจุบัน (320 ที่เลเวล 100) โจมตี 3 ครั้ง'},
