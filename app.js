@@ -2,7 +2,7 @@
 const RARITY={R:'#7aa2ff',S:'#ff6b6b',SR:'#ff7ad9',SSR:'#4de6c8',UR:'#ff8a3d',USR:'#ffd34d',LTD:'#c27bff'};
 const MAX_TEAM=4;
 /* ตู้กาชา: สุ่มได้ทุกใบรวมถึงตัวซ้ำ (น้ำหนัก = % ที่ออก) — ปรับทีหลังได้ */
-const GACHA={cost:100,cost10:900,
+const GACHA={cost:100000,cost10:900000,   /* ราคาสุ่มเป็นเงิน 💰 (ตู้ฮาโลวีนใช้ลูกอม ราคาแยกที่ HW) */
   /* การ์ดที่สุ่มได้ในตู้ (LTD ยังไม่เปิดให้สุ่ม — ซาสึเกะจะหาวิธีได้รับภายหลัง) */
   pool:['goku','zenitsu','yuji','naruto','sasukekid','gekko','ino','kirara','garo','vegeta','ichigo','kirito','megumi','gil','kurapika','shuna','chahaein','kaneki','reze','kdash','mai','kula'],
   /* เรทออก % : base = ปกติ, up = ตอนเป็นการ์ดเรทอัป (การ์ด R ที่เหลือแบ่งเท่าๆ กัน) */
