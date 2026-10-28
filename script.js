@@ -54,6 +54,8 @@ const CARDS={
         desc:'ทุกเทิร์นสุ่ม 1 ใน 5 นิ้ว (นิ้วละ 20%): ฟื้นฟู / ขโมย / ผนึก / ลบสถานะลบ / โจมตีซ้ำ x2'},
   sasuke:{name:'อุจิวะ ซาสึเกะ',rar:'LTD',img:'sasuke.jpeg',power:45,hp:450,color:'#a06cff',ability:'lightning',
         desc:'ติดสถานะสายฟ้าให้ศัตรู (รับดาเมจเพิ่ม 20% ของ POWER ผู้โจมตี) และมีโอกาส 45% ทำให้ชา'},
+  gilqueen:{name:'ราชินีแห่งวีรชน กิลกาเมช',rar:'LTD',img:'gilqueen.jpeg',power:45,hp:500,color:'#ff4a3a',ability:'gate2',
+        desc:'โจมตีพร้อมเรียกอาวุธมาโจมตีสร้างความเสียหาย 80% ของ POWER และมีโอกาส 50% หลังถูกทำลายใช้ดาบผ่าโลกสร้างความเสียหาย 3 เท่า (รับจากเควสตัวละคร)'},
   gil:{name:'กิลกาเมช',rar:'UR',img:'gil.jpeg',power:34,hp:350,color:'#ffcf4a',ability:'gate',
         desc:'เมื่อการ์ดใบนี้โจมตี จะเรียกอาวุธมาโจมตีแบบสุ่ม ทำความเสียหาย 75% ของ POWER ปัจจุบัน โจมตี 3 ครั้ง'},
   /* ===== การ์ดชุดใหม่ ===== */
@@ -84,7 +86,7 @@ const CARDS={
 /* ลำดับระดับการ์ด จากน้อยไปมาก */
 const R_ORDER=['R','S','SR','SSR','UR','USR','LTD'];
 const rIdx=r=>R_ORDER.indexOf(r);
-const ID={reze:{p:'#rzP',h:'#rzH'},shuna:{p:'#shP',h:'#shH'},chahaein:{p:'#chP',h:'#chH'},chaevo:{p:'#ceP',h:'#ceH'},kaneki:{p:'#kkP',h:'#kkH'},mai:{p:'#maP',h:'#maH'},kdash:{p:'#kyP',h:'#kyH'},mahoraga:{p:'#mhP',h:'#mhH'},sasukecurse:{p:'#scP',h:'#scH'},sasukekid:{p:'#kdP',h:'#kdH'},naruto1:{p:'#n1P',h:'#n1H'},ino:{p:'#inP',h:'#inH'},gekko:{p:'#qP',h:'#qH'},naruto:{p:'#wP',h:'#wH'},ichigo:{p:'#oP',h:'#oH'},megumi:{p:'#mP',h:'#mH'},yuji:{p:'#yP',h:'#yH'},goku:{p:'#gP',h:'#gH'},zenitsu:{p:'#zP',h:'#zH'},kirito:{p:'#kP',h:'#kH'},gil:{p:'#iP',h:'#iH'},kurapika:{p:'#rP',h:'#rH'},sasuke:{p:'#sP',h:'#sH'},hutao:{p:'#hP',h:'#hH'},luffy:{p:'#fP',h:'#fH'},gengar:{p:'#eP',h:'#eH'},alucard:{p:'#aP',h:'#aH'},isaac:{p:'#xP',h:'#xH'},okarun:{p:'#uP',h:'#uH'},kirara:{p:'#krP',h:'#krH'},garo:{p:'#gaP',h:'#gaH'},vegeta:{p:'#vgP',h:'#vgH'},kula:{p:'#kuP',h:'#kuH'},konan:{p:'#knP',h:'#knH'}};
+const ID={gilqueen:{p:'#gqP',h:'#gqH'},reze:{p:'#rzP',h:'#rzH'},shuna:{p:'#shP',h:'#shH'},chahaein:{p:'#chP',h:'#chH'},chaevo:{p:'#ceP',h:'#ceH'},kaneki:{p:'#kkP',h:'#kkH'},mai:{p:'#maP',h:'#maH'},kdash:{p:'#kyP',h:'#kyH'},mahoraga:{p:'#mhP',h:'#mhH'},sasukecurse:{p:'#scP',h:'#scH'},sasukekid:{p:'#kdP',h:'#kdH'},naruto1:{p:'#n1P',h:'#n1H'},ino:{p:'#inP',h:'#inH'},gekko:{p:'#qP',h:'#qH'},naruto:{p:'#wP',h:'#wH'},ichigo:{p:'#oP',h:'#oH'},megumi:{p:'#mP',h:'#mH'},yuji:{p:'#yP',h:'#yH'},goku:{p:'#gP',h:'#gH'},zenitsu:{p:'#zP',h:'#zH'},kirito:{p:'#kP',h:'#kH'},gil:{p:'#iP',h:'#iH'},kurapika:{p:'#rP',h:'#rH'},sasuke:{p:'#sP',h:'#sH'},hutao:{p:'#hP',h:'#hH'},luffy:{p:'#fP',h:'#fH'},gengar:{p:'#eP',h:'#eH'},alucard:{p:'#aP',h:'#aH'},isaac:{p:'#xP',h:'#xH'},okarun:{p:'#uP',h:'#uH'},kirara:{p:'#krP',h:'#krH'},garo:{p:'#gaP',h:'#gaH'},vegeta:{p:'#vgP',h:'#vgH'},kula:{p:'#kuP',h:'#kuH'},konan:{p:'#knP',h:'#knH'}};
 
 /* อาวุธ Gate of Babylon (SVG หันไปทางขวา) */
 const WEAPONS=[
@@ -119,7 +121,7 @@ function setFighter(k){
 function startBattle(opts){
   OPT=opts;FIXED=!!opts.online;RNG=opts.seed!=null?mulberry(opts.seed>>>0):null;if(opts.online){speed=1;$('#speedBtn').textContent='ความเร็ว x1'}
   run++;paused=false;$('#pauseBtn').textContent='หยุด';$('#fx').innerHTML='';$('#autoBtn').classList.toggle('hidden',!opts.auto);
-  C={mih:num('#maT')/100,mib:num('#maB')/100,mit:Math.max(1,Math.round(num('#maN'))),mim:num('#maM'),mis:num('#maS')/100,kkd:num('#kkD')/100,kkc:num('#kkC')/100,kkn:Math.max(2,Math.round(num('#kkN'))),cem:num('#ceM'),ced:num('#ceD')/100,gr:num('#gr')/100,zc:num('#zc')/100,kh:num('#kh')/100,ki:Math.max(1,num('#ki')),gc:num('#gc'),gd:num('#gd')/100,nh:num('#nh')/100,rm:num('#rm'),lb:num('#lb')/100,lc:num('#lc')/100,ym:num('#ym'),gm:num('#oM'),gn:Math.max(1,num('#oN')),sd:num('#mD')/100,sn:num('#mN')/100,se:num('#mE'),sr:num('#mR')/100,bd:num('#hB')/100,bt:Math.max(1,num('#hT')),gh:num('#hG')/100,pc:num('#fC')/100,gx:num('#eG')/100,ab:num('#aB')/100,kf:num('#kdF')/100,sv:num('#scV')/100,sc:num('#scC')/100,st:Math.max(1,num('#scT')),kb:num('#kdB')/100,kt:Math.max(1,num('#kdT')),xn:num('#xN'),xk:num('#xK'),xm:num('#xM'),ot:num('#uT')/100,od:num('#uD')/100,nr:num('#wR')/100,gk:num('#qR')/100,ni:Math.max(1,Math.round(num('#inI'))),nx:num('#inX'),n1h:num('#n1h')/100,n1c:num('#n1c')/100,wp:num('#mhW'),wr:num('#mhR')/100,zb:num('#rzB')/100,zm:num('#rzM'),zs:num('#rzS')/100,rb:num('#rzX'),shh:num('#shA')/100,shp:num('#shB')/100,cm:num('#chM'),kyd:num('#kyD')/100,kyt:Math.max(1,num('#kyT')),kyr:num('#kyR')/100,krn:Math.max(1,Math.round(num('#krN'))),krc:num('#krC')/100,krr:num('#krR')/100,krs:num('#krS')/100,krk:num('#krK')/100,krb:num('#krB')/100,gad:num('#gaD')/100,vgd:num('#vgD')/100,vgn:Math.max(1,Math.round(num('#vgA'))),vgx:Math.max(1,Math.round(num('#vgB'))),kuc:num('#kuC')/100,kud:num('#kuD')/100,kut:Math.max(1,Math.round(num('#kuT'))),knb:num('#knB')/100,knr:num('#knR')/100,knx:num('#knX')/100};
+  C={mih:num('#maT')/100,mib:num('#maB')/100,mit:Math.max(1,Math.round(num('#maN'))),mim:num('#maM'),mis:num('#maS')/100,kkd:num('#kkD')/100,kkc:num('#kkC')/100,kkn:Math.max(2,Math.round(num('#kkN'))),cem:num('#ceM'),ced:num('#ceD')/100,gr:num('#gr')/100,zc:num('#zc')/100,kh:num('#kh')/100,ki:Math.max(1,num('#ki')),gc:num('#gc'),gd:num('#gd')/100,nh:num('#nh')/100,rm:num('#rm'),lb:num('#lb')/100,lc:num('#lc')/100,ym:num('#ym'),gm:num('#oM'),gn:Math.max(1,num('#oN')),sd:num('#mD')/100,sn:num('#mN')/100,se:num('#mE'),sr:num('#mR')/100,bd:num('#hB')/100,bt:Math.max(1,num('#hT')),gh:num('#hG')/100,pc:num('#fC')/100,gx:num('#eG')/100,ab:num('#aB')/100,kf:num('#kdF')/100,sv:num('#scV')/100,sc:num('#scC')/100,st:Math.max(1,num('#scT')),kb:num('#kdB')/100,kt:Math.max(1,num('#kdT')),xn:num('#xN'),xk:num('#xK'),xm:num('#xM'),ot:num('#uT')/100,od:num('#uD')/100,nr:num('#wR')/100,gk:num('#qR')/100,ni:Math.max(1,Math.round(num('#inI'))),nx:num('#inX'),n1h:num('#n1h')/100,n1c:num('#n1c')/100,wp:num('#mhW'),gqw:num('#gqW')/100,gqe:num('#gqE')/100,gqm:num('#gqM'),wr:num('#mhR')/100,zb:num('#rzB')/100,zm:num('#rzM'),zs:num('#rzS')/100,rb:num('#rzX'),shh:num('#shA')/100,shp:num('#shB')/100,cm:num('#chM'),kyd:num('#kyD')/100,kyt:Math.max(1,num('#kyT')),kyr:num('#kyR')/100,krn:Math.max(1,Math.round(num('#krN'))),krc:num('#krC')/100,krr:num('#krR')/100,krs:num('#krS')/100,krk:num('#krK')/100,krb:num('#krB')/100,gad:num('#gaD')/100,vgd:num('#vgD')/100,vgn:Math.max(1,Math.round(num('#vgA'))),vgx:Math.max(1,Math.round(num('#vgB'))),kuc:num('#kuC')/100,kud:num('#kuD')/100,kut:Math.max(1,Math.round(num('#kuT'))),knb:num('#knB')/100,knr:num('#knR')/100,knx:num('#knX')/100};
   const mk=(lvs,sts)=>(id,i)=>{const l=(lvs&&lvs[i])||1,sr=(sts&&sts[i])||1,s=statAt(id,l,sr);return{id,lv:l,star:sr,p:s.p,hp:s.hp,max:s.hp,para:false,sealed:false,lightning:false,miss:false,burn:0,burnDmg:0,sev:0,poss:false,bleed:false,hb:0,ps:0,turbo:false,cx:0,frz:false,ice:0,iceDmg:0,wkr:0,p0:s.p,fg:null,t:0}};
   let first=opts.first||$('#first').value;if(first==='r')first=RR()<.5?'a':'b';
   S={a:null,b:null,roster:{a:opts.a.map(mk(opts.la,opts.sa)),b:opts.b.map(mk(opts.lb,opts.sb))},idx:{a:0,b:0},turn:first,n:1,over:false};
@@ -188,13 +190,13 @@ function fxEl(cls,x,y,w,h,html=''){
 }
 const sleepAnim=(an)=>an.finished.catch(()=>{});
 /* Gate of Babylon: ประตูทองคำเปิด อาวุธพุ่งออกมาแทงเป้าหมาย */
-async function gate(ak,dk){
+async function gate(ak,dk,n0,pct0){
   const A=S[ak],D=S[dk],aw=$('#f'+ak+' .cw'),dw=$('#f'+dk+' .cw');
   const ar=aw.getBoundingClientRect(),dr=dw.getBoundingClientRect();
   aw.classList.add('gold');setTimeout(()=>aw.classList.remove('gold'),1400);
   const bn=fxEl('banner',ar.left+ar.width/2,Math.max(30,ar.top+ar.height*.12),260,40,'<small>王の財宝</small>Gate of Babylon');
   setTimeout(()=>bn.remove(),1500);
-  const n=C.gc;log('✦ Gate of Babylon! '+nm(ak)+' เรียกอาวุธ '+n+' เล่ม (เล่มละ '+Math.round(C.gd*100)+'% ของ POWER ปัจจุบัน)','gold');
+  const n=n0!=null?n0:C.gc,gpct=pct0!=null?pct0:C.gd;log('✦ Gate of Babylon! '+nm(ak)+' เรียกอาวุธ '+n+' เล่ม (เล่มละ '+Math.round(gpct*100)+'% ของ POWER ปัจจุบัน)','gold');
   let total=0;
   const jobs=[];
   for(let i=0;i<n;i++)jobs.push((async()=>{
@@ -212,7 +214,7 @@ async function gate(ak,dk){
     w.animate([{opacity:1},{opacity:0}],{duration:200/speed,fill:'forwards'});setTimeout(()=>w.remove(),200/speed);
     const sp=fxEl('spark',tx,ty,90,90);setTimeout(()=>sp.remove(),500);
     if(D.hp<=0)return;
-    if(dodges(dk)){floatTxt(dw,'หลบ!','miss',rnd(25,75));return}const gdm=Math.max(1,Math.round(A.p*C.gd));   /* ดาเมจต่ออาวุธ = % ของ POWER ปัจจุบันของกิลกาเมช */
+    if(dodges(dk)){floatTxt(dw,'หลบ!','miss',rnd(25,75));return}const gdm=Math.max(1,Math.round(A.p*gpct));   /* ดาเมจต่ออาวุธ = % ของ POWER ปัจจุบันของกิลกาเมช */
      D.hp-=gdm;total+=gdm;floatTxt(dw,'-'+gdm,'sm',rnd(25,75));
     dw.classList.remove('hit');void dw.offsetWidth;dw.classList.add('hit');render();
   })());
@@ -246,7 +248,7 @@ function getsugaFx(ak,dk){
 /* ---------- คุราปิก้า: สุ่มนิ้ว (โอกาสเท่ากัน 20% ต่อนิ้ว) ---------- */
 const FN=['นิ้วโป้ง','นิ้วชี้','นิ้วกลาง','นิ้วนาง','นิ้วก้อย'];
 const FD=['ฟื้นฟู HP','ขโมยความสามารถ','ผนึกความสามารถศัตรู','ลบสถานะด้านลบ','โจมตีซ้ำ'];
-const AN={bomb:'ระเบิด (ดาเมจ ×2 + มึนงง)',shuna:'เสริมพลังทีม',boss3:'ดาเมจ ×3 ใส่บอส',boss5:'ดาเมจ ×5 ใส่บอส + หลบ 50%',ghoul:'ดูดเลือด + ตี 4 ครั้ง',mai:'โหมดไฟ (เผาไหม้) / โหมดระเบิด',questboss:'ไม่มี',pflame:'ไฟบริสุทธิ์',wheel:'ธรรมจักร (กงล้อหมุนสุ่มเสริมพลัง)',kyuubi:'จักระจิ้งจอก (ฟื้นฟู HP + ชะงัก)',getsuga:'เกตสึกะ (ดาเมจ ×3)',shiki:'ทศฉายา (เรียกชิกิกามิ)',upset:'ล้มยักษ์ (ดาเมจเพิ่มใส่ศัตรูระดับสูงกว่า)',lightning:'สายฟ้า',grow:'POWER เพิ่มขึ้น',paralyze:'ทำให้ชา',heal:'ฟื้นฟู HP',gate:'Gate of Babylon',ghost:'ผีเมาช่วยโจมตี',possess:'เข้าสิง (ศัตรูมีโอกาสโจมตีตัวเอง)',gmax:'แปลงสถานะลบเป็น POWER',double:'โจมตี 2 ครั้ง + เลือดไหล',scythe:'สุ่มการโจมตี 3 รูปแบบ',turbo:'สัญลักษณ์เทอร์โบ',crux:'กลุ่มดาวกางเขนใต้ (เรียกอุปสรรคพุ่งใส่)',garo:'โจมตี 2 ครั้ง + หลบ 40%',kiblast:'กระสุนพลัง 2-5 ครั้ง',icecrystal:'ผลึกน้ำแข็ง (แช่แข็ง + ดาเมจตกค้าง)',paper:'กระดาษวิเศษ (ลดดาเมจ / ระเบิด)'};
+const AN={gate2:'Gate of Babylon (เรียกอาวุธ 1 เล่ม)',bomb:'ระเบิด (ดาเมจ ×2 + มึนงง)',shuna:'เสริมพลังทีม',boss3:'ดาเมจ ×3 ใส่บอส',boss5:'ดาเมจ ×5 ใส่บอส + หลบ 50%',ghoul:'ดูดเลือด + ตี 4 ครั้ง',mai:'โหมดไฟ (เผาไหม้) / โหมดระเบิด',questboss:'ไม่มี',pflame:'ไฟบริสุทธิ์',wheel:'ธรรมจักร (กงล้อหมุนสุ่มเสริมพลัง)',kyuubi:'จักระจิ้งจอก (ฟื้นฟู HP + ชะงัก)',getsuga:'เกตสึกะ (ดาเมจ ×3)',shiki:'ทศฉายา (เรียกชิกิกามิ)',upset:'ล้มยักษ์ (ดาเมจเพิ่มใส่ศัตรูระดับสูงกว่า)',lightning:'สายฟ้า',grow:'POWER เพิ่มขึ้น',paralyze:'ทำให้ชา',heal:'ฟื้นฟู HP',gate:'Gate of Babylon',ghost:'ผีเมาช่วยโจมตี',possess:'เข้าสิง (ศัตรูมีโอกาสโจมตีตัวเอง)',gmax:'แปลงสถานะลบเป็น POWER',double:'โจมตี 2 ครั้ง + เลือดไหล',scythe:'สุ่มการโจมตี 3 รูปแบบ',turbo:'สัญลักษณ์เทอร์โบ',crux:'กลุ่มดาวกางเขนใต้ (เรียกอุปสรรคพุ่งใส่)',garo:'โจมตี 2 ครั้ง + หลบ 40%',kiblast:'กระสุนพลัง 2-5 ครั้ง',icecrystal:'ผลึกน้ำแข็ง (แช่แข็ง + ดาเมจตกค้าง)',paper:'กระดาษวิเศษ (ลดดาเมจ / ระเบิด)'};
 /* ไอคอนมือ: นิ้วที่ใช้ในเทิร์นนั้นจะเรืองสีทอง */
 function handSvg(i,sz=40){
   const F=[['M10 66 L22 56 L36 84 L22 92Z','',''],['M24 16h12a2 2 0 0 1 2 2v44H22V18a2 2 0 0 1 2-2z'],['M38 8h12a2 2 0 0 1 2 2v52H36V10a2 2 0 0 1 2-2z'],['M52 14h12a2 2 0 0 1 2 2v46H50V16a2 2 0 0 1 2-2z'],['M66 28h11a2 2 0 0 1 2 2v32H64V30a2 2 0 0 1 2-2z']];
@@ -313,6 +315,7 @@ async function applyAb(name,ak,dk,opt={}){
   if(name==='paralyze'){if(!d.para&&RR()<C.zc){d.para=true;log('⚡ '+nm(dk)+' ถูกทำให้ชา! ข้ามการโจมตีเทิร์นหน้า',ak)}}
   else if(name==='lightning'){if(!d.lightning)await setLightning(ak,dk);if(!d.para&&RR()<C.lc){d.para=true;log('⚡ '+nm(dk)+' ถูกทำให้ชา! ข้ามการโจมตีเทิร์นหน้า',ak)}}
   else if(name==='gate'){await sl(350);await gate(ak,dk)}
+  else if(name==='gate2'){await sl(350);await gate(ak,dk,1,C.gqw)}
   else if(name==='grow'&&C.gr>0){const add=a.p*C.gr;a.p+=add;log('POWER ของ '+nm(ak)+' เพิ่ม +'+add.toFixed(1)+' เป็น '+a.p.toFixed(1),ak)}
   else if(name==='shiki'){await shiki(ak,dk)}
   else if(name==='getsuga'){if(opt.force){S.noAb=true;const f=getsugaFx(ak,dk);const x=await hit(ak,dk,C.gm-1);await f;log('月牙天衝! โจมตีเพิ่ม '+x+' ดาเมจ',ak)}}
@@ -684,12 +687,15 @@ async function handleKO(dk,ak){
     const cw2=$('#f'+dk+' .cw');floatTxt(cw2,'ร่างแยก!','heal');cw2.classList.remove('gold');void cw2.offsetWidth;cw2.classList.add('gold');setTimeout(()=>cw2.classList.remove('gold'),1400);
     render();await sl(600);return false;
   }
-  $('#f'+dk+' .cw').classList.add('ko');log('💀 '+nm(dk)+' ถูกกำจัด!','sys');render();await sl(800);
+  $('#f'+dk+' .cw').classList.add('ko');log('💀 '+nm(dk)+' ถูกกำจัด!','sys');
+  if(typeof onKillHook==='function'&&!OPT.online&&dk==='b'&&S[ak])onKillHook(S[ak].id);   /* นับการสังหาร (เควสตัวละคร) */
+  render();await sl(800);
   const ab0=CARDS[dd.id].ability;let xko=false;
   if(ab0==='shuna')shunaFade(dk);
-  if(ab0==='bomb'){const x=S[ak];if(x&&x.hp>0){   /* เรเซ่: ถูกกำจัด → ระเบิดพร้อมดาเมจ 5 เท่าของ POWER */
-    const bd=Math.round(dd.p*C.rb);bombFx(dk,ak);x.hp-=bd;floatTxt($('#f'+ak+' .cw'),'-'+bd,'crit');
-    log('💥 '+nm(dk)+' ระเบิดตัวเอง! สร้างความเสียหาย '+bd+' ('+C.rb+' เท่าของ POWER)',dk);render();await sl(700);
+  const ea=ab0==='gate2'&&RR()<C.gqe;   /* ราชินีกิลกาเมช: ถูกกำจัด → โอกาสใช้ดาบผ่าโลก (Ea) */
+  if(ab0==='bomb'||ea){const x=S[ak];if(x&&x.hp>0){   /* เรเซ่: ถูกกำจัด → ระเบิดพร้อมดาเมจ 5 เท่าของ POWER */
+    const mul=ea?C.gqm:C.rb,bd=Math.round(dd.p*mul);bombFx(dk,ak);x.hp-=bd;floatTxt($('#f'+ak+' .cw'),'-'+bd,'crit');
+    log(ea?'🌀 '+nm(dk)+' ใช้ดาบผ่าโลก Ea! สร้างความเสียหาย '+bd+' ('+mul+' เท่าของ POWER)':'💥 '+nm(dk)+' ระเบิดตัวเอง! สร้างความเสียหาย '+bd+' ('+mul+' เท่าของ POWER)',dk);render();await sl(700);
     if(x.hp<=0){xko=true;$('#f'+ak+' .cw').classList.add('ko');log('💀 '+nm(ak)+' ถูกกำจัด!','sys');render();await sl(600);if(CARDS[x.id].ability==='shuna')shunaFade(ak)}}}
   const finish=async w=>{
     S.over=true;S.winner=w;render();log((OPT.names?OPT.names[w]:(w==='a'?'ฝั่งผู้เล่น':'ฝั่งศัตรู'))+' ชนะ!','sys');await sl(700);

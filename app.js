@@ -424,35 +424,35 @@ function renderPlay(){
   $('#mdChal').textContent='ผ่านแล้ว '+chList().filter(c=>chalState().cleared[c.id]).length+'/'+chList().length+' · รีเซ็ต '+chalLeft();
   $('#mdInf').textContent='เวฟสูงสุด '+((SV.inf&&SV.inf.best)||0);
 }
-/* ---------- เควสตัวละคร (เฉพาะ UI — ยังไม่เชื่อมระบบต่อสู้/รางวัล) · อยู่ในหน้า "เควส" แท็บแรก ----------
-   CHARQ = รายการด่าน · enemy/elv = ศัตรู (ตัวอย่าง) · rule = เงื่อนไขพิเศษของด่าน · objs = ภารกิจเก็บดาว 3 ข้อ · reward = รางวัล
-   ความคืบหน้าอ่านจาก SV.charq = {stars:{ด่าน:จำนวนดาว}} (ยังไม่มีโค้ดที่เขียนค่านี้ — ไว้ต่อภายหลัง) */
-const CHARQ_DIFF={1:{k:'easy',label:'ง่าย',sk:1},2:{k:'easy',label:'พอสู้ได้',sk:2},3:{k:'mid',label:'ปานกลาง',sk:3},4:{k:'mid',label:'ยาก',sk:4},5:{k:'hard',label:'โหด',sk:5},6:{k:'hell',label:'นรก',sk:6}};
-const CHARQ=[
-  {id:1,name:'บททดสอบแรก',d:1,rec:10,enemy:['goku','zenitsu'],elv:[10,10],rule:'จำกัด 15 เทิร์น',objs:['ผ่านเควส','ชนะภายใน 10 เทิร์น','ไม่มีการ์ดถูกกำจัด'],reward:{coins:500,exp:300}},
-  {id:2,name:'ศัตรูเสริมพลัง',d:2,rec:20,enemy:['yuji','naruto','ino'],elv:[18,18,18],rule:'ศัตรูได้ POWER +20% ทุกตัว',objs:['ผ่านเควส','ชนะภายใน 12 เทิร์น','มีการ์ดรอดอย่างน้อย 3 ใบ'],reward:{coins:900,exp:500}},
-  {id:3,name:'ทีมเล็กใจใหญ่',d:3,rec:30,enemy:['kirito','ichigo'],elv:[30,30],rule:'ใส่การ์ดได้สูงสุด 2 ใบ',objs:['ผ่านเควส','ชนะภายใน 10 เทิร์น','การ์ดทั้งหมดรอด'],reward:{coins:1500,exp:800}},
-  {id:4,name:'ห้ามการ์ดระดับสูง',d:4,rec:40,enemy:['gekko','megumi','chahaein'],elv:[40,40,40],rule:'ห้ามใช้การ์ดระดับ SSR ขึ้นไป',objs:['ผ่านเควส','ชนะภายใน 14 เทิร์น','ไม่มีการ์ดถูกกำจัด'],reward:{coins:2500,exp:1200}},
-  {id:5,name:'กำแพงเหล็ก',d:5,rec:60,enemy:['kurapika','gil','hutao','alucard'],elv:[55,55,55,55],rule:'ศัตรูฟื้นฟู HP 5% ทุกเทิร์น',objs:['ผ่านเควส','ชนะภายใน 16 เทิร์น','มีการ์ดรอดอย่างน้อย 2 ใบ'],reward:{coins:4000,exp:2000},bonus:'🎁 ไอเทมพิเศษ'},
-  {id:6,name:'ด่านสุดท้าย',d:6,rec:80,enemy:['isaac','okarun','luffy','gengar'],elv:[80,80,80,80],rule:'จำกัด 20 เทิร์น · ศัตรูได้ POWER +30%',objs:['ผ่านเควส','ชนะภายใน 15 เทิร์น','ไม่มีการ์ดถูกกำจัด'],reward:{coins:8000,exp:4000},bonus:'🎁 การ์ด/ไอเทมหายาก'}
-];
-const charqSt=()=>(SV.charq&&SV.charq.stars)||{};
-const charqStars=()=>CHARQ.reduce((s,t)=>s+(charqSt()[t.id]||0),0);
+/* ---------- เควสตัวละคร (อยู่ในหน้า "เควส" แท็บแรก) ----------
+   แต่ละเควส = ทำครบทุกเงื่อนไข → กดรับการ์ดรางวัล · ความคืบหน้าเก็บใน SV.cq:
+   kills = จำนวนครั้งที่กิลกาเมชสังหารศัตรู (นับทุกโหมดยกเว้นออนไลน์) · chal = จำนวนครั้งที่ชนะชาเลนจ์ · done = เควสที่รับรางวัลแล้ว */
+const cqN=k=>(SV.cq&&SV.cq[k])||0;
+function onKillHook(id){if(id!=='gil')return;SV.cq=SV.cq||{};SV.cq.kills=(SV.cq.kills||0)+1}
+const CQ=[{id:'gilq',card:'gilqueen',name:'ราชินีแห่งวีรชน กิลกาเมช',
+  reqs:[{t:'ใช้กิลกาเมชสังหารศัตรู',unit:'ครั้ง',need:1000,cur:()=>cqN('kills')},
+        {t:'มีการ์ดกิลกาเมช',unit:'ใบ',need:100,cur:()=>SV.count.gil||0},
+        {t:'ลงชาเลนจ์ให้ชนะ',unit:'ครั้ง',need:500,cur:()=>cqN('chal')}]}];
+const cqDone=q=>!!(SV.cq&&SV.cq.done&&SV.cq.done[q.id]);
+const cqReady=q=>q.reqs.every(r=>r.cur()>=r.need);
 function renderCharQ(){
-  const st=charqSt(),done=CHARQ.filter(t=>(st[t.id]||0)>0).length;
-  $('#thInfo').textContent='ผ่านแล้ว '+done+'/'+CHARQ.length+' เควส · ดาวสะสม '+charqStars()+'/'+CHARQ.length*3+' ⭐';
-  $('#thList').innerHTML=CHARQ.map(t=>{
-    const df=CHARQ_DIFF[t.d],stars=st[t.id]||0,locked=t.id>1&&!(st[t.id-1]>0),en=t.enemy.filter(id=>CARDS[id]);
-    return `<div class="tcard d-${df.k}${locked?' lock':''}">
-      ${locked?`<div class="lockbox"><span>🔒</span><b>ผ่านเควส ${t.id-1} ก่อน</b></div>`:''}
-      <div class="thd"><div><div class="no">เควส ${t.id}</div><h2>${t.name}</h2></div><span class="diff d-${df.k}">${'💀'.repeat(df.sk>3?3:df.sk)}${df.sk>3?'+':''} ${df.label}</span></div>
-      <div class="tens">${en.map((id,i)=>`<div class="gmini sm" style="--c:${CARDS[id].color}"><img src="${CARDS[id].img}" alt=""><b>${CARDS[id].name}</b><small>Lv.${t.elv[i]||1}</small></div>`).join('')}</div>
-      <div class="rule">⚠ ${t.rule}</div>
-      <ul class="objs">${t.objs.map((o,i)=>`<li class="${stars>i?'ok':''}"><span class="s">${stars>i?'★':'☆'}</span>${o}</li>`).join('')}</ul>
-      <div class="rw"><div class="hot">รางวัลเควส: 💰${t.reward.coins.toLocaleString()} · EXP ${t.reward.exp.toLocaleString()}${t.bonus?' · '+t.bonus:''}</div><div class="mute">แนะนำเลเวล ${t.rec}+</div></div>
-      <button data-th="${t.id}" ${locked?'disabled':''}>รับเควส</button></div>`}).join('');
+  const done=CQ.filter(cqDone).length;
+  $('#thInfo').textContent='รับรางวัลแล้ว '+done+'/'+CQ.length+' เควส';
+  $('#thList').innerHTML=CQ.map(q=>{
+    const c=CARDS[q.card],fin=cqDone(q),ok=cqReady(q);
+    return `<div class="tcard cq${fin?' fin':''}" style="--c:${c.color}">
+      <div class="thd"><div><div class="no">เควสตัวละคร</div><h2>${c.name}</h2></div><span class="diff d-hell">${c.rar}</span></div>
+      <div class="cqrw"><img src="${c.img}" alt="${c.name}"><div class="mute">รางวัล: การ์ด <b>${c.name}</b><br>POWER ${c.power} · HP ${c.hp}</div></div>
+      <ul class="cqreq">${q.reqs.map(r=>{const v=Math.min(r.cur(),r.need),p=v/r.need*100;return `<li class="${v>=r.need?'ok':''}"><span>${v>=r.need?'✔':'✖'} ${r.t}</span><b>${v.toLocaleString()} / ${r.need.toLocaleString()} ${r.unit}</b><i class="cqbar"><u style="width:${p}%"></u></i></li>`}).join('')}</ul>
+      <button data-cq="${q.id}" ${fin||!ok?'disabled':''}>${fin?'รับรางวัลแล้ว ✔':ok?'🎁 รับการ์ด':'ยังทำไม่ครบเงื่อนไข'}</button></div>`}).join('');
 }
-$('#thList').onclick=e=>{const b=e.target.closest('[data-th]');if(!b||b.disabled)return;toast('🚧 เควสตัวละครยังเป็นหน้าตัวอย่าง — ยังรับเควสไม่ได้')};
+$('#thList').onclick=e=>{const b=e.target.closest('[data-cq]');if(!b||b.disabled)return;
+  const q=CQ.find(x=>x.id===b.dataset.cq);if(!q||cqDone(q)||!cqReady(q))return;
+  SV.cq=SV.cq||{};SV.cq.done=SV.cq.done||{};SV.cq.done[q.id]=true;
+  if(SV.owned.includes(q.card))SV.count[q.card]=(SV.count[q.card]||1)+1;else{SV.owned.push(q.card);SV.count[q.card]=1}
+  save();hud();renderCharQ();
+  modal(`<h2>ผ่านเควส! 🎉</h2><p>ได้รับการ์ด <b>${CARDS[q.card].name}</b></p><div class="reward"><img src="${CARDS[q.card].img}" alt="" style="max-height:34vh;border-radius:10px"></div><button id="cqOk">ตกลง</button>`);
+  $('#cqOk').onclick=closeModal};
 
 /* --- เรด --- */
 const pctDealt=(R,b)=>(b.maxHp-R.hp)/b.maxHp*100;
@@ -542,7 +542,7 @@ function finishChal(ch,ids,r){
   if(!r.win){
     modal(`<h2>ชาเลนจ์ไม่สำเร็จ…</h2><p>${r.timeout?'หมดเวลาก่อนชนะ':'การ์ดของคุณพ่ายแพ้'} · เงื่อนไข: ${ruleText(ch.rule)}</p><div class="two"><button id="rAgain">ลองใหม่</button><button class="sec" id="rBack">กลับ</button></div>`);
     $('#rAgain').onclick=()=>{closeModal();startChal(ch,ids)};$('#rBack').onclick=()=>go('chal');return}
-  const CS=chalState(),live=ch.slot===chalKey(),first=live&&!CS.cleared[ch.id],rw=first?ch.first:ch.repeat;if(live)CS.cleared[ch.id]=true;save();const up=giveRw(rw);
+  const CS=chalState(),live=ch.slot===chalKey(),first=live&&!CS.cleared[ch.id],rw=first?ch.first:ch.repeat;if(live)CS.cleared[ch.id]=true;SV.cq=SV.cq||{};SV.cq.chal=(SV.cq.chal||0)+1;save();const up=giveRw(rw);
   modal(`<h2>ผ่านชาเลนจ์! 🏆</h2><p>${first?'ผ่านครั้งแรกของรอบนี้ — ได้รางวัลเต็ม!':live?'เล่นซ้ำในรอบนี้ — รางวัลลดลง':'ชาเลนจ์หมดรอบแล้ว — ได้รางวัลเล่นซ้ำ'} · ใช้ ${r.turns} เทิร์น</p><div class="reward"><div>💰 +${rw.coins}</div><div>EXP +${rw.exp}</div></div>${up?`<p class="lvup">⬆ เลเวลอัป! Lv.${lvOf(SV.exp)}</p>`:''}${lvrReady().length?`<p class="lvup">🎁 มีรางวัลเลเวลรอรับ ${lvrReady().length} รายการ</p>`:''}<div class="two"><button id="rAgain">ท้าทายอีกครั้ง</button><button class="sec" id="rBack">กลับ</button></div>`);
   $('#rAgain').onclick=()=>{closeModal();startChal(ch,ids)};$('#rBack').onclick=()=>go('chal');
 }

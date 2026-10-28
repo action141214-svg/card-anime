@@ -758,3 +758,10 @@ body{padding:0}
 .qtabs .qtab{min-width:min(46vw,190px);padding:8px 16px}
 .qpane{flex:1;min-height:0;display:flex;flex-direction:column;gap:inherit}
 .qpane.hidden{display:none!important}
+/* เควสตัวละคร (รางวัลเป็นการ์ด + แถบความคืบหน้า) */
+.tcard.cq{border-color:var(--c,var(--gold))}.tcard.cq.fin{opacity:.8}
+.cqrw{display:flex;gap:10px;align-items:center;text-align:left}.cqrw img{width:84px;border-radius:8px;border:1px solid var(--line);flex:none}
+.cqreq{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;text-align:left}
+.cqreq li{display:grid;grid-template-columns:1fr auto;gap:2px 8px;font-size:.92em}.cqreq li.ok{color:var(--hp)}
+.cqbar{grid-column:1/-1;display:block;height:7px;border-radius:99px;background:#0006;overflow:hidden}.cqbar u{display:block;height:100%;background:linear-gradient(90deg,#f2c14e,#ff7a3a);border-radius:99px}
+.cqreq li.ok .cqbar u{background:var(--hp)}
