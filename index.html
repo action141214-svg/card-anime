@@ -32,7 +32,7 @@
     <button class="mbtn" data-go="gacha"><span>🎰</span><b>ตู้กาชา</b><small>สุ่มการ์ดใหม่</small></button>
     <button class="mbtn" data-go="up"><span>⬆️</span><b>อัพเกรด</b><small>อัพเลเวล / อัพดาว</small></button>
     <button class="mbtn" data-go="inv"><span>📦</span><b>คลัง</b><small>วัตถุดิบ / ไอเทม</small></button>
-    <button class="mbtn" data-go="evo"><span>🧬</span><b>เควสพัฒนา</b><small>อีโวการ์ด</small></button>
+    <button class="mbtn" data-go="evo" data-tab="char"><span>📜</span><b>เควส</b><small>ตัวละคร / พัฒนา</small></button>
     <button class="mbtn" id="howBtn"><span>📖</span><b>วิธีเล่น</b><small>ดูบทสอนอีกครั้ง</small></button>
   </nav>
   <footer class="bar"><button class="sec small" id="codeBtn">🎁 ใส่โค้ดรับของขวัญ</button><button class="sec small" id="musicBtn">🔊 เพลง: เปิด</button><button class="sec small hidden" id="logoutBtn">🚪 ออกจากระบบ</button></footer>
@@ -138,16 +138,8 @@
     <button class="mode m-stage" data-go="stages"><span class="mi">⚔️</span><b>เล่นด่าน</b><small>ผ่านด่านตามลำดับ รับ EXP และเงิน<br>ชนะครั้งแรกได้รางวัลเยอะ</small><em id="mdStages"></em></button>
     <button class="mode m-raid" data-go="raid"><span class="mi">🐉</span><b>ลงเรด</b><small>รุมบอสยักษ์ HP สะสมข้ามรอบ<br>รีเซ็ตทุก 1 ชั่วโมง</small><em id="mdRaid"></em></button>
     <button class="mode m-chal" data-go="chal"><span class="mi">🏆</span><b>ลงชาเลนจ์</b><small>ภารกิจพิเศษ 3 ระดับ ง่าย / ปานกลาง / ยาก<br>เปลี่ยนศัตรูใหม่ทุก 30 นาที</small><em id="mdChal"></em></button>
-    <button class="mode m-tough" data-go="tough"><span class="mi">🔥</span><b>ด่านท้าทาย</b><small>ด่านโหดพิเศษ มีเงื่อนไขจำกัด<br>ทำภารกิจเก็บดาว รับรางวัลหายาก</small><em id="mdTough"></em></button>
     <button class="mode m-inf" data-go="inf"><span class="mi">♾️</span><b>ด่านไม่มีที่สิ้นสุด</b><small>สู้เวฟต่อเวฟ ยิ่งไปไกลยิ่งได้เงินเยอะ<br>เลือกบัฟได้ · บัฟศัตรูเพื่อเพิ่มรายได้</small><em id="mdInf"></em></button>
   </div>
-</section>
-
-<!-- ด่านท้าทาย (หน้าตัวอย่าง UI) -->
-<section class="screen hidden" id="toughScr">
-  <header class="top"><button class="sec small" data-go="play">← กลับ</button><h1>ด่านท้าทาย 🔥</h1><div class="coin">💰 <b class="coinN">0</b></div></header>
-  <div class="tinfo"><span id="thInfo"></span><small>🚧 หน้าตัวอย่าง — ยังเข้าเล่นไม่ได้ (ทำ UI ก่อน)</small></div>
-  <div class="tgrid" id="thList"></div>
 </section>
 
 <!-- ด่านไม่มีที่สิ้นสุด (โหมดปกติ · ได้เงิน) -->
@@ -181,11 +173,18 @@
 </section>
 
 <!-- รางวัลเลเวล -->
-<!-- เควสพัฒนา -->
+<!-- เควส (เควสตัวละคร + เควสพัฒนา) -->
 <section class="screen hidden" id="evoScr">
-  <header class="top"><button class="sec small" data-go="home">← กลับ</button><h1>เควสพัฒนา</h1><div class="coin">💰 <b class="coinN">0</b></div></header>
-  <div class="tinfo"><span id="evoHint"></span><small>เลือกการ์ดตัวละครเพื่อรับเควส · ผ่านด่านเควสเพื่อสะสมวัตถุดิบ แล้วนำมาอีโวการ์ด</small></div>
-  <div class="evo" id="evoBody"></div>
+  <header class="top"><button class="sec small" data-go="home">← กลับ</button><h1>เควส 📜</h1><div class="coin">💰 <b class="coinN">0</b></div></header>
+  <div class="qtabs"><button class="qtab" data-qt="char">🎯 เควสตัวละคร</button><button class="qtab sec" data-qt="evo">🧬 เควสพัฒนา</button></div>
+  <div class="qpane" id="qpChar">
+    <div class="tinfo"><span id="thInfo"></span><small>🚧 หน้าตัวอย่าง — ยังเข้าเล่นไม่ได้ (ทำ UI ก่อน)</small></div>
+    <div class="tgrid" id="thList"></div>
+  </div>
+  <div class="qpane hidden" id="qpEvo">
+    <div class="tinfo"><span id="evoHint"></span><small>เลือกการ์ดตัวละครเพื่อรับเควส · ผ่านด่านเควสเพื่อสะสมวัตถุดิบ แล้วนำมาอีโวการ์ด</small></div>
+    <div class="evo" id="evoBody"></div>
+  </div>
 </section>
 
 <section class="screen hidden" id="lvrScr">

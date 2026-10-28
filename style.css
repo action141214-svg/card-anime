@@ -723,7 +723,7 @@ body{padding:0}
 #endlessScr .rinfo h2{color:#d9c2ff}
 /* ===== ด่านไม่มีที่สิ้นสุด (โหมดปกติ) ===== */
 .m-inf{--c:#4fd1c5}
-#playScr .modes{grid-template-columns:repeat(5,minmax(0,1fr));max-width:1500px}
+#playScr .modes{grid-template-columns:repeat(4,minmax(0,1fr));max-width:1300px}
 @media (max-width:1000px){#playScr .modes{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:760px) and (orientation:portrait){#playScr .modes{grid-template-columns:1fr}}
 .infbig{display:flex;align-items:center;justify-content:center;height:100%;font-size:clamp(90px,22vh,180px);line-height:1;filter:drop-shadow(0 0 30px #4fd1c5aa) drop-shadow(0 10px 24px #000a)}
@@ -733,7 +733,6 @@ body{padding:0}
 .oncount{display:block;margin-top:2px;color:#7dffb0}.oncount b{font-family:Kanit;color:#fff}
 #onCnt{font-family:Kanit;font-size:.9em}
 /* ===== ด่านท้าทาย (UI) ===== */
-.m-tough{--c:#ff7a3d}
 .tgrid{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:clamp(10px,1.6vw,20px);align-content:start;padding:2px 2px 12px}
 .tcard{position:relative;display:flex;flex-direction:column;gap:9px;background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:14px;min-width:0}
 .tcard.d-easy{border-color:#2a8f5a}.tcard.d-mid{border-color:#a8741a}.tcard.d-hard{border-color:#a8283f}.tcard.d-hell{border-color:#8a2be2}
@@ -753,3 +752,9 @@ body{padding:0}
 .lockbox{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#05071088;border-radius:14px;text-align:center;font-family:Kanit;z-index:2;pointer-events:none}
 .lockbox span{font-size:2.4em}
 .tcard button{margin-top:auto}
+
+/* ===== หน้าเควส: แท็บ เควสตัวละคร / เควสพัฒนา ===== */
+.qtabs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.qtabs .qtab{min-width:min(46vw,190px);padding:8px 16px}
+.qpane{flex:1;min-height:0;display:flex;flex-direction:column;gap:inherit}
+.qpane.hidden{display:none!important}

@@ -96,12 +96,12 @@ function hud(){
 }
 function fan(el,ids){const n=ids.length;el.innerHTML=ids.map((id,i)=>`<img src="${CARDS[id].img}" alt="${CARDS[id].name}" style="--i:${i-(n-1)/2}">`).join('')}
 function go(name){clearAuto();
-  const m={play:'playScr',raid:'raidScr',chal:'chalScr',home:'homeScr',team:'teamScr',stages:'stagesScr',gacha:'gachaScr',inv:'invScr',up:'upScr',lvr:'lvrScr',event:'eventScr',hwstages:'stagesScr',hwgacha:'gachaScr',evboss:'evbossScr',evo:'evoScr',sell:'sellScr',online:'onlineScr',room:'roomScr',friends:'friendsScr',chat:'chatScr',endless:'endlessScr',inf:'infScr',tough:'toughScr'};
-  if(name==='up')upSel=null;if(name==='evo'){if(!evoKeep)evoSel=null;evoKeep=false}if(name==='stages')sMode='main';if(name==='hwstages')sMode='hw';if(name==='gacha')gMode='main';if(name==='hwgacha')gMode='hw';
+  const m={play:'playScr',raid:'raidScr',chal:'chalScr',home:'homeScr',team:'teamScr',stages:'stagesScr',gacha:'gachaScr',inv:'invScr',up:'upScr',lvr:'lvrScr',event:'eventScr',hwstages:'stagesScr',hwgacha:'gachaScr',evboss:'evbossScr',evo:'evoScr',sell:'sellScr',online:'onlineScr',room:'roomScr',friends:'friendsScr',chat:'chatScr',endless:'endlessScr',inf:'infScr'};
+  if(name==='up')upSel=null;if(name==='evo'){if(!evoKeep)evoSel=null;else questTab='evo';evoKeep=false}if(name==='stages')sMode='main';if(name==='hwstages')sMode='hw';if(name==='gacha')gMode='main';if(name==='hwgacha')gMode='hw';
   closeModal();show(m[name]);hud();
-  ({evo:renderEvo,sell:renderSell,play:renderPlay,raid:renderRaid,chal:renderChal,home:renderHome,team:renderTeam,stages:renderStages,gacha:renderGacha,inv:renderInv,up:renderUp,lvr:renderLvr,event:renderEvent,hwstages:renderStages,hwgacha:renderGacha,evboss:renderEvBoss,endless:renderEndless,inf:renderInf,tough:renderTough,online:()=>Online.hub(),room:()=>Online.room(),friends:()=>Online.friends(),chat:()=>Online.chat()})[name]();
+  ({evo:renderQuest,sell:renderSell,play:renderPlay,raid:renderRaid,chal:renderChal,home:renderHome,team:renderTeam,stages:renderStages,gacha:renderGacha,inv:renderInv,up:renderUp,lvr:renderLvr,event:renderEvent,hwstages:renderStages,hwgacha:renderGacha,evboss:renderEvBoss,endless:renderEndless,inf:renderInf,online:()=>Online.hub(),room:()=>Online.room(),friends:()=>Online.friends(),chat:()=>Online.chat()})[name]();
 }
-document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go)});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b){if(b.dataset.tab)questTab=b.dataset.tab;go(b.dataset.go)}});
 
 /* ---------- หน้าแรก / หน้าหลัก ---------- */
 fan($('#titleFan'),SORTED.filter(()=>1).map(id=>[Math.random(),id]).sort((a,b)=>a[0]-b[0]).slice(0,3).map(x=>x[1]).sort((a,b)=>SORTED.indexOf(a)-SORTED.indexOf(b)));   /* หน้าแรกโชว์ 3 การ์ดสุ่ม */
@@ -423,37 +423,36 @@ function renderPlay(){
   $('#mdRaid').textContent='โอกาสชั่วโมงนี้ '+(RAID_ATTEMPTS-R.used)+'/'+RAID_ATTEMPTS+' · รีเซ็ต '+hourLeft();
   $('#mdChal').textContent='ผ่านแล้ว '+chList().filter(c=>chalState().cleared[c.id]).length+'/'+chList().length+' · รีเซ็ต '+chalLeft();
   $('#mdInf').textContent='เวฟสูงสุด '+((SV.inf&&SV.inf.best)||0);
-  $('#mdTough').textContent='ดาวสะสม '+toughStars()+'/'+TOUGH.length*3+' ⭐';
 }
-/* ---------- ด่านท้าทาย (เฉพาะ UI — ยังไม่เชื่อมระบบต่อสู้/รางวัล) ----------
-   TOUGH = รายการด่าน · enemy/elv = ศัตรู (ตัวอย่าง) · rule = เงื่อนไขพิเศษของด่าน · objs = ภารกิจเก็บดาว 3 ข้อ · reward = รางวัล
-   ความคืบหน้าอ่านจาก SV.tough = {stars:{ด่าน:จำนวนดาว}} (ยังไม่มีโค้ดที่เขียนค่านี้ — ไว้ต่อภายหลัง) */
-const TOUGH_DIFF={1:{k:'easy',label:'ง่าย',sk:1},2:{k:'easy',label:'พอสู้ได้',sk:2},3:{k:'mid',label:'ปานกลาง',sk:3},4:{k:'mid',label:'ยาก',sk:4},5:{k:'hard',label:'โหด',sk:5},6:{k:'hell',label:'นรก',sk:6}};
-const TOUGH=[
-  {id:1,name:'บททดสอบแรก',d:1,rec:10,enemy:['goku','zenitsu'],elv:[10,10],rule:'จำกัด 15 เทิร์น',objs:['ชนะด่าน','ชนะภายใน 10 เทิร์น','ไม่มีการ์ดถูกกำจัด'],reward:{coins:500,exp:300}},
-  {id:2,name:'ศัตรูเสริมพลัง',d:2,rec:20,enemy:['yuji','naruto','ino'],elv:[18,18,18],rule:'ศัตรูได้ POWER +20% ทุกตัว',objs:['ชนะด่าน','ชนะภายใน 12 เทิร์น','มีการ์ดรอดอย่างน้อย 3 ใบ'],reward:{coins:900,exp:500}},
-  {id:3,name:'ทีมเล็กใจใหญ่',d:3,rec:30,enemy:['kirito','ichigo'],elv:[30,30],rule:'ใส่การ์ดได้สูงสุด 2 ใบ',objs:['ชนะด่าน','ชนะภายใน 10 เทิร์น','การ์ดทั้งหมดรอด'],reward:{coins:1500,exp:800}},
-  {id:4,name:'ห้ามการ์ดระดับสูง',d:4,rec:40,enemy:['gekko','megumi','chahaein'],elv:[40,40,40],rule:'ห้ามใช้การ์ดระดับ SSR ขึ้นไป',objs:['ชนะด่าน','ชนะภายใน 14 เทิร์น','ไม่มีการ์ดถูกกำจัด'],reward:{coins:2500,exp:1200}},
-  {id:5,name:'กำแพงเหล็ก',d:5,rec:60,enemy:['kurapika','gil','hutao','alucard'],elv:[55,55,55,55],rule:'ศัตรูฟื้นฟู HP 5% ทุกเทิร์น',objs:['ชนะด่าน','ชนะภายใน 16 เทิร์น','มีการ์ดรอดอย่างน้อย 2 ใบ'],reward:{coins:4000,exp:2000},bonus:'🎁 ไอเทมพิเศษ'},
-  {id:6,name:'ด่านสุดท้าย',d:6,rec:80,enemy:['isaac','okarun','luffy','gengar'],elv:[80,80,80,80],rule:'จำกัด 20 เทิร์น · ศัตรูได้ POWER +30%',objs:['ชนะด่าน','ชนะภายใน 15 เทิร์น','ไม่มีการ์ดถูกกำจัด'],reward:{coins:8000,exp:4000},bonus:'🎁 การ์ด/ไอเทมหายาก'}
+/* ---------- เควสตัวละคร (เฉพาะ UI — ยังไม่เชื่อมระบบต่อสู้/รางวัล) · อยู่ในหน้า "เควส" แท็บแรก ----------
+   CHARQ = รายการด่าน · enemy/elv = ศัตรู (ตัวอย่าง) · rule = เงื่อนไขพิเศษของด่าน · objs = ภารกิจเก็บดาว 3 ข้อ · reward = รางวัล
+   ความคืบหน้าอ่านจาก SV.charq = {stars:{ด่าน:จำนวนดาว}} (ยังไม่มีโค้ดที่เขียนค่านี้ — ไว้ต่อภายหลัง) */
+const CHARQ_DIFF={1:{k:'easy',label:'ง่าย',sk:1},2:{k:'easy',label:'พอสู้ได้',sk:2},3:{k:'mid',label:'ปานกลาง',sk:3},4:{k:'mid',label:'ยาก',sk:4},5:{k:'hard',label:'โหด',sk:5},6:{k:'hell',label:'นรก',sk:6}};
+const CHARQ=[
+  {id:1,name:'บททดสอบแรก',d:1,rec:10,enemy:['goku','zenitsu'],elv:[10,10],rule:'จำกัด 15 เทิร์น',objs:['ผ่านเควส','ชนะภายใน 10 เทิร์น','ไม่มีการ์ดถูกกำจัด'],reward:{coins:500,exp:300}},
+  {id:2,name:'ศัตรูเสริมพลัง',d:2,rec:20,enemy:['yuji','naruto','ino'],elv:[18,18,18],rule:'ศัตรูได้ POWER +20% ทุกตัว',objs:['ผ่านเควส','ชนะภายใน 12 เทิร์น','มีการ์ดรอดอย่างน้อย 3 ใบ'],reward:{coins:900,exp:500}},
+  {id:3,name:'ทีมเล็กใจใหญ่',d:3,rec:30,enemy:['kirito','ichigo'],elv:[30,30],rule:'ใส่การ์ดได้สูงสุด 2 ใบ',objs:['ผ่านเควส','ชนะภายใน 10 เทิร์น','การ์ดทั้งหมดรอด'],reward:{coins:1500,exp:800}},
+  {id:4,name:'ห้ามการ์ดระดับสูง',d:4,rec:40,enemy:['gekko','megumi','chahaein'],elv:[40,40,40],rule:'ห้ามใช้การ์ดระดับ SSR ขึ้นไป',objs:['ผ่านเควส','ชนะภายใน 14 เทิร์น','ไม่มีการ์ดถูกกำจัด'],reward:{coins:2500,exp:1200}},
+  {id:5,name:'กำแพงเหล็ก',d:5,rec:60,enemy:['kurapika','gil','hutao','alucard'],elv:[55,55,55,55],rule:'ศัตรูฟื้นฟู HP 5% ทุกเทิร์น',objs:['ผ่านเควส','ชนะภายใน 16 เทิร์น','มีการ์ดรอดอย่างน้อย 2 ใบ'],reward:{coins:4000,exp:2000},bonus:'🎁 ไอเทมพิเศษ'},
+  {id:6,name:'ด่านสุดท้าย',d:6,rec:80,enemy:['isaac','okarun','luffy','gengar'],elv:[80,80,80,80],rule:'จำกัด 20 เทิร์น · ศัตรูได้ POWER +30%',objs:['ผ่านเควส','ชนะภายใน 15 เทิร์น','ไม่มีการ์ดถูกกำจัด'],reward:{coins:8000,exp:4000},bonus:'🎁 การ์ด/ไอเทมหายาก'}
 ];
-const toughSt=()=>(SV.tough&&SV.tough.stars)||{};
-const toughStars=()=>TOUGH.reduce((s,t)=>s+(toughSt()[t.id]||0),0);
-function renderTough(){
-  const st=toughSt(),done=TOUGH.filter(t=>(st[t.id]||0)>0).length;
-  $('#thInfo').textContent='ผ่านแล้ว '+done+'/'+TOUGH.length+' ด่าน · ดาวสะสม '+toughStars()+'/'+TOUGH.length*3+' ⭐';
-  $('#thList').innerHTML=TOUGH.map(t=>{
-    const df=TOUGH_DIFF[t.d],stars=st[t.id]||0,locked=t.id>1&&!(st[t.id-1]>0),en=t.enemy.filter(id=>CARDS[id]);
+const charqSt=()=>(SV.charq&&SV.charq.stars)||{};
+const charqStars=()=>CHARQ.reduce((s,t)=>s+(charqSt()[t.id]||0),0);
+function renderCharQ(){
+  const st=charqSt(),done=CHARQ.filter(t=>(st[t.id]||0)>0).length;
+  $('#thInfo').textContent='ผ่านแล้ว '+done+'/'+CHARQ.length+' เควส · ดาวสะสม '+charqStars()+'/'+CHARQ.length*3+' ⭐';
+  $('#thList').innerHTML=CHARQ.map(t=>{
+    const df=CHARQ_DIFF[t.d],stars=st[t.id]||0,locked=t.id>1&&!(st[t.id-1]>0),en=t.enemy.filter(id=>CARDS[id]);
     return `<div class="tcard d-${df.k}${locked?' lock':''}">
-      ${locked?`<div class="lockbox"><span>🔒</span><b>ผ่านด่าน ${t.id-1} ก่อน</b></div>`:''}
-      <div class="thd"><div><div class="no">ด่าน ${t.id}</div><h2>${t.name}</h2></div><span class="diff d-${df.k}">${'💀'.repeat(df.sk>3?3:df.sk)}${df.sk>3?'+':''} ${df.label}</span></div>
+      ${locked?`<div class="lockbox"><span>🔒</span><b>ผ่านเควส ${t.id-1} ก่อน</b></div>`:''}
+      <div class="thd"><div><div class="no">เควส ${t.id}</div><h2>${t.name}</h2></div><span class="diff d-${df.k}">${'💀'.repeat(df.sk>3?3:df.sk)}${df.sk>3?'+':''} ${df.label}</span></div>
       <div class="tens">${en.map((id,i)=>`<div class="gmini sm" style="--c:${CARDS[id].color}"><img src="${CARDS[id].img}" alt=""><b>${CARDS[id].name}</b><small>Lv.${t.elv[i]||1}</small></div>`).join('')}</div>
       <div class="rule">⚠ ${t.rule}</div>
       <ul class="objs">${t.objs.map((o,i)=>`<li class="${stars>i?'ok':''}"><span class="s">${stars>i?'★':'☆'}</span>${o}</li>`).join('')}</ul>
-      <div class="rw"><div class="hot">รางวัลด่าน: 💰${t.reward.coins.toLocaleString()} · EXP ${t.reward.exp.toLocaleString()}${t.bonus?' · '+t.bonus:''}</div><div class="mute">แนะนำเลเวล ${t.rec}+</div></div>
-      <button data-th="${t.id}" ${locked?'disabled':''}>ท้าทาย</button></div>`}).join('');
+      <div class="rw"><div class="hot">รางวัลเควส: 💰${t.reward.coins.toLocaleString()} · EXP ${t.reward.exp.toLocaleString()}${t.bonus?' · '+t.bonus:''}</div><div class="mute">แนะนำเลเวล ${t.rec}+</div></div>
+      <button data-th="${t.id}" ${locked?'disabled':''}>รับเควส</button></div>`}).join('');
 }
-$('#thList').onclick=e=>{const b=e.target.closest('[data-th]');if(!b||b.disabled)return;toast('🚧 ด่านท้าทายยังเป็นหน้าตัวอย่าง — ยังเข้าเล่นไม่ได้')};
+$('#thList').onclick=e=>{const b=e.target.closest('[data-th]');if(!b||b.disabled)return;toast('🚧 เควสตัวละครยังเป็นหน้าตัวอย่าง — ยังรับเควสไม่ได้')};
 
 /* --- เรด --- */
 const pctDealt=(R,b)=>(b.maxHp-R.hp)/b.maxHp*100;
@@ -519,7 +518,7 @@ function renderChal(){
       <div class="rule">⚠ ${ruleText(c.rule)}</div>
       <div class="en" style="--n:${c.enemy.length}">${c.enemy.map((id,i)=>`<div class="gmini sm" style="--c:${CARDS[id].color}"><img src="${CARDS[id].img}" alt=""><b>${CARDS[id].name}</b><small>Lv.${c.elv[i]||1}</small></div>`).join('')}</div>
       <div class="rw"><div class="${cl?'dim':'hot'}">ชนะครั้งแรกของรอบ: 💰${c.first.coins} · EXP ${c.first.exp}${cl?' (รับแล้ว)':''}</div><div>เล่นซ้ำ: 💰${c.repeat.coins} · EXP ${c.repeat.exp}</div></div>
-      <button data-ch="${c.id}">ท้าทาย</button></div>`}).join('');
+      <button data-ch="${c.id}">รับเควส</button></div>`}).join('');
 }
 $('#chalList').onclick=e=>{const b=e.target.closest('[data-ch]');if(b)openPicker(chList().find(c=>c.id===b.dataset.ch))};
 function openPicker(ch){
@@ -671,7 +670,7 @@ function renderInv(){
   for(const k of keys){
     const it=ITEMS[k],n=itemN(k),use=EVOS.filter(e=>e.need.items[k]),d=document.createElement('div');
     d.className='gcard'+(n?'':' locked');d.style.setProperty('--c',it.color);
-    d.innerHTML=`<div class="gimg"><div class="gw"><img src="${it.img}" alt="${it.name}"><span class="tag">มี ×${n}</span></div></div><div class="ginfo"><b>${it.name} <i class="rar" style="--r:${RARITY[it.rar]}">${it.rar}</i></b><span>วัตถุดิบวิวัฒนาการ</span><small>${use.length?'ใช้กับ: '+use.map(e=>CARDS[e.from].name+' → '+CARDS[e.to].name).join(', '):it.desc}</small><div class="two"><button class="sec small" data-go="evo">ไปเควสพัฒนา</button></div></div>`;
+    d.innerHTML=`<div class="gimg"><div class="gw"><img src="${it.img}" alt="${it.name}"><span class="tag">มี ×${n}</span></div></div><div class="ginfo"><b>${it.name} <i class="rar" style="--r:${RARITY[it.rar]}">${it.rar}</i></b><span>วัตถุดิบวิวัฒนาการ</span><small>${use.length?'ใช้กับ: '+use.map(e=>CARDS[e.from].name+' → '+CARDS[e.to].name).join(', '):it.desc}</small><div class="two"><button class="sec small" data-go="evo" data-tab="evo">ไปเควสพัฒนา</button></div></div>`;
     g.appendChild(d);
   }
 }
@@ -921,7 +920,15 @@ const EVOS=[{from:'naruto',to:'naruto1',need:{cards:50,items:{seal9:1},coins:100
   boss:{card:'mahoraga',name:'มโหรากา',hp:5000,power:150,lv:1,coins:100,drops:[{item:'hojin',rate:.01}]}},
   {from:'chahaein',to:'chaevo',need:{cards:50,items:{sword:1},coins:20000000},
   boss:{card:'chaboss',name:'เริงระบำเจ้าหญิงดาบ ชา แฮ อิน',hp:10000,power:150,lv:1,coins:100,drops:[{item:'sword',rate:.01}]}}];
-let evoSel=null,evoKeep=false;
+let evoSel=null,evoKeep=false,questTab='char';
+/* หน้า "เควส" มี 2 แท็บ: เควสตัวละคร (char) และ เควสพัฒนา (evo) */
+function renderQuest(){
+  const evo=questTab==='evo';
+  $$('.qtab').forEach(b=>{const on=b.dataset.qt===questTab;b.classList.toggle('sec',!on);b.classList.toggle('on',on)});
+  $('#qpChar').classList.toggle('hidden',evo);$('#qpEvo').classList.toggle('hidden',!evo);
+  if(evo)renderEvo();else renderCharQ();
+}
+$$('.qtab').forEach(b=>b.onclick=()=>{questTab=b.dataset.qt;renderQuest()});
 const evoOk=e=>(SV.count[e.from]||0)>=e.need.cards&&Object.entries(e.need.items).every(([k,n])=>itemN(k)>=n)&&SV.coins>=e.need.coins;
 function renderEvo(){
   const body=$('#evoBody'),e=EVOS.find(x=>x.from===evoSel);
