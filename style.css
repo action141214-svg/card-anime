@@ -765,3 +765,7 @@ body{padding:0}
 .cqreq li{display:grid;grid-template-columns:1fr auto;gap:2px 8px;font-size:.92em}.cqreq li.ok{color:var(--hp)}
 .cqbar{grid-column:1/-1;display:block;height:7px;border-radius:99px;background:#0006;overflow:hidden}.cqbar u{display:block;height:100%;background:linear-gradient(90deg,#f2c14e,#ff7a3a);border-radius:99px}
 .cqreq li.ok .cqbar u{background:var(--hp)}
+/* ===== สถานะบาดแผลศักดิ์สิทธิ์ (จอมมาร ริมุรุ) ===== */
+.badge.hwb{top:auto;bottom:calc(var(--bs)*6.6);background:#fff3b0;color:#4a3300;box-shadow:0 0 18px #ffd54a}
+.holywound .badge.hwb{display:block}
+.cw.holywound img{filter:sepia(.35) saturate(1.4) drop-shadow(0 0 8px #ffd54a)}

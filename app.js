@@ -433,7 +433,8 @@ const cqN=k=>(SV.cq&&SV.cq[k])||0;
 function onSpend(n){SV.cq=SV.cq||{};SV.cq.spent=(SV.cq.spent||0)+(n||0)}   /* เงินที่ใช้ไปรวม (กาชา · อัปเลเวล · อีโว) นับตั้งแต่อัปเดตนี้ */
 function onStatHook(heal,dmg){SV.cq=SV.cq||{};if(heal)SV.cq.heal=(SV.cq.heal||0)+heal;if(dmg)SV.cq.dmg=(SV.cq.dmg||0)+dmg}
 const totalCards=()=>Object.values(SV.count||{}).reduce((t,n)=>t+(n||0),0);
-function onKillHook(id){if(id!=='gil')return;SV.cq=SV.cq||{};SV.cq.kills=(SV.cq.kills||0)+1}
+function onKillHook(id){SV.kills=(SV.kills||0)+1;   /* นับสังหารศัตรูรวม (ใช้เป็นเงื่อนไขอีโว จอมมาร ริมุรุ) */
+  if(id!=='gil')return;SV.cq=SV.cq||{};SV.cq.kills=(SV.cq.kills||0)+1}
 const CQ=[{id:'gilq',card:'gilqueen',name:'ราชินีแห่งวีรชน กิลกาเมช',
   reqs:[{t:'ใช้กิลกาเมชสังหารศัตรู',unit:'ครั้ง',need:1000,cur:()=>cqN('kills')},
         {t:'มีการ์ดกิลกาเมช',unit:'ใบ',need:100,cur:()=>SV.count.gil||0},
@@ -932,7 +933,10 @@ const EVOS=[{from:'naruto',to:'naruto1',need:{cards:50,items:{seal9:1},coins:100
   {from:'chahaein',to:'chaevo',need:{cards:50,items:{sword:1},coins:20000000},
   boss:{card:'chaboss',name:'เริงระบำเจ้าหญิงดาบ ชา แฮ อิน',hp:10000,power:150,lv:1,coins:100,drops:[{item:'sword',rate:.01}]}},
   {from:'slime',to:'rimuru',need:{cards:100,items:{shisu:1},coins:50000000},
-  boss:{card:'slime',count:4,name:'ริมุรุ ร่างสไลม์ ×4',hp:5000,power:100,lv:1,coins:100,drops:[{item:'shisu',rate:.005}]}}];
+  boss:{card:'slime',count:4,name:'ริมุรุ ร่างสไลม์ ×4',hp:5000,power:100,lv:1,coins:100,drops:[{item:'shisu',rate:.005}]}},
+  /* need.more = การ์ดอื่นที่ต้องใช้เพิ่ม · need.kills = สังหารศัตรูสะสม (ไม่ถูกใช้หมดไป) · grant = ดาว/เลเวลของการ์ดที่ได้ */
+  {from:'rimuru',to:'rimulord',need:{cards:5,more:{slime:50},items:{shisu:10},kills:10000,coins:200000000},grant:{lv:1,star:6},
+  boss:{card:'rimuruboss',name:'ริมุรุ ร่าง SSR',hp:30000,power:150,lv:1,coins:100,drops:[{item:'shisu',rate:.005}]}}];
 let evoSel=null,evoKeep=false,questTab='char';
 /* หน้า "เควส" มี 2 แท็บ: เควสตัวละคร (char) และ เควสพัฒนา (evo) */
 function renderQuest(){
@@ -942,7 +946,7 @@ function renderQuest(){
   if(evo)renderEvo();else renderCharQ();
 }
 $$('.qtab').forEach(b=>b.onclick=()=>{questTab=b.dataset.qt;renderQuest()});
-const evoOk=e=>(SV.count[e.from]||0)>=e.need.cards&&Object.entries(e.need.items).every(([k,n])=>itemN(k)>=n)&&SV.coins>=e.need.coins;
+const evoOk=e=>(SV.count[e.from]||0)>=e.need.cards&&Object.entries(e.need.more||{}).every(([id,n])=>(SV.count[id]||0)>=n)&&Object.entries(e.need.items).every(([k,n])=>itemN(k)>=n)&&(SV.kills||0)>=(e.need.kills||0)&&SV.coins>=e.need.coins;
 function renderEvo(){
   const body=$('#evoBody'),e=EVOS.find(x=>x.from===evoSel);
   if(!e){
@@ -952,7 +956,7 @@ function renderEvo(){
       <div class="evq soon"><div class="evimg">❓</div><b>เควสใหม่</b><small>เร็วๆ นี้</small></div></div>`;
     return;
   }
-  const c0=CARDS[e.from],c1=CARDS[e.to],b=e.boss,bc=CARDS[b.card],have=SV.count[e.from]||0,ok=evoOk(e),s1=statAt(e.to,1);
+  const c0=CARDS[e.from],c1=CARDS[e.to],b=e.boss,bc=CARDS[b.card],have=SV.count[e.from]||0,ok=evoOk(e),s1=statAt(e.to,(e.grant&&e.grant.lv)||1,(e.grant&&e.grant.star)||1);
   const row=(t,h,n)=>`<li class="${h>=n?'ok':'no'}"><span>${h>=n?'✔':'✖'}</span>${t}<b>${h.toLocaleString()} / ${n.toLocaleString()}</b></li>`;
   $('#evoHint').innerHTML='<button class="sec small" id="evoBack">← เลือกการ์ดอื่น</button>';
   $('#evoBack').onclick=()=>{evoSel=null;renderEvo()};
@@ -960,12 +964,14 @@ function renderEvo(){
     <div class="evtrans">
       <div class="evc" style="--c:${c0.color}"><img src="${c0.img}" alt="${c0.name}"><b>${c0.name} ${rarTag(e.from)}</b><small>มี ×${have}</small></div>
       <div class="evarrow">➜<small>EVOLUTION</small></div>
-      <div class="evc" style="--c:${c1.color}"><img src="${c1.img}" alt="${c1.name}"><b>${c1.name} ${rarTag(e.to)}</b><small>POWER ${s1.p} · HP ${s1.hp}${SV.owned.includes(e.to)?' · มี ×'+(SV.count[e.to]||1):''}</small></div>
+      <div class="evc" style="--c:${c1.color}"><img src="${c1.img}" alt="${c1.name}"><b>${c1.name} ${rarTag(e.to)}</b><small>${e.grant?e.grant.star+'★ Lv.'+e.grant.lv+' · ':''}POWER ${s1.p} · HP ${s1.hp}${SV.owned.includes(e.to)?' · มี ×'+(SV.count[e.to]||1):''}</small></div>
     </div>
     <div class="evinfo">
       <div class="box"><b>เงื่อนไขอีโว</b><ul class="req">
         ${row('การ์ด '+c0.name,have,e.need.cards)}
+        ${Object.entries(e.need.more||{}).map(([id,n])=>row('การ์ด '+CARDS[id].name,SV.count[id]||0,n)).join('')}
         ${Object.entries(e.need.items).map(([k,n])=>row(ITEMS[k].name,itemN(k),n)).join('')}
+        ${e.need.kills?row('สังหารศัตรูสะสม ⚔',Math.min(SV.kills||0,e.need.kills),e.need.kills):''}
         ${row('เงิน 💰',SV.coins,e.need.coins)}</ul>
         <button id="evoDo" ${ok?'':'disabled'}>🧬 อีโวการ์ด</button></div>
       <div class="box"><b>ด่านเควส: ${b.name}</b>
@@ -1001,15 +1007,19 @@ function finishEvoQuest(e,r){
 function confirmEvolve(e){
   if(!evoOk(e))return toast('วัตถุดิบยังไม่ครบ');
   const c0=CARDS[e.from],c1=CARDS[e.to];
-  modal(`<h2>ยืนยันการอีโว?</h2><p>จะใช้ ${c0.name} ×${e.need.cards}${Object.entries(e.need.items).map(([k,n])=>' · '+ITEMS[k].name+' ×'+n).join('')} · 💰${e.need.coins.toLocaleString()}</p><p class="mute">เพื่อได้ ${c1.name} (เลเวลจะสืบทอดจากการ์ดเดิม)</p><div class="two"><button id="evYes">ยืนยัน อีโว!</button><button class="sec" id="evNo">ยกเลิก</button></div>`);
+  modal(`<h2>ยืนยันการอีโว?</h2><p>จะใช้ ${c0.name} ×${e.need.cards}${Object.entries(e.need.more||{}).map(([id,n])=>' · '+CARDS[id].name+' ×'+n).join('')}${Object.entries(e.need.items).map(([k,n])=>' · '+ITEMS[k].name+' ×'+n).join('')} · 💰${e.need.coins.toLocaleString()}</p><p class="mute">เพื่อได้ ${c1.name} ${e.grant?'('+e.grant.star+' ดาว เลเวล '+e.grant.lv+' ทันที)':'(เลเวลจะสืบทอดจากการ์ดเดิม)'}</p><div class="two"><button id="evYes">ยืนยัน อีโว!</button><button class="sec" id="evNo">ยกเลิก</button></div>`);
   $('#evNo').onclick=closeModal;$('#evYes').onclick=()=>doEvolve(e);
 }
 function doEvolve(e){
   if(!evoOk(e)){closeModal();return renderEvo()}
   const lv=SV.lv[e.from]||1;
+  Object.entries(e.need.more||{}).forEach(([id,n])=>{   /* การ์ดอื่นที่ต้องใช้เพิ่ม: หักจำนวน ถ้าหมดให้ถอดออกจากคลัง/ทีม */
+    SV.count[id]-=n;if(SV.count[id]<=0){SV.owned=SV.owned.filter(x=>x!==id);delete SV.count[id];delete SV.lv[id];delete SV.star[id];SV.team=SV.team.filter(x=>x!==id)}});
   SV.count[e.from]-=e.need.cards;Object.entries(e.need.items).forEach(([k,n])=>{SV.items[k]=itemN(k)-n});SV.coins-=e.need.coins;onSpend(e.need.coins);
-  if(SV.owned.includes(e.to))SV.count[e.to]=(SV.count[e.to]||1)+1;else{SV.owned.push(e.to);SV.count[e.to]=1}
-  SV.lv[e.to]=Math.max(SV.lv[e.to]||1,lv);
+  const isNew=!SV.owned.includes(e.to);
+  if(!isNew)SV.count[e.to]=(SV.count[e.to]||1)+1;else{SV.owned.push(e.to);SV.count[e.to]=1}
+  if(e.grant){SV.lv[e.to]=isNew?e.grant.lv:Math.max(SV.lv[e.to]||1,e.grant.lv);SV.star=SV.star||{};SV.star[e.to]=Math.max(SV.star[e.to]||1,e.grant.star)}   /* เช่น 6 ดาว เลเวล 1 ทันที */
+  else SV.lv[e.to]=Math.max(SV.lv[e.to]||1,lv);
   if(SV.count[e.from]<=0){   /* ใช้การ์ดเดิมหมด: ถอดออกจากคลัง และเปลี่ยนในทีมเป็นการ์ดใหม่ */
     SV.owned=SV.owned.filter(x=>x!==e.from);delete SV.count[e.from];delete SV.lv[e.from];delete SV.star[e.from];
     const i=SV.team.indexOf(e.from);if(i>=0){if(SV.team.includes(e.to))SV.team.splice(i,1);else SV.team[i]=e.to}
