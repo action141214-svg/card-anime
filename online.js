@@ -489,5 +489,10 @@ function renderRoom(){
   }
 }
 
-window.Online={gate,onSave,hub,friends,chat,room,logout,get me(){return me},_test:{get R(){return R},joinRoom,createRoom}};
+/* โค้ดที่ใช้ได้คนเดียวทั้งโลก: ตรวจ/จองที่เซิร์ฟเวอร์ (ฟังก์ชัน redeem_code ใน redeem.sql) → 'ok' | 'taken' | 'invalid' | 'login' | 'offline' | 'error' */
+async function redeem(code){
+  if(!sb||!me)return 'offline';
+  try{const {data,error}=await sb.rpc('redeem_code',{c:code});if(error)return 'error';return typeof data==='string'?data:'error'}catch(e){return 'error'}
+}
+window.Online={redeem,gate,onSave,hub,friends,chat,room,logout,get me(){return me},_test:{get R(){return R},joinRoom,createRoom}};
 })();

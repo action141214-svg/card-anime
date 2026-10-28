@@ -126,18 +126,26 @@ const GIFT_CODES={
   DEV:()=>{SV.coins=(SV.coins||0)+99999999;SV.candy=(SV.candy||0)+999999999;let n=0;
     Object.keys(CARDS).forEach(id=>{if(!SV.owned.includes(id)){SV.owned.push(id);SV.count[id]=1;n++}});
     return 'เงิน +99,999,999 · ลูกอม +999,999,999 · ปลดล็อคการ์ดใหม่ '+n+' ใบ'},
+  /* โค้ดคนเดียวทั้งโลก: srv = ต้องจองที่เซิร์ฟเวอร์ก่อน (ต้องล็อคอินออนไลน์ + รัน redeem.sql) */
+  HUTAO:{srv:true,run:()=>{if(!SV.owned.includes('hutao')){SV.owned.push('hutao');SV.count.hutao=1}else SV.count.hutao=(SV.count.hutao||1)+1;SV.lv.hutao=100;return 'ได้รับ ฮูเต๋า เลเวล 100'}},
   HOJIN:()=>{SV.items=SV.items||{};SV.items.hojin=(SV.items.hojin||0)+3;return 'ได้รับ ธรรมจักรแปดซี่ ×3'}
 };
 function codeModal(){
   modal(`<h2>🎁 ใส่โค้ดรับของขวัญ</h2><form class="auth" id="cdF"><input id="cdI" placeholder="พิมพ์โค้ดที่นี่" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="30"><p class="aerr" id="cdE"></p><p class="mute" id="cdOk"></p><div class="two"><button type="submit">รับของขวัญ</button><button type="button" class="sec" id="cdX">ปิด</button></div></form>`);
   $('#cdX').onclick=closeModal;
-  $('#cdF').onsubmit=e=>{e.preventDefault();
+  let busy=false;
+  $('#cdF').onsubmit=async e=>{e.preventDefault();if(busy)return;
     const c=$('#cdI').value.trim().toUpperCase(),f=GIFT_CODES[c];
-    SV.codes=SV.codes||{};
+    SV.codes=SV.codes||{};$('#cdOk').textContent='';
     if(!c){$('#cdE').textContent='กรุณาพิมพ์โค้ด';return}
     if(!f){$('#cdE').textContent='โค้ดไม่ถูกต้อง';return}
     if(SV.codes[c]){$('#cdE').textContent='โค้ดนี้ใช้ไปแล้ว';return}
-    SV.codes[c]=1;const msg=f();save();hud();
+    if(f.srv){   /* โค้ดที่ใช้ได้คนเดียวทั้งโลก */
+      busy=true;$('#cdE').textContent='กำลังตรวจสอบโค้ด…';
+      const st=window.Online?await Online.redeem(c):'offline';busy=false;
+      if(st!=='ok'){$('#cdE').textContent=st==='taken'?'โค้ดนี้มีคนใช้ไปแล้ว':st==='offline'||st==='login'?'ต้องล็อคอินออนไลน์ก่อนจึงใช้โค้ดนี้ได้':st==='invalid'?'โค้ดไม่ถูกต้อง':'ตรวจสอบโค้ดไม่สำเร็จ ลองใหม่อีกครั้ง (ถ้ายังไม่ได้ ให้ผู้ดูแลรัน redeem.sql ใน Supabase)';return}
+    }
+    SV.codes[c]=1;const msg=(f.run||f)();save();hud();
     if(typeof renderHome==='function')renderHome();
     $('#cdE').textContent='';$('#cdOk').textContent='✅ รับสำเร็จ: '+msg;$('#cdI').value='';toast('รับของขวัญสำเร็จ!')};
   setTimeout(()=>{const i=$('#cdI');if(i)i.focus()},50);
