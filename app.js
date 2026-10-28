@@ -4,13 +4,13 @@ const MAX_TEAM=4;
 /* ตู้กาชา: สุ่มได้ทุกใบรวมถึงตัวซ้ำ (น้ำหนัก = % ที่ออก) — ปรับทีหลังได้ */
 const GACHA={cost:100,cost10:900,
   /* การ์ดที่สุ่มได้ในตู้ (LTD ยังไม่เปิดให้สุ่ม — ซาสึเกะจะหาวิธีได้รับภายหลัง) */
-  pool:['goku','zenitsu','yuji','naruto','sasukekid','gekko','ino','kirara','garo','vegeta','ichigo','kirito','megumi','gil','kurapika','shuna','chahaein','kaneki','reze','kdash','mai','kula','slime'],
+  pool:['goku','zenitsu','yuji','naruto','sasukekid','gekko','ino','kirara','garo','vegeta','ichigo','kirito','megumi','gil','kurapika','shuna','chahaein','kaneki','reze','kdash','mai','kula'],
   /* เรทออก % : base = ปกติ, up = ตอนเป็นการ์ดเรทอัป (การ์ด R ที่เหลือแบ่งเท่าๆ กัน) */
   /* เรทตามระดับ (รวมทุกใบในระดับนั้น): USR 0.1% · UR 1% — แบ่งเท่าๆ กันในระดับเดียวกัน, ถ้าเป็นการ์ดเรทอัปได้ส่วนแบ่ง rarUp ของระดับนั้น (ตัวเลขใน rates ด้านล่างของ UR/USR ใช้แสดงผลเท่านั้น) */
   rarTotal:{USR:0.1,UR:1},rarUp:0.7,
   /* การันตี (ตู้ปกติ): สุ่มครบกี่ครั้งโดยยังไม่ได้ระดับนั้น → ครั้งถัดไปได้แน่นอน (ได้ USR ถือว่านับ UR ใหม่ด้วย) */
   pityUR:400,pityUSR:1000,
-  rates:{base:{kirito:15,ichigo:15,kaneki:10,megumi:5,shuna:8,slime:8,chahaein:4,gil:0.5,reze:0.5,kurapika:0.05,kdash:0.05,mai:0.05},up:{kirito:30,ichigo:30,kaneki:10,megumi:10,shuna:8,slime:8,chahaein:4,gil:0.7,reze:0.7,kurapika:0.07,kdash:0.07,mai:0.07}},
+  rates:{base:{kirito:15,ichigo:15,kaneki:10,megumi:5,shuna:8,chahaein:4,gil:0.5,reze:0.5,kurapika:0.05,kdash:0.05,mai:0.05},up:{kirito:30,ichigo:30,kaneki:10,megumi:10,shuna:8,chahaein:4,gil:0.7,reze:0.7,kurapika:0.07,kdash:0.07,mai:0.07}},
   dup:{R:20,S:40,SR:55,SSR:70,UR:90,USR:130,LTD:180},
   /* ตู้เดียว เรทอัปเปลี่ยนทุก 1 ชั่วโมง (เวลาไทย) วนตามลำดับนี้: c = การ์ดตรงกลาง, s = การ์ดข้างๆ (เรทปกติ) */
   rotation:[{c:'kurapika',s:['yuji','kirito']},{c:'gil',s:['zenitsu','kirito']},{c:'kirito',s:['goku','gil']},
@@ -41,7 +41,7 @@ const gico=()=>gMode==='hw'?'🍬':'💰';
 const stageList=()=>sMode==='hw'?HW.stages:STAGES;
 const sGo=()=>sMode==='hw'?'hwstages':'stages';
 const inPool=id=>GACHA.pool.includes(id);
-const lockTxt=id=>id==='cc'?'ได้จากเควสตัวละคร หรือโค้ดพิเศษ':CARDS[id].endless?'ได้จากด่านไม่มีที่สิ้นสุด (อีเว้นท์) · ทุก '+(EL.dropEvery>1?EL.dropEvery+' ':'')+'เวฟมีโอกาส '+EL.baseRate+'%':CARDS[id].evo?'ได้จากการอีโว (เควสพัฒนา)':HW.pool.includes(id)?'ได้จากตู้ฮาโลวีน (อีเว้นท์)':inPool(id)?(HW.rPool.includes(id)?'ได้จากตู้กาชา / ตู้ฮาโลวีน':'ได้จากตู้กาชา'):'ยังไม่เปิดให้ได้รับ';   // เงินคืนเมื่อได้การ์ดซ้ำ แยกตามระดับ
+const lockTxt=id=>id==='cc'?'ได้จากเควสตัวละคร หรือโค้ดพิเศษ':id==='slime'?'ได้จากเควสตัวละครเท่านั้น':CARDS[id].endless?'ได้จากด่านไม่มีที่สิ้นสุด (อีเว้นท์) · ทุก '+(EL.dropEvery>1?EL.dropEvery+' ':'')+'เวฟมีโอกาส '+EL.baseRate+'%':CARDS[id].evo?'ได้จากการอีโว (เควสพัฒนา)':HW.pool.includes(id)?'ได้จากตู้ฮาโลวีน (อีเว้นท์)':inPool(id)?(HW.rPool.includes(id)?'ได้จากตู้กาชา / ตู้ฮาโลวีน':'ได้จากตู้กาชา'):'ยังไม่เปิดให้ได้รับ';   // เงินคืนเมื่อได้การ์ดซ้ำ แยกตามระดับ
 /* ด่าน: first = รางวัลชนะครั้งแรก, repeat = รางวัลเล่นซ้ำ */
 const STAGES=[
   {id:1,name:'ด่าน 1 · บททดสอบแรก',enemy:['goku'],elv:[1],first:{coins:150,exp:100},repeat:{coins:30,exp:20}},
