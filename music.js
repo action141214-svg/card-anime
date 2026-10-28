@@ -2,7 +2,7 @@
    เบราว์เซอร์ไม่ให้เล่นเสียงเองก่อนผู้เล่นแตะหน้าจอ → เริ่มเล่นตอนแตะ/กดครั้งแรก
    ปุ่ม #musicBtn (หน้าหลัก) เปิด/ปิดเพลง จำค่าไว้ในเครื่อง · พักเพลงอัตโนมัติเมื่อสลับแท็บ/ออกจากแอป */
 (()=>{
-  const KEY='cardduel_music',VOL=.5;
+  const KEY='cardduel_music',VOL=1;
   const a=new Audio('lobby.mp3');a.loop=true;a.preload='auto';a.volume=VOL;
   let on=true,started=false;
   try{on=localStorage.getItem(KEY)!=='off'}catch(e){}
