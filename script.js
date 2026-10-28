@@ -61,7 +61,7 @@ const CARDS={
   rimuruboss:{name:'ริมุรุ ร่าง SSR (บอสเควส)',rar:'SSR',evo:true,questOnly:true,img:'rimuru.jpeg',power:150,hp:30000,color:'#6a5cff',ability:'questboss',
         desc:'บอสเควสพัฒนาของจอมมาร ริมุรุ เทมเพสต์ ไม่มีความสามารถพิเศษ'},
   truerimuru:{name:'จอมมารที่แท้จริง ริมุรุ เทมเพสต์',rar:'LTD',evo:true,img:'truerimuru.jpeg',power:40,hp:460,color:'#5fc8ff',ability:'truelord',
-        desc:'ผลลัพธ์ด้านลบไม่มีผล และเปลี่ยนผลลัพธ์ด้านลบเป็นการเพิ่มค่าสเตตัสครั้งละ 15% · สร้างสถานะ "บาดแผลศักดิ์สิทธิ์" ทำให้ไม่สามารถฟื้นฟู HP ได้ และสร้างความเสียหาย 15% ของ HP สูงสุดของศัตรู · ทุกๆ 3 เทิร์นจะฟื้นฟู HP 30% ของ HP สูงสุดของตัวเอง'},
+        desc:'ผลลัพธ์ด้านลบไม่มีผล และเปลี่ยนผลลัพธ์ด้านลบเป็นการเพิ่มค่าสเตตัสครั้งละ 15% · สร้างสถานะ "บาดแผลศักดิ์สิทธิ์" ทำให้ไม่สามารถฟื้นฟู HP ได้ และสร้างความเสียหาย 15% ของ HP สูงสุดของศัตรู · ทุกๆ 4 เทิร์นจะฟื้นฟู HP 10% ของ HP สูงสุดของตัวเอง'},
   rimulordboss:{name:'จอมมาร ริมุรุ เทมเพสต์ (บอสเควส เฟส 1)',rar:'USR',evo:true,questOnly:true,img:'rimurulord.jpeg',power:200,hp:10000,color:'#9a5cff',ability:'questboss',
         desc:'บอสเควสพัฒนา เฟส 1 ของจอมมารที่แท้จริง ริมุรุ เทมเพสต์ ไม่มีความสามารถพิเศษ'},
   truerimuruboss:{name:'จอมมารที่แท้จริง ริมุรุ เทมเพสต์ (บอสเควส เฟส 2)',rar:'LTD',evo:true,questOnly:true,img:'truerimuru.jpeg',power:300,hp:50000,color:'#5fc8ff',ability:'questboss',
