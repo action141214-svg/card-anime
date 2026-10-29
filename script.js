@@ -82,7 +82,7 @@ const CARDS={
         desc:'โอกาสหลบหลีก 55% · โจมตี 4 ครั้งในเทิร์นเดียว · โอกาส 55% โจมตีโต้กลับ · มี Void Shield กันการโจมตีและการใช้สกิลของศัตรูได้ 2 ครั้ง (ได้จากการอีโวสัตว์ประหลาดที่สมบูรณ์แบบ กาโร่)'},
   garocosmicboss:{name:'คอสมิค กาโร่ (บอสเควส)',rar:'USR',evo:true,questOnly:true,img:'cosmic.jpeg',power:100,hp:50000,color:'#8a5cff',ability:'garocosmic',
         desc:'บอสเควสพัฒนาของ คอสมิค กาโร่ · โอกาสหลบหลีก 55% · โจมตี 4 ครั้งในเทิร์นเดียว · โอกาส 55% โจมตีโต้กลับ · มี Void Shield กันการโจมตีและการใช้สกิลได้ 2 ครั้ง'},
-  kabuto:{name:'มาสไรเดอร์ คาบูโตะ',rar:'LTD',img:'kabuto.jpeg',power:45,hp:480,color:'#e0242c',ability:'kabuto',
+  kabuto:{name:'มาสไรเดอร์ คาบูโตะ',rar:'LTD',img:'kabuto.jpeg',power:60.48,hp:480,color:'#e0242c',ability:'kabuto',
         desc:'โอกาส 50% หลบหลีก · สร้างความเสียหาย 5 เท่าของ POWER ปัจจุบันแก่ BOSS · ลดความเสียหาย 10% ของ POWER ศัตรู'},
   slime:{name:'ริมุรุ ร่างสไลม์',rar:'S',img:'slime.jpeg',power:33,hp:250,color:'#5fb6ff',ability:'slime',
         desc:'เมื่อสังหารการ์ดศัตรูใบไหนได้จะทำการแปลงร่างเป็นการ์ดนั้น แล้วคงสเตตัสและความสามารถของการ์ดที่ถูกสังหารได้'},
