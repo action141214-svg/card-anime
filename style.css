@@ -819,3 +819,12 @@ body{padding:0}
 .dgsep{text-align:center;color:var(--mute);line-height:1}
 .dgall{max-height:60vh;overflow-y:auto}
 @media(max-width:760px){.dglb .pset{order:9;width:100%}}
+
+/* ตารางอันดับแบบหน้าต่าง */
+.dglb{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px 12px;display:flex;flex-direction:column;gap:4px;text-align:left}
+.dglb .dgl1{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dglb .dgl2{overflow-x:auto}
+.dglb .dgn{font-family:Kanit}
+.dglb .dgl1 small{color:var(--mute)}
+.dgall{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.dgbtns{margin-top:6px}

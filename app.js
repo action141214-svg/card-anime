@@ -820,7 +820,6 @@ function renderEndless(){
   <div class="rinfo"><h2>♾ ด่านไม่มีที่สิ้นสุด</h2>
     <div class="rhpt"><b>${run?'เวฟที่ '+run.wave:'ยังไม่ได้เริ่มรอบ'}</b><span>เวฟสูงสุด ${E.best}${run?' · ได้ลูกอมรอบนี้ 🍬'+run.candy:''}</span></div>
     <div class="rmeta"><span>⚔ POWER ทีม +${Math.round(b.p*100)}%</span><span>❤ HP ทีม +${Math.round(b.h*100)}%</span><span>☠ ศัตรู +${Math.round(b.risk*EL.riskMul*100)}%</span></div>
-    <div class="ebrule"><b>กติกา</b><br>• ผ่านเวฟละ 🍬 ${EL.candy} อัน · แพ้เมื่อไหร่รอบนี้จบ (ลูกอมที่ได้แล้วเก็บไว้)<br>• เวฟแรกๆ ง่าย แล้วยากขึ้นเรื่อยๆ · ทุก ${EL.every} เวฟเป็นเวฟบอส<br>• หลังชนะแต่ละเวฟ เลือกบัฟ 1 อย่าง: POWER / HP ทีม หรือ <b>ศัตรูแกร่งขึ้น</b> เพื่อเพิ่มโอกาสได้การ์ด<br>• ทุก ${EL.dropEvery>1?EL.dropEvery+' ':''}เวฟทอยลุ้น <b>${c.name}</b> · ตอนนี้ <b>${elRateTxt(rate)}</b> (พื้นฐาน ${EL.baseRate}% + ${EL.riskRate}% ต่อชั้นศัตรู${run?' · '+b.risk+' ชั้น':''})${own?'<br>• คุณมีการ์ดนี้แล้ว (ได้ซ้ำจะนับเป็นการ์ดซ้ำ)':''}</div>
     <div class="myteam"><span>ทีมของคุณ</span><div>${team.length?team.map(t=>`<img class="th" src="${CARDS[t].img}" alt="${CARDS[t].name}">`).join(''):'<small>ยังไม่มีการ์ดในทีม</small>'}</div><button class="sec small" data-go="team">จัดทีม</button></div>
     <div class="two"><button id="elGo">${!open?'อีเว้นท์จบแล้ว':run?(run.pick?'เลือกบัฟเวฟถัดไป':'สู้เวฟ '+run.wave+' ต่อ'):'เริ่มรอบใหม่'}</button>${run?'<button class="sec" id="elQuit">ยอมแพ้รอบนี้</button>':''}</div>
   </div>`;
@@ -951,7 +950,7 @@ function ifEnd(quit,r){
 }
 
 /* ---------- ดันเจี้ยนออนไลน์ (บอสจักรพรรดิเงา · ทุกคนช่วยกันตีบอสตัวเดียวกัน) ----------
-   เซิร์ฟเวอร์ (Supabase · dungeon.sql) คุมทั้งหมด: ทุกชั่วโมงดันเจี้ยนโผล่แบบสุ่มภายใน 30 นาทีแรก เปิดนาน 30 นาที · HP บอสรวม 1,000,000
+   เซิร์ฟเวอร์ (Supabase · dungeon.sql) คุมทั้งหมด: ทุกชั่วโมงดันเจี้ยนโผล่แบบสุ่มภายใน 30 นาทีแรก เปิดนาน 30 นาที · ทุกชั่วโมงดันเจี้ยนโผล่แบบสุ่มภายใน 30 นาทีแรก เปิดนาน 30 นาที · HP บอสรวม 3,000,000 (ตั้งที่ dungeon.sql)
    ลงได้คนละ 5 ครั้งต่อรอบ (หักสิทธิ์ทันทีที่ลง แพ้/ออกกลางคันก็เสียสิทธิ์) · ดาเมจที่ทำได้หักจาก HP บอสรวม แม้แพ้ก็นับ
    บอสถูกปราบ → ปิดทันที ทุกคนที่ช่วยตีได้ทหารเงาสุ่ม 1 ใน 3 (อิกริส / เบรุ / ไออน) และนับเป็น "ผ่านดันเจี้ยน" 1 ครั้ง
    ต้องล็อกอินออนไลน์จึงจะเล่นได้ · ค่า HP/เวลา/สิทธิ์ตั้งที่ dungeon.sql (ที่นี่ใช้แสดงผลและตั้ง POWER บอส) */
@@ -989,27 +988,31 @@ async function dgClaimFlow(hr,extra=''){
   $('#dgBack').onclick=()=>{closeModal();if(!$('#dungeonScr').classList.contains('hidden'))renderDungeon()};
   return true;
 }
+const dgTeamOf=(r,P)=>{   // เซ็ตของผู้เล่น: ที่เซิร์ฟเวอร์เก็บไว้ตอนตีบอส → ไม่มีก็ใช้เซ็ตปัจจุบันของคนออนไลน์
+  const t=Array.isArray(r.team)?r.team.slice(0,8).filter(x=>Array.isArray(x)&&typeof x[0]==='string'&&CARDS[x[0]]).map(x=>[x[0],Math.max(1,x[1]|0),Math.max(1,x[2]|0)]):[];
+  return t.length?t:(P[r.user_id]?P[r.user_id].team:[]);
+};
 function dgLbRow(r,P){
-  const on=P[r.user_id],meId=Online.me&&Online.me.id;
-  return `<div class="fr dglb${r.user_id===meId?' me':''}"><b class="rk">#${r.rank}</b><i class="od${on?' on':''}"></i><b>${dgEsc(r.name||'ผู้เล่น')}</b><small>${(r.damage||0).toLocaleString()}</small><span class="sp"></span>${on?Online.setHtml(on.team):''}<small class="chn">${dgTag(r.rank)}</small></div>`;
+  const on=P[r.user_id],meId=Online.me&&Online.me.id,medal=['🥇','🥈','🥉'][r.rank-1]||'';
+  return `<div class="dglb${r.user_id===meId?' me':''}"><div class="dgl1"><b class="rk">${medal||'#'+r.rank}</b><i class="od${on?' on':''}"></i><b class="dgn">${dgEsc(r.name||'ผู้เล่น')}</b><small>${(r.damage||0).toLocaleString()} ดาเมจ</small><span class="sp"></span><small class="chn">${dgTag(r.rank)}</small></div><div class="dgl2">${Online.setHtml(dgTeamOf(r,P))}</div></div>`;
 }
-function dgLbHtml(){
-  const lb=DGLB;if(!lb||!Array.isArray(lb.rows))return '';
-  const P=Online.presence?Online.presence():{},meId=Online.me&&Online.me.id,rows=lb.rows,top=rows.slice(0,10),mine=lb.me;
-  const myRow=mine&&mine.rank&&!top.some(r=>r.user_id===meId)?dgLbRow({rank:mine.rank,user_id:meId,name:Online.me.name||Online.me.username,damage:mine.damage},P):'';
-  return `<h3>🏆 อันดับดาเมจรอบนี้</h3>
-    <p class="mute">ท็อป 1-5 ได้ทหารเงา 100% · อันดับ 6-50 ลุ้น 50% ไล่ลงมา · 🟢 = ออนไลน์ (โชว์เซ็ตการ์ด)</p>
-    <div class="frlist">${top.length?top.map(r=>dgLbRow(r,P)).join(''):'<p class="mute">ยังไม่มีใครตีบอสรอบนี้</p>'}${myRow?'<div class="dgsep">⋯</div>'+myRow:''}</div>
-    ${rows.length>10?'<button class="sec small" id="dgLbAll">ดูทั้งหมด ('+rows.length+')</button>':''}`;
+function dgPaintLb(){   // คนออนไลน์เปลี่ยน → อัปเดตตารางในหน้าต่าง (ถ้าเปิดอยู่)
+  if(!$('#dgLbList')||!DGLB)return;const P=Online.presence?Online.presence():{};
+  $('#dgLbList').innerHTML=DGLB.rows.slice(0,50).map(r=>dgLbRow(r,P)).join('');
 }
-function dgPaintLb(){   // อัปเดตเฉพาะตาราง (เมื่อคนเข้า/ออนไลน์เปลี่ยน) ไม่วาดทั้งหน้า
-  const b=$('#dgLb');if(!b||!$('#mdl').classList.contains('hidden'))return;
-  b.innerHTML=dgLbHtml();const x=$('#dgLbAll');if(x)x.onclick=dgLbModal;
-}
-function dgLbModal(){
-  if(!DGLB)return;const P=Online.presence?Online.presence():{};
-  modal(`<h2>🏆 อันดับดาเมจ</h2><div class="frlist dgall">${DGLB.rows.slice(0,50).map(r=>dgLbRow(r,P)).join('')}</div><div class="two"><button id="dgLbX">ปิด</button></div>`);
+async function dgLbModal(){
+  if(!DGLB){dgLbAt=0;await dgRefresh()}
+  const P=Online.presence?Online.presence():{},lb=DGLB,mine=lb&&lb.me;
+  if(!lb||!Array.isArray(lb.rows)){toast('โหลดตารางอันดับไม่ได้ (ยังไม่ได้ติดตั้ง dungeon_leaderboard บนเซิร์ฟเวอร์?)');return}
+  modal(`<h2>🏆 อันดับดาเมจดันเจี้ยน</h2>
+    <p class="mute">ท็อป 1-5 ได้ทหารเงา 100% · อันดับ 6-50 ลุ้น 50% ไล่ลงมา · 🟢 = ออนไลน์${mine&&mine.rank?'<br>คุณอยู่อันดับ <b>#'+mine.rank+'</b> ('+(mine.damage||0).toLocaleString()+' ดาเมจ) · '+dgTag(mine.rank):''}</p>
+    <div class="frlist dgall" id="dgLbList">${lb.rows.length?lb.rows.slice(0,50).map(r=>dgLbRow(r,P)).join(''):'<p class="mute">ยังไม่มีใครตีบอสรอบนี้</p>'}</div>
+    <div class="two"><button id="dgLbX">ปิด</button></div>`);
   $('#dgLbX').onclick=closeModal;
+}
+function dgRulesModal(){
+  modal(`<h2>📖 กติกาดันเจี้ยน</h2><div class="ebrule">• ทุกคนช่วยกันตีบอสตัวเดียวกัน ดาเมจรวมหัก HP บอสรวม (แพ้ก็นับดาเมจที่ทำได้)<br>• ลงได้คนละ ${DG.tries} ครั้งต่อรอบ หักสิทธิ์ทันทีที่ลง แพ้หรือออกกลางคันก็เสียสิทธิ์<br>• บอส <b>กันสถานะผิดปกติทุกชนิดและกันการโจมตีแบบตายทันที</b><br>• บอสถูกปราบ → ดันเจี้ยนปิดทันที ทุกคนที่ช่วยตีนับเป็นผ่านดันเจี้ยน 1 ครั้ง · ของรางวัลคือทหารเงาสุ่ม 1 ใน 3 (<b>อิกริส / เบรุ / ไออน</b>) จัดตามอันดับดาเมจรวม: <b>ท็อป 1-5 ได้ 100%</b> · อันดับ 6 ลุ้น 50% แล้วไล่ลงทีละน้อยถึงอันดับ 50 (5%) · อันดับ 51 ขึ้นไปไม่มีของ<br>• ไม่มีใครปราบทันภายในเวลา → ไม่มีรางวัล</div><div class="two"><button id="dgRlX">ปิด</button></div>`);
+  $('#dgRlX').onclick=closeModal;
 }
 function dgPaint(){
   const s=DGS,bc=CARDS.shadowempboss,team=SV.team.filter(x=>SV.owned.includes(x));
@@ -1026,11 +1029,11 @@ function dgPaint(){
   else st=`<div class="dgtime">⏳ ยังไม่เปิด</div><p>ดันเจี้ยนรอบนี้จะโผล่แบบสุ่มภายใน 30 นาทีแรกของชั่วโมง · เปิดหน้านี้ค้างไว้ได้ (ปุ่มดันเจี้ยนที่หน้าหลักจะเรืองแสงเมื่อเปิด)</p>`;
   $('#dgRaid').innerHTML=box(`${bar}${st}
     <div class="ebrule"><b>กติกา</b><br>• ทุกคนช่วยกันตีบอสตัวเดียวกัน ดาเมจรวมหัก HP บอสรวม (แพ้ก็นับดาเมจที่ทำได้)<br>• ลงได้คนละ ${DG.tries} ครั้งต่อรอบ หักสิทธิ์ทันทีที่ลง แพ้หรือออกกลางคันก็เสียสิทธิ์<br>• บอสถูกปราบ → ดันเจี้ยนปิดทันที ทุกคนที่ช่วยตีนับเป็นผ่านดันเจี้ยน 1 ครั้ง · ของรางวัลคือทหารเงาสุ่ม 1 ใน 3 (<b>อิกริส / เบรุ / ไออน</b>) จัดตามอันดับดาเมจรวม: <b>ท็อป 1-5 ได้ 100%</b> · อันดับ 6 ลุ้น 50% แล้วไล่ลงทีละน้อยถึงอันดับ 50 (5%) · อันดับ 51 ขึ้นไปไม่มีของ<br>• ไม่มีใครปราบทันภายในเวลา → ไม่มีรางวัล</div>
-    <div class="box dglbbox" id="dgLb">${dgLbHtml()}</div>
     <div class="myteam"><span>ทีมของคุณ</span><div>${team.length?team.map(t=>`<img class="th" src="${CARDS[t].img}" alt="${CARDS[t].name}">`).join(''):'<small>ยังไม่มีการ์ดในทีม</small>'}</div><button class="sec small" data-go="team">จัดทีม</button></div>
-    <div class="two"><button id="dgGo" ${open&&left>0&&team.length?'':'disabled'}>${open?(left>0?'⚔ เข้าดันเจี้ยน (สิทธิ์เหลือ '+left+')':'หมดสิทธิ์ลงรอบนี้แล้ว'):'ยังเข้าไม่ได้'}</button><button class="sec small" id="dgRef">🔄 รีเฟรช</button></div>`);
+    <div class="two"><button id="dgGo" ${open&&left>0&&team.length?'':'disabled'}>${open?(left>0?'⚔ เข้าดันเจี้ยน (สิทธิ์เหลือ '+left+')':'หมดสิทธิ์ลงรอบนี้แล้ว'):'ยังเข้าไม่ได้'}</button><button class="sec small" id="dgRef">🔄 รีเฟรช</button></div>
+    <div class="two dgbtns"><button class="sec" id="dgLbBtn">🏆 ดูตารางอันดับ${s.damage>0&&DGLB&&DGLB.me&&DGLB.me.rank?' (คุณ #'+DGLB.me.rank+')':''}</button><button class="sec" id="dgRuleBtn">📖 กติกา</button></div>`);
   $('#dgGo').onclick=startDungeon;$('#dgRef').onclick=()=>{dgLbAt=0;renderDungeon()};
-  const la=$('#dgLbAll');if(la)la.onclick=dgLbModal;
+  $('#dgLbBtn').onclick=dgLbModal;$('#dgRuleBtn').onclick=dgRulesModal;
 }
 function renderDungeon(){
   $('#dgRaid').innerHTML='<div class="rinfo"><h2>🕳️ ดันเจี้ยน</h2><p class="mute">กำลังโหลดข้อมูลจากเซิร์ฟเวอร์…</p></div>';
@@ -1044,7 +1047,7 @@ async function startDungeon(){
   if(!e||!e.ok){toast(dgErrTxt(e&&(e.err||e.error)));return renderDungeon()}
   clearAuto();setAutoBtn();dgInBattle=true;
   const hp0=Math.max(1,Math.ceil(e.hp));
-  Battle.start({auto:false,a:team,la:team.map(clv),sa:team.map(cstar),b:['shadowempboss'],lb:[1],bossHp:{max:e.max_hp,cur:hp0},bossP:DG.power,noHeal:true,first:'a',
+  Battle.start({auto:false,a:team,la:team.map(clv),sa:team.map(cstar),b:['shadowempboss'],lb:[1],bossHp:{max:e.max_hp,cur:hp0},bossP:DG.power,bossImmune:true,noHeal:true,first:'a',
     title:'ดันเจี้ยน · จักรพรรดิเงา ซอง จิน วู (ลงครั้งที่ '+e.try+'/'+DG.tries+')',
     onExit:async()=>{dgInBattle=false;go('dungeon');await Online.dungeon.report(e.hr,0)},   // ออกกลางคัน: เสียสิทธิ์ ไม่นับดาเมจ
     onEnd:r=>finishDungeon(r,e,hp0)});
@@ -1054,6 +1057,7 @@ async function finishDungeon(r,e,hp0){
   let res=null;
   for(let i=0;i<3&&!(res&&res.ok);i++){res=await Online.dungeon.report(e.hr,dmg);if(res&&res.ok)break;if(res&&res.err==='noticket')break;await new Promise(z=>setTimeout(z,900))}
   dgInBattle=false;
+  if(res&&res.ok&&Online.dungeon.setTeam)Online.dungeon.setTeam(e.hr,SV.team.filter(x=>SV.owned.includes(x)).slice(0,8).map(id=>[id,clv(id),cstar(id)]));   // เก็บเซ็ตที่ใช้ตีไว้โชว์ในตารางอันดับ (แม้ออฟไลน์)
   const me=res&&res.ok?res.applied:0,head=r.win?'ปราบบอสสำเร็จ! 🎉':'พ่ายแพ้…';
   const line=`<p>ใช้ ${r.turns} เทิร์น · ดาเมจที่ทำได้ <b>${dmg.toLocaleString()}</b>${res&&res.ok?` (เซิร์ฟเวอร์นับ <b>${me.toLocaleString()}</b>${me<dmg?' · เกินเพดานต่อครั้ง':''})`:' · <span style="color:#ff8a8a">ส่งผลไปเซิร์ฟเวอร์ไม่สำเร็จ</span>'}</p>`;
   if(res&&res.ok&&res.cleared){   // เราเป็นคนปราบ หรือปิดรอบพอดี → รับรางวัลทันที

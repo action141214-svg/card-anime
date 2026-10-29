@@ -250,7 +250,8 @@ function startBattle(opts){
   if(opts.bossHp){const r=S.roster.b[0];r.max=opts.bossHp.max;r.hp=opts.bossHp.cur;r.boss=true;
     if(opts.noHeal)r.noHeal=true;   /* เควสพัฒนา: บอสไม่ฟื้นฟู HP */
     if(opts.bossP!=null)r.p=opts.bossP;   /* อีเว้นท์: กำหนด POWER บอสเอง */
-    if(opts.bossSafe){r.safe=true;r.base=statAt(r.id,r.lv).hp}   /* บอส HP มหาศาล: กันจุดตายทันที / เลือดไหลที่คิดจาก HP สูงสุด */
+    if(opts.bossSafe||opts.bossImmune){r.safe=true;r.base=statAt(r.id,r.lv).hp}
+    if(opts.bossImmune){r.resist=true;r.noStatus=true}   /* ดันเจี้ยน: บอสกันสถานะผิดปกติทุกชนิด (รวมลด POWER) + กันจุดตาย/ตายทันที */   /* บอส HP มหาศาล: กันจุดตายทันที / เลือดไหลที่คิดจาก HP สูงสุด */
   }   /* เรด: บอสมี HP สะสมข้ามรอบ */
   for(const k of['a','b']){const m=k==='a'?opts.mulA:opts.mulB;   /* ตัวคูณสเตตัสทั้งทีม (ด่านไม่มีที่สิ้นสุด) */
     if(m)S.roster[k].forEach(r=>{if(r.boss)return;r.p=Math.round(r.p*(m.p||1)*10)/10;r.p0=r.p;const h=Math.max(1,Math.round(r.hp*(m.h||1)));r.hp=r.max=h})}
@@ -974,7 +975,7 @@ async function paperAb(ak,dk){
     await sleepAnim(o.animate([{transform:'translate(0,0) scale(.5) rotate(0)',opacity:0},{opacity:1,offset:.15},{transform:`translate(${tx-sx}px,${ty-sy}px) scale(1.1) rotate(540deg)`,opacity:1}],{duration:380/speed,easing:'ease-in',fill:'forwards'}));o.remove()};
   if(!bomb){   /* กระดาษลดความเสียหาย: POWER ศัตรูลดลง 20% ของ POWER สูงสุด จนจบการโจมตีครั้งถัดไป */
     await fly(dw.getBoundingClientRect(),'📜');
-    const cur=D.wkr||0,mx=Math.max(D.p0||0,D.p+cur),amt=Math.min(Math.round(mx*C.knr*10)/10,Math.max(0,D.p+cur-1));
+    const cur=D.wkr||0,mx=Math.max(D.p0||0,D.p+cur),amt=D.noStatus?0:Math.min(Math.round(mx*C.knr*10)/10,Math.max(0,D.p+cur-1));
     if(amt>cur){D.p=Math.round((D.p-(amt-cur))*10)/10;D.wkr=amt;floatTxt(dw,'POWER -'+amt,'sm');render();
       log('📜 กระดาษลดความเสียหาย! POWER ของ '+nm(dk)+' ลดลง '+amt+' ('+Math.round(C.knr*100)+'% ของ POWER สูงสุด) จนจบการโจมตีครั้งถัดไป (เหลือ '+D.p+')',ak)}
     else log('📜 กระดาษลดความเสียหาย แต่ '+nm(dk)+' ถูกลดอยู่แล้ว',ak);
@@ -1003,7 +1004,7 @@ async function shadowAb(ak,dk){
     const pd=Math.max(1,Math.round((D.base||D.max)*C.sws));
     if(!(D.ps>=pd)){D.ps=pd;floatTxt(dw,'พิษ','sm');log('☠ '+nm(dk)+' ติดสถานะพิษ! เสีย HP '+pd.toLocaleString()+' ต่อเทิร์น ('+(Math.round(C.sws*1000)/10)+'% ของ HP สูงสุด)',ak)}
   }else if(k===2){   /* ไออน: ลด POWER ศัตรู 50% จนจบการโจมตีครั้งถัดไป (1 เทิร์นของศัตรู) */
-    const cur=D.wkr||0,mx=Math.max(D.p0||0,D.p+cur),amt=Math.min(Math.round(mx*C.swz*10)/10,Math.max(0,D.p+cur-1));
+    const cur=D.wkr||0,mx=Math.max(D.p0||0,D.p+cur),amt=D.noStatus?0:Math.min(Math.round(mx*C.swz*10)/10,Math.max(0,D.p+cur-1));
     if(amt>cur){D.p=Math.round((D.p-(amt-cur))*10)/10;D.wkr=amt;floatTxt(dw,'POWER -'+amt,'sm');
       log('🛡 POWER ของ '+nm(dk)+' ลดลง '+amt+' ('+Math.round(C.swz*100)+'%) นาน 1 เทิร์น (เหลือ '+D.p+')',ak)}
   }

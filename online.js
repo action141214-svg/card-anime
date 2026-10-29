@@ -603,6 +603,6 @@ async function dgCall(fn,args){
   if(!sb||!me)return {error:'offline'};
   try{const {data,error}=await sb.rpc(fn,args||{});if(error)return {error:'error'};return data||{error:'error'}}catch(e){return {error:'error'}}
 }
-const dungeon={status:()=>dgCall('dungeon_status'),enter:()=>dgCall('dungeon_enter'),report:(hr,d)=>dgCall('dungeon_report',{p_hr:hr,p_damage:Math.max(0,Math.floor(d||0))}),claim:hr=>dgCall('dungeon_claim',{p_hr:hr}),leaderboard:()=>dgCall('dungeon_leaderboard')};
+const dungeon={status:()=>dgCall('dungeon_status'),enter:()=>dgCall('dungeon_enter'),report:(hr,d)=>dgCall('dungeon_report',{p_hr:hr,p_damage:Math.max(0,Math.floor(d||0))}),claim:hr=>dgCall('dungeon_claim',{p_hr:hr}),leaderboard:()=>dgCall('dungeon_leaderboard'),setTeam:(hr,t)=>dgCall('dungeon_set_team',{p_hr:hr,p_team:t})};
 window.Online={presence:()=>onlinePres,setHtml,onPres:null,dungeon,redeem,gate,onSave,hub,friends,chat,room,logout,get me(){return me},_test:{get R(){return R},joinRoom,createRoom}};
 })();
