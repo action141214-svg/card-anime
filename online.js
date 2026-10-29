@@ -229,7 +229,7 @@ function bindFriends(){
   };
 }
 async function inviteFriend(fid){
-  if(!R){const ok=await createRoom();if(!ok)return}
+  if(!R){const ok=await createRoom('1v1');if(!ok)return}
   const c=sb.channel('user-'+fid);
   c.subscribe(st=>{if(st==='SUBSCRIBED'){c.send({type:'broadcast',event:'invite',payload:{code:R.code,from:me.name||me.username}});setTimeout(()=>sb.removeChannel(c),600)}});
   toast('ส่งคำเชิญแล้ว — รอเพื่อนเข้าห้อง '+R.code);
@@ -275,15 +275,16 @@ function hub(){
   const pend=FR.rows.filter(r=>r.status==='pending'&&r.addressee===me.id).length;
   b.innerHTML=`<div class="box onprof"><div><b class="nm">${esc(me.name||me.username)}</b><small>ไอดี: ${esc(me.username)} · ☁ เซฟบนเซิร์ฟเวอร์อัตโนมัติ</small><small class=\"oncount\">🟢 ผู้เล่นออนไลน์ตอนนี้ <b id=\"onHubCnt\">${onlineIds.size}</b> คน</small></div><div class="two"><button class="sec small" id="onRn">✏ เปลี่ยนชื่อ</button><button class="sec small" id="onOut">ออกจากระบบ</button></div></div>
     <div class="ontiles">
-      <button class="mode m-stage" id="onCreate"><span class="mi">🚪</span><b>สร้างห้อง</b><small>ได้เลขห้อง 6 หลัก<br>ส่งให้เพื่อนเข้ามาสู้</small></button>
+      <button class="mode m-stage" id="onCreate1"><span class="mi">⚔️</span><b>สร้างห้อง 1 ต่อ 1</b><small>ผู้เล่น 2 คน · เลขห้อง 6 หลัก<br>ส่งให้เพื่อนเข้ามาสู้</small></button>
+      <button class="mode m-hws" id="onCreate2"><span class="mi">🛡️</span><b>สร้างห้อง 2 ต่อ 2</b><small>ผู้เล่น 4 คน ทีมละ 2 คน<br>คุมการ์ดคนละชุด เลือกเป้าโจมตีเอง</small></button>
       <div class="mode m-raid onjoin"><span class="mi">🔑</span><b>เข้าห้อง</b><input id="onCode" inputmode="numeric" maxlength="6" placeholder="เลขห้อง 6 หลัก" autocomplete="off"><button id="onJoin">เข้าห้อง</button></div>
       <button class="mode m-chal" data-go="friends"><span class="mi">👥</span><b>เพื่อน</b><small>เพิ่มเพื่อน · ชวนสู้<br>${pend?'มีคำขอใหม่ '+pend+' รายการ':'ดูว่าใครออนไลน์'}</small></button>
       <button class="mode m-hwg" data-go="chat"><span class="mi">💬</span><b>แชทโลก</b><small>คุยกับผู้เล่นทุกคน</small></button>
     </div>
-    <p class="mute onnote">ต่อสู้ออนไลน์: 2 คน = 1 ต่อ 1 · ครบ 4 คน = 2 ต่อ 2 · เลือก ${PICK_N} ใบ → แบนของคู่ตรงข้ามคนละ ${BAN_N} ใบ → สู้ด้วย ${PICK_N-BAN_N} ใบ · ทุกการ์ดใช้ Lv.${ONLINE_LV} ${ONLINE_STAR}★ เท่ากัน</p>`;
+    <p class="mute onnote">ต่อสู้ออนไลน์: เลือกโหมด 1 ต่อ 1 หรือ 2 ต่อ 2 ตอนสร้างห้อง · เลือก ${PICK_N} ใบ → แบนของคู่ตรงข้ามคนละ ${BAN_N} ใบ → สู้ด้วย ${PICK_N-BAN_N} ใบ · ทุกการ์ดใช้ Lv.${ONLINE_LV} ${ONLINE_STAR}★ เท่ากัน</p>`;
   $('#onRn').onclick=()=>askName(false);
   $('#onOut').onclick=logout;
-  $('#onCreate').onclick=createRoom;
+  $('#onCreate1').onclick=()=>createRoom('1v1');$('#onCreate2').onclick=()=>createRoom('2v2');
   $('#onJoin').onclick=()=>joinRoom($('#onCode').value.trim());
   $('#onCode').onkeydown=e=>{if(e.key==='Enter')joinRoom($('#onCode').value.trim())};
 }
@@ -318,32 +319,33 @@ const myTeam=()=>teamOf(Math.max(0,myIdx()));
 const oppIdx=i=>i^1;
 const pnameOf=id=>{const p=(R.order||[]).find(x=>x.id===id);return p?p.name:'ผู้เล่น'};
 const validOrder=(o,n)=>Array.isArray(o)&&(n?o.length===n:(o.length===2||o.length===4))&&o.every(p=>p&&typeof p.id==='string'&&typeof p.name==='string')&&new Set(o.map(p=>p.id)).size===o.length&&o.some(p=>p.id===me.id);
-function joinChannel(code,role){
+function joinChannel(code,role,mode){
   return new Promise(res=>{
     const ch=sb.channel('room-'+code,{config:{broadcast:{self:false},presence:{key:me.id}}});
     ch.on('presence',{event:'sync'},()=>roomSync());
     ['phase','pick','ban','start','result','rematch','forfeit','bye','tgt'].forEach(ev=>ch.on('broadcast',{event:ev},m=>onMsg(ev,m.payload||{})));
     let done=false;
     ch.subscribe(st=>{
-      if(st==='SUBSCRIBED'&&!done){done=true;ch.track({id:me.id,name:me.name||me.username,role,t:Date.now()});res(ch)}
+      if(st==='SUBSCRIBED'&&!done){done=true;ch.track({id:me.id,name:me.name||me.username,role,t:Date.now(),mode:mode||null});res(ch)}
       else if((st==='CHANNEL_ERROR'||st==='TIMED_OUT')&&!done){done=true;res(null)}
     });
   });
 }
-function newRoom(code,ch,role){
-  R={code,ch,role,phase:'lobby',order:null,picks:{},bans:{},rem:new Set(),results:{},tgt:{},tgtW:null,myPick:null,myBan:null,rosters:null,sel:[],leftT:null,battle:false,over:false};
+function newRoom(code,ch,role,mode){
+  R={code,ch,role,mode:mode||'1v1',phase:'lobby',order:null,picks:{},bans:{},rem:new Set(),results:{},tgt:{},tgtW:null,myPick:null,myBan:null,rosters:null,sel:[],leftT:null,battle:false,over:false};
 }
 function needCards(){if(owned().length<PICK_N){toast('ต้องมีการ์ดอย่างน้อย '+PICK_N+' ใบจึงจะต่อสู้ออนไลน์ได้');return true}return false}
-async function createRoom(){
+async function createRoom(mode){
+  mode=mode==='2v2'?'2v2':'1v1';
   if(!me)return false;
   if(R)return true;
   if(needCards())return false;
   toast('กำลังสร้างห้อง…');
   for(let t=0;t<5;t++){
-    const code=rand6(),ch=await joinChannel(code,'host');
+    const code=rand6(),ch=await joinChannel(code,'host',mode);
     if(!ch){toast('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้');return false}
     await sleep(700);
-    newRoom(code,ch,'host');
+    newRoom(code,ch,'host',mode);
     const others=players().filter(p=>p.id!==me.id&&p.role==='host');
     if(!others.length){go('room');return true}
     try{sb.removeChannel(ch)}catch(e){}R=null;
@@ -358,13 +360,14 @@ async function joinRoom(code){
   toast('กำลังเข้าห้อง…');
   const ch=await joinChannel(code,'guest');
   if(!ch)return toast('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้');
-  newRoom(code,ch,'guest');
+  newRoom(code,ch,'guest','1v1');
   let host=null,others=[];
   for(let i=0;i<14&&!host;i++){await sleep(200);const ps=players();host=ps.find(p=>p.role==='host'&&p.id!==me.id);others=ps.filter(p=>p.role==='guest'&&p.id!==me.id)}
   const fail=m=>{try{sb.removeChannel(ch)}catch(e){}R=null;toast(m)};
   if(!host)return fail('ไม่พบห้องนี้ (เลขห้องผิดหรือห้องปิดแล้ว)');
   if(host.lock)return fail('ห้องนี้เริ่มเล่นไปแล้ว');
-  if(others.length>=MAX_P-1)return fail('ห้องนี้เต็มแล้ว (สูงสุด 4 คน)');
+  const hm=host.mode==='2v2'?'2v2':'1v1';R.mode=hm;
+  if(others.length+1>=(hm==='2v2'?4:2))return fail('ห้องนี้เต็มแล้ว ('+(hm==='2v2'?'2 ต่อ 2 ครบ 4 คน':'1 ต่อ 1 ครบ 2 คน')+')');
   go('room');
 }
 async function leaveRoom(silent){
@@ -524,15 +527,15 @@ function renderRoom(){
   $('#roomTitle').textContent='ห้อง '+R.code;
   if(R.phase==='lobby'){
     const host=R.role==='host',ps=players(),n=ps.length;
-    const mode=n===2?'1 ต่อ 1':n===4?'2 ต่อ 2':null;
-    const seat=i=>{const p=ps[i];return p?`<div class="pl"><i class="od on"></i><b>${esc(p.name)}${p.id===me.id?' (คุณ)':''}</b><small>${p.role==='host'?'เจ้าของห้อง':'ผู้เล่น'}</small></div>`:`<div class="pl empty"><i class="od"></i><b class="mute">${i<2?'รอผู้เล่น…':'ว่าง (ชวนเพื่อนเล่น 2 ต่อ 2)'}</b></div>`};
+    const two=R.mode==='2v2',cap=two?4:2,mode=n===cap?(two?'2 ต่อ 2':'1 ต่อ 1'):null;
+    const seat=i=>{const p=ps[i===2?2:i];return p?`<div class="pl"><i class="od on"></i><b>${esc(p.name)}${p.id===me.id?' (คุณ)':''}</b><small>${p.role==='host'?'เจ้าของห้อง':'ผู้เล่น'}</small></div>`:`<div class="pl empty"><i class="od"></i><b class="mute">${i<2?'รอผู้เล่น…':'ว่าง (ชวนเพื่อนเล่น 2 ต่อ 2)'}</b></div>`};
     b.innerHTML=`<div class="box lobby"><div class="code">${R.code}</div><small>เลขห้อง — ส่งให้เพื่อนเพื่อเข้ามา (สูงสุด 4 คน)</small>
-      <div class="teams2"><div><h3>ทีม A</h3>${seat(0)}${seat(2)}</div><div><h3>ทีม B</h3>${seat(1)}${seat(3)}</div></div>
-      <p class="mute">โหมดตอนนี้: <b>${mode||(n<2?'รอผู้เล่น':'รอครบ 4 คน (หรือให้เหลือ 2 คน)')}</b> · 2 คน = 1 ต่อ 1 · ครบ 4 คน = 2 ต่อ 2 (ทีมละ 2 คน)</p>
+      <div class="teams2"><div><h3>ทีม A</h3>${seat(0)}${two?seat(2):''}</div><div><h3>ทีม B</h3>${seat(1)}${two?seat(3):''}</div></div>
+      <p class="mute">โหมดห้องนี้: <b>${two?'2 ต่อ 2 (ผู้เล่น 4 คน)':'1 ต่อ 1 (ผู้เล่น 2 คน)'}</b> · ${mode?'ครบแล้ว พร้อมเริ่ม':'รอผู้เล่น '+n+'/'+cap}</p>
       ${host?`<div class="two"><button id="rmStart" ${mode?'':'disabled'}>เริ่มเลือกการ์ด${mode?' ('+mode+')':''}</button><button class="sec" id="rmInv">👥 ชวนเพื่อน</button></div>`:'<p class="mute">รอเจ้าของห้องกดเริ่ม…</p>'}
       <p class="mute">กติกา: ทุกคนเลือก ${PICK_N} ใบ → แบนการ์ดของคู่ตรงข้ามคนละ ${BAN_N} ใบ → สู้ด้วย ${KEEP_N} ใบที่เหลือ · ทุกใบ Lv.${ONLINE_LV} ${ONLINE_STAR}★<br>2 ต่อ 2: ทีมละ 2 คน แต่ละคนคุมการ์ดของตัวเอง สลับกันโจมตี ถึงตาใครคนนั้นเลือกเป้าหมาย (ใบที่ตายจะมีตัวสำรองของคนนั้นลงแทน)</p></div>`;
     if(host){
-      $('#rmStart').onclick=()=>{const ps2=players();if(ps2.length!==2&&ps2.length!==4)return;
+      $('#rmStart').onclick=()=>{const ps2=players();if(ps2.length!==(R.mode==='2v2'?4:2))return;
         R.order=ps2.map(p=>({id:p.id,name:p.name}));R.ch.track({id:me.id,name:me.name||me.username,role:'host',t:(ps2[0]&&ps2[0].t)||Date.now(),lock:true});
         resetRound();send('phase',{p:'pick',order:R.order});renderRoom()};
       $('#rmInv').onclick=()=>go('friends');
