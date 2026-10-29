@@ -960,7 +960,7 @@ const EVOS=[{from:'naruto',to:'naruto1',need:{cards:50,items:{seal9:1},coins:100
   {from:'garored',to:'garomon',need:{cards:20,more:{garo:200},items:{},gmk:3000,gmd:3000,win:true,coins:20000000},
   boss:{card:'garomonboss',name:'สัตว์ประหลาดที่สมบูรณ์แบบ กาโร่',hp:30000,power:100,lv:1,coins:100,drops:[]}},
   /* need.pmk / pmd / pma / pmc = สัตว์ประหลาดที่สมบูรณ์แบบ กาโร่ สังหาร / หลบหลีก / โจมตี / โต้กลับ สะสม (นับตั้งแต่อัปเดตนี้) */
-  {from:'garomon',to:'garocosmic',need:{cards:5,more:{garo:300,garored:30},items:{cosmic:1},pmk:5000,pmd:5000,pma:1000,pmc:100,win:true,coins:1000000000},
+  {from:'garomon',to:'garocosmic',need:{cards:5,more:{garo:300,garored:30},items:{cosmic:1},pmk:5000,pmd:5000,pma:1000,pmc:100,win:true,coins:1000000000},grant:{star:6},
   boss:{card:'garocosmicboss',name:'คอสมิค กาโร่',hp:50000,power:100,lv:1,coins:100,drops:[{item:'cosmic',rate:.005}]}}];
 const evDropRate=(e,d)=>(d.first!=null&&!SV.evoWin[e.from])?d.first:d.rate;   /* โอกาสออกตอนนี้ (ชนะครั้งแรกอาจได้โอกาสพิเศษ) */
 let evoSel=null,evoKeep=false,questTab='char';
@@ -990,7 +990,7 @@ function renderEvo(){
     <div class="evtrans">
       <div class="evc" style="--c:${c0.color}"><img src="${c0.img}" alt="${c0.name}"><b>${c0.name} ${rarTag(e.from)}</b><small>มี ×${have}</small></div>
       <div class="evarrow">➜<small>EVOLUTION</small></div>
-      <div class="evc" style="--c:${c1.color}"><img src="${c1.img}" alt="${c1.name}"><b>${c1.name} ${rarTag(e.to)}</b><small>${e.grant?e.grant.star+'★ Lv.'+e.grant.lv+' · ':''}POWER ${s1.p} · HP ${s1.hp}${SV.owned.includes(e.to)?' · มี ×'+(SV.count[e.to]||1):''}</small></div>
+      <div class="evc" style="--c:${c1.color}"><img src="${c1.img}" alt="${c1.name}"><b>${c1.name} ${rarTag(e.to)}</b><small>${e.grant?e.grant.star+'★ '+(e.grant.lv?'Lv.'+e.grant.lv+' ':'')+'· ':''}POWER ${s1.p} · HP ${s1.hp}${SV.owned.includes(e.to)?' · มี ×'+(SV.count[e.to]||1):''}</small></div>
     </div>
     <div class="evinfo">
       <div class="box"><b>เงื่อนไขอีโว</b><ul class="req">
@@ -1042,7 +1042,7 @@ function finishEvoQuest(e,r){
 function confirmEvolve(e){
   if(!evoOk(e))return toast('วัตถุดิบยังไม่ครบ');
   const c0=CARDS[e.from],c1=CARDS[e.to];
-  modal(`<h2>ยืนยันการอีโว?</h2><p>จะใช้ ${c0.name} ×${e.need.cards}${Object.entries(e.need.more||{}).map(([id,n])=>' · '+CARDS[id].name+' ×'+n).join('')}${Object.entries(e.need.items).map(([k,n])=>' · '+ITEMS[k].name+' ×'+n).join('')} · 💰${e.need.coins.toLocaleString()}</p><p class="mute">เพื่อได้ ${c1.name} ${e.grant?'('+e.grant.star+' ดาว เลเวล '+e.grant.lv+' ทันที)':'(เลเวลจะสืบทอดจากการ์ดเดิม)'}</p><div class="two"><button id="evYes">ยืนยัน อีโว!</button><button class="sec" id="evNo">ยกเลิก</button></div>`);
+  modal(`<h2>ยืนยันการอีโว?</h2><p>จะใช้ ${c0.name} ×${e.need.cards}${Object.entries(e.need.more||{}).map(([id,n])=>' · '+CARDS[id].name+' ×'+n).join('')}${Object.entries(e.need.items).map(([k,n])=>' · '+ITEMS[k].name+' ×'+n).join('')} · 💰${e.need.coins.toLocaleString()}</p><p class="mute">เพื่อได้ ${c1.name} ${e.grant?'('+e.grant.star+' ดาว'+(e.grant.lv?' เลเวล '+e.grant.lv:' เลเวลสืบทอดจากการ์ดเดิม')+' ทันที)':'(เลเวลจะสืบทอดจากการ์ดเดิม)'}</p><div class="two"><button id="evYes">ยืนยัน อีโว!</button><button class="sec" id="evNo">ยกเลิก</button></div>`);
   $('#evNo').onclick=closeModal;$('#evYes').onclick=()=>doEvolve(e);
 }
 function doEvolve(e){
@@ -1053,7 +1053,7 @@ function doEvolve(e){
   SV.count[e.from]-=e.need.cards;Object.entries(e.need.items).forEach(([k,n])=>{SV.items[k]=itemN(k)-n});SV.coins-=e.need.coins;onSpend(e.need.coins);
   const isNew=!SV.owned.includes(e.to);
   if(!isNew)SV.count[e.to]=(SV.count[e.to]||1)+1;else{SV.owned.push(e.to);SV.count[e.to]=1}
-  if(e.grant){SV.lv[e.to]=isNew?e.grant.lv:Math.max(SV.lv[e.to]||1,e.grant.lv);SV.star=SV.star||{};SV.star[e.to]=Math.max(SV.star[e.to]||1,e.grant.star)}   /* เช่น 6 ดาว เลเวล 1 ทันที */
+  if(e.grant){const glv=e.grant.lv||lv;SV.lv[e.to]=isNew?glv:Math.max(SV.lv[e.to]||1,glv);SV.star=SV.star||{};SV.star[e.to]=Math.max(SV.star[e.to]||1,e.grant.star)}   /* เช่น 6 ดาว เลเวล 1 ทันที */
   else SV.lv[e.to]=Math.max(SV.lv[e.to]||1,lv);
   if(SV.count[e.from]<=0){   /* ใช้การ์ดเดิมหมด: ถอดออกจากคลัง และเปลี่ยนในทีมเป็นการ์ดใหม่ */
     SV.owned=SV.owned.filter(x=>x!==e.from);delete SV.count[e.from];delete SV.lv[e.from];delete SV.star[e.from];
@@ -1061,7 +1061,7 @@ function doEvolve(e){
   }
   save();hud();
   const c=CARDS[e.to],s=statAt(e.to,clv(e.to),cstar(e.to));
-  modal(`<h2>EVOLUTION สำเร็จ! 🧬</h2><div class="reveal" style="--c:${RARITY[c.rar]}"><div class="glow"></div><img src="${c.img}" alt="${c.name}"></div><h2>${c.name} ${rarTag(e.to)}</h2><p>Lv.${clv(e.to)} · POWER ${s.p} · HP ${s.hp}</p><div class="two"><button id="evOk">ตกลง</button><button class="sec" id="evTeam">ดูทีม</button></div>`);
+  modal(`<h2>EVOLUTION สำเร็จ! 🧬</h2><div class="reveal" style="--c:${RARITY[c.rar]}"><div class="glow"></div><img src="${c.img}" alt="${c.name}"></div><h2>${c.name} ${rarTag(e.to)}</h2><p>Lv.${clv(e.to)} · ${cstar(e.to)}★ · POWER ${s.p} · HP ${s.hp}</p><div class="two"><button id="evOk">ตกลง</button><button class="sec" id="evTeam">ดูทีม</button></div>`);
   $('#evOk').onclick=()=>{closeModal();evoKeep=true;renderEvo()};$('#evTeam').onclick=()=>go('team');
 }
 $('#devEvo').onclick=()=>{SV.count.naruto=(SV.count.naruto||0)+50;if(!SV.owned.includes('naruto'))SV.owned.push('naruto');SV.items.seal9=itemN('seal9')+1;SV.coins+=10000;save();hud();if(!$('#evoScr').classList.contains('hidden'))renderEvo();toast('ได้ชุดทดสอบอีโว: นารูโตะ ×50, ตราประทับ ×1, 💰10,000')};
