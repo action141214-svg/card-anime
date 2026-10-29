@@ -460,7 +460,7 @@ const CQ=[{id:'gilq',card:'gilqueen',name:'ราชินีแห่งวี�
   {id:'kabuto',card:'kabuto',name:'มาสไรเดอร์ คาบูโตะ',
   reqs:[{t:'ใช้การ์ดหลบหลีก',unit:'ครั้ง',need:10000,key:'dodge',cur:()=>cqN('dodge')},
         {t:'สังหารบอส',unit:'ตัว',need:1000,key:'bosskill',cur:()=>cqN('bosskill')},
-        {t:'ทำดาเมจสะสม',unit:'ดาเมจ',need:5000000,key:'kdmg',cur:()=>Math.floor(cqN('kdmg'))}]}];
+        {t:'ทำดาเมจสะสม',unit:'ดาเมจ',need:1000000,key:'kdmg',cur:()=>Math.floor(cqN('kdmg'))}]}];
 /* เควสทำซ้ำได้ไม่จำกัด (ไว้เก็บการ์ดซ้ำเพื่ออัปดาว): done[id] = จำนวนครั้งที่รับแล้ว (เซฟเก่าที่เป็น true นับเป็น 1 ครั้ง)
    ตัวนับสะสม (key) จะถูกหักตามจำนวนที่ใช้ เหลือส่วนเกินไว้รอบหน้า · เงื่อนไข "มีการ์ด" ไม่ถูกหัก */
 const cqTimes=q=>{const d=SV.cq&&SV.cq.done&&SV.cq.done[q.id];return d===true?1:(+d||0)};
