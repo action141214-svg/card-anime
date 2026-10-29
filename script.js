@@ -56,6 +56,10 @@ const CARDS={
         desc:'ติดสถานะสายฟ้าให้ศัตรู (รับดาเมจเพิ่ม 20% ของ POWER ผู้โจมตี) และมีโอกาส 45% ทำให้ชา'},
   cc:{name:'ซีซี',rar:'LTD',img:'cc.jpeg',power:20,hp:600,color:'#7ddf6a',ability:'immune',
         desc:'เมื่อการ์ดใบนี้อยู่ในทีมจะป้องกันสถานะผิดปกติทั้งหมดให้แก่ทีม (ได้จากเควสตัวละคร หรือโค้ดพิเศษ)'},
+  rias:{name:'รีอัส เกรโมรี่',rar:'UR',img:'rias.jpeg',power:32,hp:400,color:'#e0364b',ability:'rias',
+        desc:'ลบสถานะผิดปกติให้ตัวเองแล้วสะท้อนกลับไปหาศัตรู · มีโอกาส 30% ที่จะทำลายการ์ดของศัตรูได้ในครั้งเดียว · มี Void Shield กันดาเมจและสกิล 3 ครั้ง'},
+  issei:{name:'เฮียวโด อิซเซย์',rar:'SR',img:'issei.jpeg',power:30,hp:300,color:'#d63a2e',ability:'issei',
+        desc:'เมื่อเริ่มเกมสเตตัสทุกอย่างจะถูกเพิ่มขึ้น 2 เท่าเป็นเวลา 10 เทิร์น ก่อนจะถูกลดไปเหลือเท่าเดิมหลังจากนั้น'},
   rimulord:{name:'จอมมาร ริมุรุ เทมเพสต์',rar:'USR',evo:true,img:'rimurulord.jpeg',power:40,hp:425,color:'#9a5cff',ability:'rimulord',
         desc:'ล้างสถานะผิดปกติได้ทุกชนิด · เมื่อโจมตีจะมอบสถานะ "บาดแผลศักดิ์สิทธิ์" ทำให้ไม่สามารถฟื้นฟู HP ได้ และสร้างความเสียหาย 15% ของ HP สูงสุดของศัตรู'},
   rimuruboss:{name:'ริมุรุ ร่าง SSR (บอสเควส)',rar:'SSR',evo:true,questOnly:true,img:'rimuru.jpeg',power:150,hp:30000,color:'#6a5cff',ability:'questboss',
@@ -114,7 +118,7 @@ const CARDS={
 /* ลำดับระดับการ์ด จากน้อยไปมาก */
 const R_ORDER=['R','S','SR','SSR','UR','USR','LTD'];
 const rIdx=r=>R_ORDER.indexOf(r);
-const ID={garocosmic:{p:'#voP',h:'#voH'},garomon:{p:'#pfP',h:'#pfH'},garored:{p:'#grP',h:'#grH'},truerimuru:{p:'#trP',h:'#trH'},rimulord:{p:'#rlP',h:'#rlH'},slime:{p:'#slP',h:'#slH'},rimuru:{p:'#riP',h:'#riH'},cc:{p:'#ccP',h:'#ccH'},gilqueen:{p:'#gqP',h:'#gqH'},reze:{p:'#rzP',h:'#rzH'},shuna:{p:'#shP',h:'#shH'},chahaein:{p:'#chP',h:'#chH'},chaevo:{p:'#ceP',h:'#ceH'},kaneki:{p:'#kkP',h:'#kkH'},mai:{p:'#maP',h:'#maH'},kdash:{p:'#kyP',h:'#kyH'},mahoraga:{p:'#mhP',h:'#mhH'},sasukecurse:{p:'#scP',h:'#scH'},sasukekid:{p:'#kdP',h:'#kdH'},naruto1:{p:'#n1P',h:'#n1H'},ino:{p:'#inP',h:'#inH'},gekko:{p:'#qP',h:'#qH'},naruto:{p:'#wP',h:'#wH'},ichigo:{p:'#oP',h:'#oH'},megumi:{p:'#mP',h:'#mH'},yuji:{p:'#yP',h:'#yH'},goku:{p:'#gP',h:'#gH'},zenitsu:{p:'#zP',h:'#zH'},kirito:{p:'#kP',h:'#kH'},gil:{p:'#iP',h:'#iH'},kurapika:{p:'#rP',h:'#rH'},sasuke:{p:'#sP',h:'#sH'},hutao:{p:'#hP',h:'#hH'},luffy:{p:'#fP',h:'#fH'},gengar:{p:'#eP',h:'#eH'},alucard:{p:'#aP',h:'#aH'},isaac:{p:'#xP',h:'#xH'},okarun:{p:'#uP',h:'#uH'},kirara:{p:'#krP',h:'#krH'},garo:{p:'#gaP',h:'#gaH'},vegeta:{p:'#vgP',h:'#vgH'},kula:{p:'#kuP',h:'#kuH'},konan:{p:'#knP',h:'#knH'}};
+const ID={rias:{p:'#rsP',h:'#rsH'},issei:{p:'#isP',h:'#isH'},garocosmic:{p:'#voP',h:'#voH'},garomon:{p:'#pfP',h:'#pfH'},garored:{p:'#grP',h:'#grH'},truerimuru:{p:'#trP',h:'#trH'},rimulord:{p:'#rlP',h:'#rlH'},slime:{p:'#slP',h:'#slH'},rimuru:{p:'#riP',h:'#riH'},cc:{p:'#ccP',h:'#ccH'},gilqueen:{p:'#gqP',h:'#gqH'},reze:{p:'#rzP',h:'#rzH'},shuna:{p:'#shP',h:'#shH'},chahaein:{p:'#chP',h:'#chH'},chaevo:{p:'#ceP',h:'#ceH'},kaneki:{p:'#kkP',h:'#kkH'},mai:{p:'#maP',h:'#maH'},kdash:{p:'#kyP',h:'#kyH'},mahoraga:{p:'#mhP',h:'#mhH'},sasukecurse:{p:'#scP',h:'#scH'},sasukekid:{p:'#kdP',h:'#kdH'},naruto1:{p:'#n1P',h:'#n1H'},ino:{p:'#inP',h:'#inH'},gekko:{p:'#qP',h:'#qH'},naruto:{p:'#wP',h:'#wH'},ichigo:{p:'#oP',h:'#oH'},megumi:{p:'#mP',h:'#mH'},yuji:{p:'#yP',h:'#yH'},goku:{p:'#gP',h:'#gH'},zenitsu:{p:'#zP',h:'#zH'},kirito:{p:'#kP',h:'#kH'},gil:{p:'#iP',h:'#iH'},kurapika:{p:'#rP',h:'#rH'},sasuke:{p:'#sP',h:'#sH'},hutao:{p:'#hP',h:'#hH'},luffy:{p:'#fP',h:'#fH'},gengar:{p:'#eP',h:'#eH'},alucard:{p:'#aP',h:'#aH'},isaac:{p:'#xP',h:'#xH'},okarun:{p:'#uP',h:'#uH'},kirara:{p:'#krP',h:'#krH'},garo:{p:'#gaP',h:'#gaH'},vegeta:{p:'#vgP',h:'#vgH'},kula:{p:'#kuP',h:'#kuH'},konan:{p:'#knP',h:'#knH'}};
 
 /* อาวุธ Gate of Babylon (SVG หันไปทางขวา) */
 const WEAPONS=[
@@ -149,8 +153,8 @@ function setFighter(k){
 function startBattle(opts){
   OPT=opts;FIXED=!!opts.online;RNG=opts.seed!=null?mulberry(opts.seed>>>0):null;if(opts.online){speed=1;$('#speedBtn').textContent='ความเร็ว x1'}
   run++;paused=false;$('#pauseBtn').textContent='หยุด';$('#fx').innerHTML='';$('#autoBtn').classList.toggle('hidden',!opts.auto);
-  C={mih:num('#maT')/100,mib:num('#maB')/100,mit:Math.max(1,Math.round(num('#maN'))),mim:num('#maM'),mis:num('#maS')/100,kkd:num('#kkD')/100,kkc:num('#kkC')/100,kkn:Math.max(2,Math.round(num('#kkN'))),cem:num('#ceM'),ced:num('#ceD')/100,gr:num('#gr')/100,zc:num('#zc')/100,kh:num('#kh')/100,ki:Math.max(1,num('#ki')),gc:num('#gc'),gd:num('#gd')/100,nh:num('#nh')/100,rm:num('#rm'),lb:num('#lb')/100,lc:num('#lc')/100,ym:num('#ym'),gm:num('#oM'),gn:Math.max(1,num('#oN')),sd:num('#mD')/100,sn:num('#mN')/100,se:num('#mE'),sr:num('#mR')/100,bd:num('#hB')/100,bt:Math.max(1,num('#hT')),gh:num('#hG')/100,pc:num('#fC')/100,gx:num('#eG')/100,ab:num('#aB')/100,kf:num('#kdF')/100,sv:num('#scV')/100,sc:num('#scC')/100,st:Math.max(1,num('#scT')),kb:num('#kdB')/100,kt:Math.max(1,num('#kdT')),xn:num('#xN'),xk:num('#xK'),xm:num('#xM'),ot:num('#uT')/100,od:num('#uD')/100,nr:num('#wR')/100,gk:num('#qR')/100,ni:Math.max(1,Math.round(num('#inI'))),nx:num('#inX'),n1h:num('#n1h')/100,n1c:num('#n1c')/100,wp:num('#mhW'),gqw:num('#gqW')/100,gqc:Math.max(1,Math.round(num('#gqC'))),gqe:num('#gqE')/100,gqm:num('#gqM'),wr:num('#mhR')/100,zb:num('#rzB')/100,zm:num('#rzM'),zs:num('#rzS')/100,rb:num('#rzX'),shh:num('#shA')/100,shp:num('#shB')/100,cm:num('#chM'),kyd:num('#kyD')/100,kyt:Math.max(1,num('#kyT')),kyr:num('#kyR')/100,krn:Math.max(1,Math.round(num('#krN'))),krc:num('#krC')/100,krr:num('#krR')/100,krs:num('#krS')/100,krk:num('#krK')/100,krb:num('#krB')/100,gad:num('#gaD')/100,vgd:num('#vgD')/100,vgn:Math.max(1,Math.round(num('#vgA'))),vgx:Math.max(1,Math.round(num('#vgB'))),kuc:num('#kuC')/100,kud:num('#kuD')/100,kut:Math.max(1,Math.round(num('#kuT'))),knb:num('#knB')/100,knr:num('#knR')/100,knx:num('#knX')/100,rit:num('#riT')/100,rib:num('#riB')/100,rin:Math.max(1,Math.round(num('#riN'))),pcd:num('#voD')/100,pcn:Math.max(2,Math.round(num('#voN'))),pcc:num('#voC')/100,pcs:Math.max(0,Math.round(num('#voS'))),pfd:num('#pfD')/100,pfn:Math.max(2,Math.round(num('#pfN'))),pfc:num('#pfC')/100,pfb:num('#pfB')/100,pft:Math.max(1,Math.round(num('#pfT'))),grd:num('#grD')/100,grn:Math.max(2,Math.round(num('#grN'))),hwd:num('#rlD')/100,hwn:Math.max(1,Math.round(num('#rlN'))),trg:num('#trG')/100,tri:Math.max(1,Math.round(num('#trI'))),trh:num('#trR')/100};
-  const mk=(lvs,sts)=>(id,i)=>{const l=(lvs&&lvs[i])||1,sr=(sts&&sts[i])||1,s=statAt(id,l,sr);return{id,lv:l,star:sr,p:s.p,hp:s.hp,max:s.hp,para:false,sealed:false,lightning:false,miss:false,burn:0,burnDmg:0,sev:0,poss:false,bleed:false,hb:0,ps:0,hw:0,hwDmg:0,turbo:false,cx:0,frz:false,ice:0,iceDmg:0,wkr:0,vs:CARDS[id].ability==='garocosmic'?C.pcs:0,p0:s.p,slime:id==='slime',rm:0,rmOn:false,rmUsed:false,rmP:0,rmH:0,rmT:0,rmHeal:false,fg:null,t:0}};
+  C={rsk:num('#rsK')/100,rvs:Math.max(0,Math.round(num('#rsV'))),isx:num('#isX'),isn:Math.max(1,Math.round(num('#isN'))),mih:num('#maT')/100,mib:num('#maB')/100,mit:Math.max(1,Math.round(num('#maN'))),mim:num('#maM'),mis:num('#maS')/100,kkd:num('#kkD')/100,kkc:num('#kkC')/100,kkn:Math.max(2,Math.round(num('#kkN'))),cem:num('#ceM'),ced:num('#ceD')/100,gr:num('#gr')/100,zc:num('#zc')/100,kh:num('#kh')/100,ki:Math.max(1,num('#ki')),gc:num('#gc'),gd:num('#gd')/100,nh:num('#nh')/100,rm:num('#rm'),lb:num('#lb')/100,lc:num('#lc')/100,ym:num('#ym'),gm:num('#oM'),gn:Math.max(1,num('#oN')),sd:num('#mD')/100,sn:num('#mN')/100,se:num('#mE'),sr:num('#mR')/100,bd:num('#hB')/100,bt:Math.max(1,num('#hT')),gh:num('#hG')/100,pc:num('#fC')/100,gx:num('#eG')/100,ab:num('#aB')/100,kf:num('#kdF')/100,sv:num('#scV')/100,sc:num('#scC')/100,st:Math.max(1,num('#scT')),kb:num('#kdB')/100,kt:Math.max(1,num('#kdT')),xn:num('#xN'),xk:num('#xK'),xm:num('#xM'),ot:num('#uT')/100,od:num('#uD')/100,nr:num('#wR')/100,gk:num('#qR')/100,ni:Math.max(1,Math.round(num('#inI'))),nx:num('#inX'),n1h:num('#n1h')/100,n1c:num('#n1c')/100,wp:num('#mhW'),gqw:num('#gqW')/100,gqc:Math.max(1,Math.round(num('#gqC'))),gqe:num('#gqE')/100,gqm:num('#gqM'),wr:num('#mhR')/100,zb:num('#rzB')/100,zm:num('#rzM'),zs:num('#rzS')/100,rb:num('#rzX'),shh:num('#shA')/100,shp:num('#shB')/100,cm:num('#chM'),kyd:num('#kyD')/100,kyt:Math.max(1,num('#kyT')),kyr:num('#kyR')/100,krn:Math.max(1,Math.round(num('#krN'))),krc:num('#krC')/100,krr:num('#krR')/100,krs:num('#krS')/100,krk:num('#krK')/100,krb:num('#krB')/100,gad:num('#gaD')/100,vgd:num('#vgD')/100,vgn:Math.max(1,Math.round(num('#vgA'))),vgx:Math.max(1,Math.round(num('#vgB'))),kuc:num('#kuC')/100,kud:num('#kuD')/100,kut:Math.max(1,Math.round(num('#kuT'))),knb:num('#knB')/100,knr:num('#knR')/100,knx:num('#knX')/100,rit:num('#riT')/100,rib:num('#riB')/100,rin:Math.max(1,Math.round(num('#riN'))),pcd:num('#voD')/100,pcn:Math.max(2,Math.round(num('#voN'))),pcc:num('#voC')/100,pcs:Math.max(0,Math.round(num('#voS'))),pfd:num('#pfD')/100,pfn:Math.max(2,Math.round(num('#pfN'))),pfc:num('#pfC')/100,pfb:num('#pfB')/100,pft:Math.max(1,Math.round(num('#pfT'))),grd:num('#grD')/100,grn:Math.max(2,Math.round(num('#grN'))),hwd:num('#rlD')/100,hwn:Math.max(1,Math.round(num('#rlN'))),trg:num('#trG')/100,tri:Math.max(1,Math.round(num('#trI'))),trh:num('#trR')/100};
+  const mk=(lvs,sts)=>(id,i)=>{const l=(lvs&&lvs[i])||1,sr=(sts&&sts[i])||1,s=statAt(id,l,sr);return{id,lv:l,star:sr,p:s.p,hp:s.hp,max:s.hp,para:false,sealed:false,lightning:false,miss:false,burn:0,burnDmg:0,sev:0,poss:false,bleed:false,hb:0,ps:0,hw:0,hwDmg:0,turbo:false,cx:0,frz:false,ice:0,iceDmg:0,wkr:0,vs:CARDS[id].ability==='garocosmic'?C.pcs:(CARDS[id].ability==='rias'?C.rvs:0),p0:s.p,slime:id==='slime',rm:0,rmOn:false,rmUsed:false,rmP:0,rmH:0,rmT:0,rmHeal:false,fg:null,t:0}};
   let first=opts.first||$('#first').value;if(first==='r')first=RR()<.5?'a':'b';
   S={a:null,b:null,roster:{a:opts.a.map(mk(opts.la,opts.sa)),b:opts.b.map(mk(opts.lb,opts.sb))},idx:{a:0,b:0},turn:first,n:1,over:false,phase2:opts.phase2||null};   /* phase2 = บอสเควส 2 เฟส: เมื่อเฟส 1 ตาย บอสตัวเดิมเปลี่ยนเป็นเฟส 2 */
   if(opts.bossHp){const r=S.roster.b[0];r.max=opts.bossHp.max;r.hp=opts.bossHp.cur;r.boss=true;
@@ -168,6 +172,12 @@ function startBattle(opts){
   for(const k of['a','b']){const sh=S.roster[k].find(r=>r.id==='shuna');if(!sh)continue;
     S.roster[k].forEach(r=>{if(r===sh||r.boss)return;const h=Math.round(r.max*C.shh),p=Math.round(r.p*C.shp*10)/10;r.max+=h;r.hp+=h;r.p=Math.round((r.p+p)*10)/10;r.sb={h,p}});
     sbLogs.push([k,'🌸 ชูนะเสริมพลังให้ทีม: HP +'+Math.round(C.shh*100)+'% · POWER +'+Math.round(C.shp*100)+'% (หายเมื่อชูนะถูกกำจัด)'])}
+  for(const k of['a','b'])S.roster[k].forEach(r=>{   /* อิซเซย์: เริ่มเกมสเตตัส ×isx นาน isn เทิร์นของทีม แล้วกลับเป็นเท่าเดิม */
+    if(CARDS[r.id].ability!=='issei'||r.boss)return;
+    const ap=Math.round(r.p*(C.isx-1)*10)/10,ah=Math.round(r.max*(C.isx-1));
+    r.isP=ap;r.isH=ah;r.p=Math.round((r.p+ap)*10)/10;r.max+=ah;r.hp+=ah;r.isOn=true;r.isN=C.isn;
+    sbLogs.push([k,'🔥 '+CARDS[r.id].name+': สเตตัสทุกอย่าง ×'+C.isx+' (POWER '+r.p+' · HP '+r.max+') นาน '+C.isn+' เทิร์น']);
+  });
   S.a=S.roster.a[0];S.b=S.roster.b[0];
   $('#teamA').innerHTML=sideHtml('a');$('#teamB').innerHTML=sideHtml('b');
   setFighter('a');setFighter('b');$('#stgName').textContent=opts.title||'';
@@ -232,7 +242,7 @@ function qTrack(){
 }
 function render(){
   qTrack();
-  if(S&&!S.over){gmaxPurify('a');gmaxPurify('b');for(const k of['a','b']){pflameImmune(k);enterField(k);rimuruCheck(k)}}
+  if(S&&!S.over){riasReflect('a');riasReflect('b');gmaxPurify('a');gmaxPurify('b');for(const k of['a','b']){pflameImmune(k);enterField(k);rimuruCheck(k)}}
   for(const k of['a','b']){const s=S[k],f=$('#f'+k),pc=Math.max(0,s.hp/s.max*100);
     const fl=$('.fill',f);fl.style.width=pc+'%';fl.classList.toggle('low',pc<30);
     $('.hpt',f).textContent='HP '+Math.max(0,Math.ceil(s.hp)).toLocaleString()+' / '+s.max.toLocaleString();
@@ -309,7 +319,7 @@ function getsugaFx(ak,dk){
 /* ---------- คุราปิก้า: สุ่มนิ้ว (โอกาสเท่ากัน 20% ต่อนิ้ว) ---------- */
 const FN=['นิ้วโป้ง','นิ้วชี้','นิ้วกลาง','นิ้วนาง','นิ้วก้อย'];
 const FD=['ฟื้นฟู HP','ขโมยความสามารถ','ผนึกความสามารถศัตรู','ลบสถานะด้านลบ','โจมตีซ้ำ'];
-const AN={garocosmic:'โจมตี 4 ครั้ง + หลบ 55% + โต้กลับ + Void Shield',garomon:'โจมตี 3 ครั้ง + หลบ 45% + โต้กลับ + เพิ่มสเตตัส',garored:'โจมตี 3 ครั้ง + หลบ 40%',truebossimm:'สถานะลบไม่มีผล + แปลงเป็นสเตตัส',truelord:'บาดแผลศักดิ์สิทธิ์',rimulord:'ล้างสถานะผิดปกติ + บาดแผลศักดิ์สิทธิ์',slime:'กลืนกินแล้วแปลงร่าง',rimuru:'ไร้ผลด้านลบ + โหมดผู้ไร้ความปราณี',immune:'ป้องกันสถานะผิดปกติให้ทีม',gate2:'Gate of Babylon (เรียกอาวุธ 3 เล่ม)',bomb:'ระเบิด (ดาเมจ ×2 + มึนงง)',shuna:'เสริมพลังทีม',boss3:'ดาเมจ ×3 ใส่บอส',boss5:'ดาเมจ ×5 ใส่บอส + หลบ 50%',ghoul:'ดูดเลือด + ตี 4 ครั้ง',mai:'โหมดไฟ (เผาไหม้) / โหมดระเบิด',questboss:'ไม่มี',pflame:'ไฟบริสุทธิ์',wheel:'ธรรมจักร (กงล้อหมุนสุ่มเสริมพลัง)',kyuubi:'จักระจิ้งจอก (ฟื้นฟู HP + ชะงัก)',getsuga:'เกตสึกะ (ดาเมจ ×3)',shiki:'ทศฉายา (เรียกชิกิกามิ)',upset:'ล้มยักษ์ (ดาเมจเพิ่มใส่ศัตรูระดับสูงกว่า)',lightning:'สายฟ้า',grow:'POWER เพิ่มขึ้น',paralyze:'ทำให้ชา',heal:'ฟื้นฟู HP',gate:'Gate of Babylon',ghost:'ผีเมาช่วยโจมตี',possess:'เข้าสิง (ศัตรูมีโอกาสโจมตีตัวเอง)',gmax:'แปลงสถานะลบเป็น POWER',double:'โจมตี 2 ครั้ง + เลือดไหล',scythe:'สุ่มการโจมตี 3 รูปแบบ',turbo:'สัญลักษณ์เทอร์โบ',crux:'กลุ่มดาวกางเขนใต้ (เรียกอุปสรรคพุ่งใส่)',garo:'โจมตี 2 ครั้ง + หลบ 40%',kiblast:'กระสุนพลัง 2-5 ครั้ง',icecrystal:'ผลึกน้ำแข็ง (แช่แข็ง + ดาเมจตกค้าง)',paper:'กระดาษวิเศษ (ลดดาเมจ / ระเบิด)'};
+const AN={rias:'สะท้อนสถานะ + ทำลายในครั้งเดียว + Void Shield',issei:'สเตตัส ×2 ชั่วคราว',garocosmic:'โจมตี 4 ครั้ง + หลบ 55% + โต้กลับ + Void Shield',garomon:'โจมตี 3 ครั้ง + หลบ 45% + โต้กลับ + เพิ่มสเตตัส',garored:'โจมตี 3 ครั้ง + หลบ 40%',truebossimm:'สถานะลบไม่มีผล + แปลงเป็นสเตตัส',truelord:'บาดแผลศักดิ์สิทธิ์',rimulord:'ล้างสถานะผิดปกติ + บาดแผลศักดิ์สิทธิ์',slime:'กลืนกินแล้วแปลงร่าง',rimuru:'ไร้ผลด้านลบ + โหมดผู้ไร้ความปราณี',immune:'ป้องกันสถานะผิดปกติให้ทีม',gate2:'Gate of Babylon (เรียกอาวุธ 3 เล่ม)',bomb:'ระเบิด (ดาเมจ ×2 + มึนงง)',shuna:'เสริมพลังทีม',boss3:'ดาเมจ ×3 ใส่บอส',boss5:'ดาเมจ ×5 ใส่บอส + หลบ 50%',ghoul:'ดูดเลือด + ตี 4 ครั้ง',mai:'โหมดไฟ (เผาไหม้) / โหมดระเบิด',questboss:'ไม่มี',pflame:'ไฟบริสุทธิ์',wheel:'ธรรมจักร (กงล้อหมุนสุ่มเสริมพลัง)',kyuubi:'จักระจิ้งจอก (ฟื้นฟู HP + ชะงัก)',getsuga:'เกตสึกะ (ดาเมจ ×3)',shiki:'ทศฉายา (เรียกชิกิกามิ)',upset:'ล้มยักษ์ (ดาเมจเพิ่มใส่ศัตรูระดับสูงกว่า)',lightning:'สายฟ้า',grow:'POWER เพิ่มขึ้น',paralyze:'ทำให้ชา',heal:'ฟื้นฟู HP',gate:'Gate of Babylon',ghost:'ผีเมาช่วยโจมตี',possess:'เข้าสิง (ศัตรูมีโอกาสโจมตีตัวเอง)',gmax:'แปลงสถานะลบเป็น POWER',double:'โจมตี 2 ครั้ง + เลือดไหล',scythe:'สุ่มการโจมตี 3 รูปแบบ',turbo:'สัญลักษณ์เทอร์โบ',crux:'กลุ่มดาวกางเขนใต้ (เรียกอุปสรรคพุ่งใส่)',garo:'โจมตี 2 ครั้ง + หลบ 40%',kiblast:'กระสุนพลัง 2-5 ครั้ง',icecrystal:'ผลึกน้ำแข็ง (แช่แข็ง + ดาเมจตกค้าง)',paper:'กระดาษวิเศษ (ลดดาเมจ / ระเบิด)'};
 /* ไอคอนมือ: นิ้วที่ใช้ในเทิร์นนั้นจะเรืองสีทอง */
 function handSvg(i,sz=40){
   const F=[['M10 66 L22 56 L36 84 L22 92Z','',''],['M24 16h12a2 2 0 0 1 2 2v44H22V18a2 2 0 0 1 2-2z'],['M38 8h12a2 2 0 0 1 2 2v52H36V10a2 2 0 0 1 2-2z'],['M52 14h12a2 2 0 0 1 2 2v46H50V16a2 2 0 0 1 2-2z'],['M66 28h11a2 2 0 0 1 2 2v32H64V30a2 2 0 0 1 2-2z']];
@@ -671,6 +681,29 @@ async function garoAb(ak,dk,extra=1){   /* โจมตีเพิ่มอี�
   }
 }
 /* ---------- สัตว์ประหลาดที่สมบูรณ์แบบ กาโร่: เพิ่มสเตตัส (POWER / HP สูงสุด) C.pfb ทุกๆ C.pft เทิร์น (บอสเควสที่ไม่ฟื้นฟู HP จะเพิ่มเฉพาะ POWER) ---------- */
+/* ---------- รีอัส เกรโมรี่: ลบสถานะผิดปกติของตัวเองแล้วสะท้อนกลับไปที่การ์ดศัตรูที่กำลังสู้ ---------- */
+const RIAS_BOOL=['para','sealed','lightning','miss','poss','bleed','frz'];
+const RIAS_NUM=[['burn','burnDmg','burnTx'],['sev'],['hb'],['ps'],['hw','hwDmg'],['ice','iceDmg'],['cx']];
+function riasReflect(k){
+  const s=S&&S[k];if(!s||s.hp<=0||CARDS[s.id].ability!=='rias')return;
+  const got=RIAS_BOOL.filter(f=>s[f]).length+RIAS_NUM.filter(g=>s[g[0]]>0).length;if(!got)return;
+  const snap={};
+  RIAS_BOOL.forEach(f=>{snap[f]=s[f];s[f]=false});
+  RIAS_NUM.forEach(g=>g.forEach(f=>{snap[f]=s[f];s[f]=f==='burnTx'?null:0}));
+  const cw=$('#f'+k+' .cw');if(cw)floatTxt(cw,'REFLECT','sm');
+  const o=k==='a'?'b':'a',t=S[o];
+  if(!t||t.hp<=0){log('🔁 '+nm(k)+' ลบสถานะผิดปกติ '+got+' อย่างของตัวเอง',k);render();return}
+  RIAS_BOOL.forEach(f=>{if(snap[f])t[f]=true});
+  RIAS_NUM.forEach(g=>{if(!(snap[g[0]]>0))return;t[g[0]]=Math.max(t[g[0]]||0,snap[g[0]]);
+    g.slice(1).forEach(f=>{if(f==='burnTx')t.burnTx=snap.burnTx;else t[f]=Math.max(t[f]||0,snap[f]||0)})});
+  log('🔁 '+nm(k)+' ลบสถานะผิดปกติ '+got+' อย่างของตัวเอง แล้วสะท้อนกลับไปที่ '+nm(o)+'!',k);render();
+}
+/* ---------- อิซเซย์: นับถอยหลังทุกครั้งที่ทีมเจ้าของได้เล่น เมื่อครบสเตตัสกลับเป็นเท่าเดิม ---------- */
+function isseiEnd(r,k){
+  r.isOn=false;r.p=Math.max(1,Math.round((r.p-r.isP)*10)/10);r.max=Math.max(1,r.max-r.isH);r.hp=Math.min(r.hp,r.max);r.isP=r.isH=0;
+  log('🔥 พลัง ×'+C.isx+' ของ '+CARDS[r.id].name+' หมดลง สเตตัสกลับเป็นปกติ (POWER '+r.p+' · HP '+Math.ceil(r.hp)+'/'+r.max+')',k);render();
+}
+function isseiTick(k){S.roster[k].forEach(r=>{if(!r.isOn)return;r.isN--;if(r.isN<=0)isseiEnd(r,k)})}
 /* สกิลที่ Void Shield (คอสมิค กาโร่) กันได้ — สกิลที่ใช้กับศัตรู (ไม่รวมสกิลเสริมพลังตัวเอง) */
 const VS_SKILL=['paralyze','lightning','kyuubi','sevpara','gekko','ghost','possess','double','crux','paper','garo','garored','garomon','garocosmic','ghoul','kiblast','icecrystal','fireball','ino','rimulord','truelord','gate','gate2','shiki'];
 function garomonBoost(k){
@@ -821,6 +854,7 @@ async function handleKO(dk,ak){
 async function doTurn(){
   const ak=S.turn,dk=ak==='a'?'b':'a',a=S[ak],d=S[dk],ac=CARDS[a.id];
   if(a.rmOn&&a.rm<=0)rimuruEnd(ak);
+  isseiTick(ak);
   a.t++;
   if(a.burn>0){   /* เผาไหม้: เสีย HP ต้นเทิร์นของการ์ดที่ติดสถานะ */
     const bd=a.burnDmg,cw=$('#f'+ak+' .cw');a.hp-=bd;a.burn--;floatTxt(cw,'-'+bd,'sm');cw.classList.remove('hit');void cw.offsetWidth;cw.classList.add('hit');
@@ -882,12 +916,14 @@ async function doTurn(){
     const big=!sealed&&ac.ability==='getsuga'&&a.t%(C.gn+1)===0;   // ทุก N เทิร์น การโจมตีครั้งถัดไป ×3
     const gf=big?getsugaFx(ak,dk):null;
     let imode=0;if(!sealed&&ac.ability==='scythe'){const rr=RR()*100;imode=rr<C.xk?2:rr<C.xk+C.xn?1:0;if(imode===2&&(a.safe||d.safe||d.vs>0))imode=1}   // 0 ปกติ / 1 เฉียดจุดตาย / 2 จุดตาย
+    const rkill=!sealed&&ac.ability==='rias'&&!imode&&!(a.safe||d.safe||d.vs>0)&&RR()<C.rsk;   // รีอัส: โอกาสทำลายการ์ดศัตรูในครั้งเดียว (ข้ามเมื่อศัตรูมี Void Shield / ถูกป้องกันจุดตาย)
     if(imode)await scytheFx(ak,dk,imode);
     const boom=!sealed&&ac.ability==='bomb'&&!imode&&RR()<C.zb;
     if(boom){bombFx(ak,dk);log('💥 '+nm(ak)+' โจมตีแบบระเบิด!',ak)}
     const maiB=!sealed&&ac.ability==='mai'&&a.hp<=a.max*C.mih;   // ไม: HP ≤ 40% → โหมดระเบิด · มากกว่านั้น → โหมดไฟ
     if(maiB){bombFx(ak,dk);log('💥 '+nm(ak)+' โจมตีโหมดระเบิด! (HP ต่ำกว่า '+Math.round(C.mih*100)+'%)',ak)}
-    const dmg=imode===2?await deathStrike(ak,dk):await hit(ak,dk,big?C.gm:(imode===1?C.xm:(boom?C.zm:(maiB?C.mim:1))));if(gf)await gf;
+    const dmg=(imode===2||rkill)?await deathStrike(ak,dk):await hit(ak,dk,big?C.gm:(imode===1?C.xm:(boom?C.zm:(maiB?C.mim:1))));if(gf)await gf;
+    if(rkill&&dmg>0)log('💀 '+nm(ak)+' ทำลายการ์ดของ '+nm(dk)+' ในครั้งเดียว!',ak);
     if(!sealed&&ac.ability==='ghoul'&&dmg>0)ghoulDrain(ak);   // คาเนกิ: โจมตีโดน → ดูดเลือด
     S.maiHit=dmg>0;
     if(maiB&&dmg>0&&d.hp>0&&RR()<C.mis){d.para=true;log('😵 '+nm(dk)+' ติดสถานะมึนงง! ไม่สามารถโจมตีในเทิร์นถัดไปได้',ak);floatTxt($('#f'+dk+' .cw'),'มึนงง','sm')}
