@@ -950,11 +950,11 @@ function ifEnd(quit,r){
 }
 
 /* ---------- ดันเจี้ยนออนไลน์ (บอสจักรพรรดิเงา · ทุกคนช่วยกันตีบอสตัวเดียวกัน) ----------
-   เซิร์ฟเวอร์ (Supabase · dungeon.sql) คุมทั้งหมด: ทุกชั่วโมงดันเจี้ยนโผล่แบบสุ่มภายใน 30 นาทีแรก เปิดนาน 30 นาที · ทุกชั่วโมงดันเจี้ยนโผล่แบบสุ่มภายใน 30 นาทีแรก เปิดนาน 30 นาที · HP บอสรวม 3,000,000 (ตั้งที่ dungeon.sql)
+   เซิร์ฟเวอร์ (Supabase · dungeon.sql) คุมทั้งหมด: ทุกชั่วโมงดันเจี้ยนโผล่แบบสุ่มภายใน 30 นาทีแรก เปิดนาน 30 นาที · ทุกชั่วโมงดันเจี้ยนโผล่แบบสุ่มภายใน 30 นาทีแรก เปิดนาน 30 นาที · HP บอสรวม 5,000,000 (ตั้งที่ dungeon.sql)
    ลงได้คนละ 5 ครั้งต่อรอบ (หักสิทธิ์ทันทีที่ลง แพ้/ออกกลางคันก็เสียสิทธิ์) · ดาเมจที่ทำได้หักจาก HP บอสรวม แม้แพ้ก็นับ
    บอสถูกปราบ → ปิดทันที ทุกคนที่ช่วยตีได้ทหารเงาสุ่ม 1 ใน 3 (อิกริส / เบรุ / ไออน) และนับเป็น "ผ่านดันเจี้ยน" 1 ครั้ง
    ต้องล็อกอินออนไลน์จึงจะเล่นได้ · ค่า HP/เวลา/สิทธิ์ตั้งที่ dungeon.sql (ที่นี่ใช้แสดงผลและตั้ง POWER บอส) */
-const DG={tries:5,power:99};
+const DG={tries:5,power:99,stCap:15000,turns:50};   // stCap = ดาเมจสถานะ(ตาม HP สูงสุด)ต่อครั้งที่บอสรับได้สูงสุด · turns = จำกัดเทิร์นต่อการลง
 let DGLB=null,dgLbAt=0;
 let DGS=null,dgBusy=false,dgClaiming=false,dgInBattle=false,dgPollAt=0;
 const dgFmt=sec=>{sec=Math.max(0,Math.ceil(sec));const m=Math.floor(sec/60),s=sec%60;return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')};
@@ -1011,7 +1011,7 @@ async function dgLbModal(){
   $('#dgLbX').onclick=closeModal;
 }
 function dgRulesModal(){
-  modal(`<h2>📖 กติกาดันเจี้ยน</h2><div class="ebrule">• ทุกคนช่วยกันตีบอสตัวเดียวกัน ดาเมจรวมหัก HP บอสรวม (แพ้ก็นับดาเมจที่ทำได้)<br>• ลงได้คนละ ${DG.tries} ครั้งต่อรอบ หักสิทธิ์ทันทีที่ลง แพ้หรือออกกลางคันก็เสียสิทธิ์<br>• บอส <b>กันสถานะผิดปกติทุกชนิดและกันการโจมตีแบบตายทันที</b><br>• บอสถูกปราบ → ดันเจี้ยนปิดทันที ทุกคนที่ช่วยตีนับเป็นผ่านดันเจี้ยน 1 ครั้ง · ของรางวัลคือทหารเงาสุ่ม 1 ใน 3 (<b>อิกริส / เบรุ / ไออน</b>) จัดตามอันดับดาเมจรวม: <b>ท็อป 1-5 ได้ 100%</b> · อันดับ 6 ลุ้น 50% แล้วไล่ลงทีละน้อยถึงอันดับ 50 (5%) · อันดับ 51 ขึ้นไปไม่มีของ<br>• ไม่มีใครปราบทันภายในเวลา → ไม่มีรางวัล</div><div class="two"><button id="dgRlX">ปิด</button></div>`);
+  modal(`<h2>📖 กติกาดันเจี้ยน</h2><div class="ebrule">• ทุกคนช่วยกันตีบอสตัวเดียวกัน ดาเมจรวมหัก HP บอสรวม (แพ้ก็นับดาเมจที่ทำได้)<br>• ลงได้คนละ ${DG.tries} ครั้งต่อรอบ หักสิทธิ์ทันทีที่ลง แพ้หรือออกกลางคันก็เสียสิทธิ์<br>• บอสติดสถานะผิดปกติได้ แต่ดาเมจสถานะที่หักตาม HP สูงสุดรับได้ไม่เกิน <b>${DG.stCap.toLocaleString()}</b> ต่อครั้ง · กันการโจมตีแบบตายทันที · จำกัด <b>${DG.turns} เทิร์น</b> ต่อการลง 1 ครั้ง (หมดเวลาก็นับดาเมจที่ทำได้)<br>• บอสถูกปราบ → ดันเจี้ยนปิดทันที ทุกคนที่ช่วยตีนับเป็นผ่านดันเจี้ยน 1 ครั้ง · ของรางวัลคือทหารเงาสุ่ม 1 ใน 3 (<b>อิกริส / เบรุ / ไออน</b>) จัดตามอันดับดาเมจรวม: <b>ท็อป 1-5 ได้ 100%</b> · อันดับ 6 ลุ้น 50% แล้วไล่ลงทีละน้อยถึงอันดับ 50 (5%) · อันดับ 51 ขึ้นไปไม่มีของ<br>• ไม่มีใครปราบทันภายในเวลา → ไม่มีรางวัล</div><div class="two"><button id="dgRlX">ปิด</button></div>`);
   $('#dgRlX').onclick=closeModal;
 }
 function dgPaint(){
@@ -1047,7 +1047,7 @@ async function startDungeon(){
   if(!e||!e.ok){toast(dgErrTxt(e&&(e.err||e.error)));return renderDungeon()}
   clearAuto();setAutoBtn();dgInBattle=true;
   const hp0=Math.max(1,Math.ceil(e.hp));
-  Battle.start({auto:false,a:team,la:team.map(clv),sa:team.map(cstar),b:['shadowempboss'],lb:[1],bossHp:{max:e.max_hp,cur:hp0},bossP:DG.power,bossImmune:true,noHeal:true,first:'a',
+  Battle.start({auto:false,a:team,la:team.map(clv),sa:team.map(cstar),b:['shadowempboss'],lb:[1],bossHp:{max:e.max_hp,cur:hp0},bossP:DG.power,bossCap:DG.stCap,maxTurns:DG.turns,noHeal:true,first:'a',
     title:'ดันเจี้ยน · จักรพรรดิเงา ซอง จิน วู (ลงครั้งที่ '+e.try+'/'+DG.tries+')',
     onExit:async()=>{dgInBattle=false;go('dungeon');await Online.dungeon.report(e.hr,0)},   // ออกกลางคัน: เสียสิทธิ์ ไม่นับดาเมจ
     onEnd:r=>finishDungeon(r,e,hp0)});

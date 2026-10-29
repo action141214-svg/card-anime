@@ -250,8 +250,8 @@ function startBattle(opts){
   if(opts.bossHp){const r=S.roster.b[0];r.max=opts.bossHp.max;r.hp=opts.bossHp.cur;r.boss=true;
     if(opts.noHeal)r.noHeal=true;   /* เควสพัฒนา: บอสไม่ฟื้นฟู HP */
     if(opts.bossP!=null)r.p=opts.bossP;   /* อีเว้นท์: กำหนด POWER บอสเอง */
-    if(opts.bossSafe||opts.bossImmune){r.safe=true;r.base=statAt(r.id,r.lv).hp}
-    if(opts.bossImmune){r.resist=true;r.noStatus=true}   /* ดันเจี้ยน: บอสกันสถานะผิดปกติทุกชนิด (รวมลด POWER) + กันจุดตาย/ตายทันที */   /* บอส HP มหาศาล: กันจุดตายทันที / เลือดไหลที่คิดจาก HP สูงสุด */
+    if(opts.bossSafe){r.safe=true;r.base=statAt(r.id,r.lv).hp}
+    if(opts.bossCap){r.safe=true;r.stCap=opts.bossCap}   /* ดันเจี้ยน: บอสติดสถานะได้ปกติ แต่ดาเมจสถานะที่เสียตาม HP ไม่เกิน bossCap ต่อครั้ง (คิดจาก HP สูงสุดจริง) · ยังกันจุดตาย/ตายทันที */   /* บอส HP มหาศาล: กันจุดตายทันที / เลือดไหลที่คิดจาก HP สูงสุด */
   }   /* เรด: บอสมี HP สะสมข้ามรอบ */
   for(const k of['a','b']){const m=k==='a'?opts.mulA:opts.mulB;   /* ตัวคูณสเตตัสทั้งทีม (ด่านไม่มีที่สิ้นสุด) */
     if(m)S.roster[k].forEach(r=>{if(r.boss)return;r.p=Math.round(r.p*(m.p||1)*10)/10;r.p0=r.p;const h=Math.max(1,Math.round(r.hp*(m.h||1)));r.hp=r.max=h})}
@@ -283,6 +283,7 @@ const endInfo=()=>{const sm=(k,f)=>S.roster[k].reduce((s,r)=>s+f(r),0);return{wi
 /* โอคารุน: โอกาสหลบการโจมตี */
 const dodges=k=>{const d=S&&S[k];if(!d||d.hp<=0)return false;const ab=CARDS[d.id].ability;const r=(ab==='turbo'&&RR()<C.od)||(ab==='garo'&&RR()<C.gad)||(ab==='garored'&&RR()<C.grd)||(ab==='kabuto'&&RR()<C.kbd)||(ab==='garomon'&&RR()<C.pfd)||(ab==='garocosmic'&&RR()<C.pcd)||(ab==='boss5'&&RR()<C.ced);if(r&&k==='a'&&typeof onDodgeHook==='function'&&!OPT.online)onDodgeHook(d.id);return r};
 /* เก็งการ์ร่างกิกะแม็กซ์ / โอคารุน: สถานะด้านลบทุกชนิด → ล้างทันที + เพิ่ม POWER */
+const stc=(r,v)=>r.stCap?Math.min(v,r.stCap):v;   /* เพดานดาเมจสถานะต่อครั้ง (บอสดันเจี้ยน) */
 function gmaxPurify(k){
   const s=S&&S[k];const cci=!!(S&&S.roster&&S.roster[k].some(r=>r.id==='cc'&&r.hp>0));   /* ซีซีในทีม (ยังไม่ถูกกำจัด) = ทั้งทีมกันสถานะผิดปกติ */
   if(!s||s.hp<=0||!(['gmax','turbo','rimuru','rimulord','truelord','truebossimm','shichi'].includes(CARDS[s.id].ability)||s.resist||cci))return;
@@ -975,7 +976,7 @@ async function paperAb(ak,dk){
     await sleepAnim(o.animate([{transform:'translate(0,0) scale(.5) rotate(0)',opacity:0},{opacity:1,offset:.15},{transform:`translate(${tx-sx}px,${ty-sy}px) scale(1.1) rotate(540deg)`,opacity:1}],{duration:380/speed,easing:'ease-in',fill:'forwards'}));o.remove()};
   if(!bomb){   /* กระดาษลดความเสียหาย: POWER ศัตรูลดลง 20% ของ POWER สูงสุด จนจบการโจมตีครั้งถัดไป */
     await fly(dw.getBoundingClientRect(),'📜');
-    const cur=D.wkr||0,mx=Math.max(D.p0||0,D.p+cur),amt=D.noStatus?0:Math.min(Math.round(mx*C.knr*10)/10,Math.max(0,D.p+cur-1));
+    const cur=D.wkr||0,mx=Math.max(D.p0||0,D.p+cur),amt=Math.min(Math.round(mx*C.knr*10)/10,Math.max(0,D.p+cur-1));
     if(amt>cur){D.p=Math.round((D.p-(amt-cur))*10)/10;D.wkr=amt;floatTxt(dw,'POWER -'+amt,'sm');render();
       log('📜 กระดาษลดความเสียหาย! POWER ของ '+nm(dk)+' ลดลง '+amt+' ('+Math.round(C.knr*100)+'% ของ POWER สูงสุด) จนจบการโจมตีครั้งถัดไป (เหลือ '+D.p+')',ak)}
     else log('📜 กระดาษลดความเสียหาย แต่ '+nm(dk)+' ถูกลดอยู่แล้ว',ak);
@@ -1004,7 +1005,7 @@ async function shadowAb(ak,dk){
     const pd=Math.max(1,Math.round((D.base||D.max)*C.sws));
     if(!(D.ps>=pd)){D.ps=pd;floatTxt(dw,'พิษ','sm');log('☠ '+nm(dk)+' ติดสถานะพิษ! เสีย HP '+pd.toLocaleString()+' ต่อเทิร์น ('+(Math.round(C.sws*1000)/10)+'% ของ HP สูงสุด)',ak)}
   }else if(k===2){   /* ไออน: ลด POWER ศัตรู 50% จนจบการโจมตีครั้งถัดไป (1 เทิร์นของศัตรู) */
-    const cur=D.wkr||0,mx=Math.max(D.p0||0,D.p+cur),amt=D.noStatus?0:Math.min(Math.round(mx*C.swz*10)/10,Math.max(0,D.p+cur-1));
+    const cur=D.wkr||0,mx=Math.max(D.p0||0,D.p+cur),amt=Math.min(Math.round(mx*C.swz*10)/10,Math.max(0,D.p+cur-1));
     if(amt>cur){D.p=Math.round((D.p-(amt-cur))*10)/10;D.wkr=amt;floatTxt(dw,'POWER -'+amt,'sm');
       log('🛡 POWER ของ '+nm(dk)+' ลดลง '+amt+' ('+Math.round(C.swz*100)+'%) นาน 1 เทิร์น (เหลือ '+D.p+')',ak)}
   }
@@ -1079,34 +1080,34 @@ async function doTurn(){
   isseiTick(ak);milimTick(ak);jwTick(ak);
   a.t++;
   if(a.burn>0){   /* เผาไหม้: เสีย HP ต้นเทิร์นของการ์ดที่ติดสถานะ */
-    const bd=a.burnDmg,cw=$('#f'+ak+' .cw');a.hp-=bd;a.burn--;floatTxt(cw,'-'+bd,'sm');cw.classList.remove('hit');void cw.offsetWidth;cw.classList.add('hit');
+    const bd=stc(a,a.burnDmg),cw=$('#f'+ak+' .cw');a.hp-=bd;a.burn--;floatTxt(cw,'-'+bd,'sm');cw.classList.remove('hit');void cw.offsetWidth;cw.classList.add('hit');
     log('🔥 '+nm(ak)+' ถูก'+(a.burnTx||'เผาไหม้')+' -'+bd+' (เหลือ HP '+Math.max(0,Math.ceil(a.hp))+')',dk);render();await sl(450);
     if(a.hp<=0){if(await handleKO(ak,dk))return;S.turn=dk;S.n++;render();return}
   }
   if(a.bleed){   /* เลือดไหล: เสีย HP % ของ HP สูงสุด ต้นเทิร์นของการ์ดที่ติดสถานะ */
-    const bd=Math.round((a.base||a.max)*C.ab),cw=$('#f'+ak+' .cw');a.hp-=bd;floatTxt(cw,'-'+bd,'sm');cw.classList.remove('hit');void cw.offsetWidth;cw.classList.add('hit');
+    const bd=stc(a,Math.round((a.base||a.max)*C.ab)),cw=$('#f'+ak+' .cw');a.hp-=bd;floatTxt(cw,'-'+bd,'sm');cw.classList.remove('hit');void cw.offsetWidth;cw.classList.add('hit');
     log('🩸 '+nm(ak)+' เลือดไหล -'+bd+' (เหลือ HP '+Math.max(0,Math.ceil(a.hp))+')',dk);render();await sl(450);
     if(a.hp<=0){if(await handleKO(ak,dk))return;S.turn=dk;S.n++;render();return}
   }
   for(const [fld,ic,tx] of [['hb','🩸','เลือดไหล'],['ps','☠','พิษ']]){   /* สถานะของเก็กโค: เสีย HP ต้นเทิร์นของการ์ดที่ติดสถานะ */
     if(a[fld]>0&&a.hp>0){
-      const bd=a[fld],cw=$('#f'+ak+' .cw');a.hp-=bd;floatTxt(cw,'-'+bd,'sm');cw.classList.remove('hit');void cw.offsetWidth;cw.classList.add('hit');
+      const bd=stc(a,a[fld]),cw=$('#f'+ak+' .cw');a.hp-=bd;floatTxt(cw,'-'+bd,'sm');cw.classList.remove('hit');void cw.offsetWidth;cw.classList.add('hit');
       log(ic+' '+nm(ak)+' '+tx+' -'+bd+' (เหลือ HP '+Math.max(0,Math.ceil(a.hp))+')',dk);render();await sl(450);
       if(a.hp<=0){if(await handleKO(ak,dk))return;S.turn=dk;S.n++;render();return}
     }
   }
   if(a.hw>0&&a.hp>0){   /* บาดแผลศักดิ์สิทธิ์ (จอมมาร ริมุรุ): เสีย HP % ของ HP สูงสุด ต้นเทิร์นของการ์ดที่ติดสถานะ */
-    const bd=a.hwDmg,cw=$('#f'+ak+' .cw');a.hp-=bd;a.hw--;floatTxt(cw,'-'+bd,'sm');cw.classList.remove('hit');void cw.offsetWidth;cw.classList.add('hit');
+    const bd=stc(a,a.hwDmg),cw=$('#f'+ak+' .cw');a.hp-=bd;a.hw--;floatTxt(cw,'-'+bd,'sm');cw.classList.remove('hit');void cw.offsetWidth;cw.classList.add('hit');
     log('✝ '+nm(ak)+' บาดแผลศักดิ์สิทธิ์ -'+bd+' (เหลือ HP '+Math.max(0,Math.ceil(a.hp))+')',dk);render();await sl(450);
     if(a.hp<=0){if(await handleKO(ak,dk))return;S.turn=dk;S.n++;render();return}
   }
   if(a.ice>0&&a.hp>0){   /* ผลึกน้ำแข็งตกค้าง: เสีย HP ต้นเทิร์นของการ์ดที่ติดสถานะ */
-    const bd=a.iceDmg,cw=$('#f'+ak+' .cw');a.ice--;if(a.ice<=0)a.iceDmg=0;a.hp-=bd;floatTxt(cw,'-'+bd,'zp');cw.classList.remove('hit');void cw.offsetWidth;cw.classList.add('hit');
+    const bd=stc(a,a.iceDmg),cw=$('#f'+ak+' .cw');a.ice--;if(a.ice<=0)a.iceDmg=0;a.hp-=bd;floatTxt(cw,'-'+bd,'zp');cw.classList.remove('hit');void cw.offsetWidth;cw.classList.add('hit');
     log('❄ '+nm(ak)+' ถูกผลึกน้ำแข็งตกค้างโจมตี -'+bd+' (เหลือ HP '+Math.max(0,Math.ceil(a.hp))+')',dk);render();await sl(450);
     if(a.hp<=0){if(await handleKO(ak,dk))return;S.turn=dk;S.n++;render();return}
   }
   if(a.sev>0&&a.hp>0){   /* ชาขั้นรุนแรง: ถูกไฟฟ้าช็อต + มีโอกาสโจมตีไม่ได้ในเทิร์นนี้ */
-    const bd=Math.round((a.base||a.max)*C.sv),cw=$('#f'+ak+' .cw');a.sev--;boltFx(dk,ak);a.hp-=bd;floatTxt(cw,'-'+bd,'zp');cw.classList.remove('hit');void cw.offsetWidth;cw.classList.add('hit');
+    const bd=stc(a,Math.round((a.base||a.max)*C.sv)),cw=$('#f'+ak+' .cw');a.sev--;boltFx(dk,ak);a.hp-=bd;floatTxt(cw,'-'+bd,'zp');cw.classList.remove('hit');void cw.offsetWidth;cw.classList.add('hit');
     log('⚡ '+nm(ak)+' ถูกไฟฟ้าช็อต -'+bd+' (เหลือ HP '+Math.max(0,Math.ceil(a.hp))+')',dk);render();await sl(500);
     if(a.hp<=0){if(await handleKO(ak,dk))return;S.turn=dk;S.n++;render();return}
     if(RR()<C.sc&&!a.para){a.para=true;log('⚡ '+nm(ak)+' ชาขั้นรุนแรง! จะโจมตีไม่ได้ในเทิร์นนี้',dk)}
