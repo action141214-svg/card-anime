@@ -64,8 +64,8 @@ const CARDS={
         desc:'ผลลัพธ์ด้านลบไม่มีผล และเปลี่ยนผลลัพธ์ด้านลบเป็นการเพิ่มค่าสเตตัสครั้งละ 15% · สร้างสถานะ "บาดแผลศักดิ์สิทธิ์" ทำให้ไม่สามารถฟื้นฟู HP ได้ และสร้างความเสียหาย 15% ของ HP สูงสุดของศัตรู · ทุกๆ 4 เทิร์นจะฟื้นฟู HP 10% ของ HP สูงสุดของตัวเอง'},
   rimulordboss:{name:'จอมมาร ริมุรุ เทมเพสต์ (บอสเควส เฟส 1)',rar:'USR',evo:true,questOnly:true,img:'rimurulord.jpeg',power:200,hp:10000,color:'#9a5cff',ability:'questboss',
         desc:'บอสเควสพัฒนา เฟส 1 ของจอมมารที่แท้จริง ริมุรุ เทมเพสต์ ไม่มีความสามารถพิเศษ'},
-  truerimuruboss:{name:'จอมมารที่แท้จริง ริมุรุ เทมเพสต์ (บอสเควส เฟส 2)',rar:'LTD',evo:true,questOnly:true,img:'truerimuru.jpeg',power:300,hp:50000,color:'#5fc8ff',ability:'questboss',
-        desc:'บอสเควสพัฒนา เฟส 2 ของจอมมารที่แท้จริง ริมุรุ เทมเพสต์ ไม่มีความสามารถพิเศษ'},
+  truerimuruboss:{name:'จอมมารที่แท้จริง ริมุรุ เทมเพสต์ (บอสเควส เฟส 2)',rar:'LTD',evo:true,questOnly:true,img:'truerimuru.jpeg',power:300,hp:100000,color:'#5fc8ff',ability:'truebossimm',
+        desc:'บอสเควสพัฒนา เฟส 2 ของจอมมารที่แท้จริง ริมุรุ เทมเพสต์ · สถานะด้านลบไม่มีผลและแปลงเป็นสเตตัส (POWER และ HP สูงสุด) ให้ตัวเอง'},
   slime:{name:'ริมุรุ ร่างสไลม์',rar:'S',img:'slime.jpeg',power:33,hp:250,color:'#5fb6ff',ability:'slime',
         desc:'เมื่อสังหารการ์ดศัตรูใบไหนได้จะทำการแปลงร่างเป็นการ์ดนั้น แล้วคงสเตตัสและความสามารถของการ์ดที่ถูกสังหารได้'},
   rimuru:{name:'ริมุรุ เทมเพสต์',rar:'SSR',evo:true,img:'rimuru.jpeg',power:39,hp:400,color:'#6a5cff',ability:'rimuru',
@@ -168,11 +168,11 @@ const dodges=k=>{const d=S&&S[k];if(!d||d.hp<=0)return false;const ab=CARDS[d.id
 /* เก็งการ์ร่างกิกะแม็กซ์ / โอคารุน: สถานะด้านลบทุกชนิด → ล้างทันที + เพิ่ม POWER */
 function gmaxPurify(k){
   const s=S&&S[k];const cci=!!(S&&S.roster&&S.roster[k].some(r=>r.id==='cc'&&r.hp>0));   /* ซีซีในทีม (ยังไม่ถูกกำจัด) = ทั้งทีมกันสถานะผิดปกติ */
-  if(!s||s.hp<=0||!(['gmax','turbo','rimuru','rimulord','truelord'].includes(CARDS[s.id].ability)||s.resist||cci))return;
+  if(!s||s.hp<=0||!(['gmax','turbo','rimuru','rimulord','truelord','truebossimm'].includes(CARDS[s.id].ability)||s.resist||cci))return;
   const n=(s.para?1:0)+(s.sealed?1:0)+(s.lightning?1:0)+(s.miss?1:0)+(s.burn>0?1:0)+(s.sev>0?1:0)+(s.poss?1:0)+(s.bleed?1:0)+(s.hb>0?1:0)+(s.ps>0?1:0)+(s.hw>0?1:0)+(s.frz?1:0)+(s.ice>0?1:0)+(s.cx>0?1:0);if(!n)return;
   s.para=s.sealed=s.lightning=s.miss=s.poss=s.bleed=false;s.burn=0;s.sev=0;s.hb=s.ps=0;s.hw=0;s.hwDmg=0;s.frz=false;s.ice=0;s.iceDmg=0;s.cx=0;
   const cw=$('#f'+k+' .cw');
-  if(CARDS[s.id].ability==='truelord'){   /* จอมมารที่แท้จริง: สถานะลบไม่มีผล + แปลงเป็นสเตตัส (POWER และ HP สูงสุด) +C.trg ต่อสถานะ */
+  if(CARDS[s.id].ability==='truelord'||CARDS[s.id].ability==='truebossimm'){   /* จอมมารที่แท้จริง (และบอสเควสเฟส 2): สถานะลบไม่มีผล + แปลงเป็นสเตตัส (POWER และ HP สูงสุด) +C.trg ต่อสถานะ */
     const g=C.trg*n,ap=Math.round(s.p*g*10)/10,ah=Math.round(s.max*g);s.p=Math.round((s.p+ap)*10)/10;s.max+=ah;s.hp+=ah;
     log('👑 '+nm(k)+' ไม่ได้รับผลของสถานะด้านลบ '+n+' อย่าง และแปลงเป็นสเตตัส +'+Math.round(g*100)+'% (POWER +'+ap+' เป็น '+s.p+' · HP สูงสุด +'+ah.toLocaleString()+')',k);
     if(cw){floatTxt(cw,'+'+Math.round(g*100)+'%','heal');cw.classList.remove('gold');void cw.offsetWidth;cw.classList.add('gold');setTimeout(()=>cw.classList.remove('gold'),1400)}
@@ -297,7 +297,7 @@ function getsugaFx(ak,dk){
 /* ---------- คุราปิก้า: สุ่มนิ้ว (โอกาสเท่ากัน 20% ต่อนิ้ว) ---------- */
 const FN=['นิ้วโป้ง','นิ้วชี้','นิ้วกลาง','นิ้วนาง','นิ้วก้อย'];
 const FD=['ฟื้นฟู HP','ขโมยความสามารถ','ผนึกความสามารถศัตรู','ลบสถานะด้านลบ','โจมตีซ้ำ'];
-const AN={truelord:'บาดแผลศักดิ์สิทธิ์',rimulord:'ล้างสถานะผิดปกติ + บาดแผลศักดิ์สิทธิ์',slime:'กลืนกินแล้วแปลงร่าง',rimuru:'ไร้ผลด้านลบ + โหมดผู้ไร้ความปราณี',immune:'ป้องกันสถานะผิดปกติให้ทีม',gate2:'Gate of Babylon (เรียกอาวุธ 3 เล่ม)',bomb:'ระเบิด (ดาเมจ ×2 + มึนงง)',shuna:'เสริมพลังทีม',boss3:'ดาเมจ ×3 ใส่บอส',boss5:'ดาเมจ ×5 ใส่บอส + หลบ 50%',ghoul:'ดูดเลือด + ตี 4 ครั้ง',mai:'โหมดไฟ (เผาไหม้) / โหมดระเบิด',questboss:'ไม่มี',pflame:'ไฟบริสุทธิ์',wheel:'ธรรมจักร (กงล้อหมุนสุ่มเสริมพลัง)',kyuubi:'จักระจิ้งจอก (ฟื้นฟู HP + ชะงัก)',getsuga:'เกตสึกะ (ดาเมจ ×3)',shiki:'ทศฉายา (เรียกชิกิกามิ)',upset:'ล้มยักษ์ (ดาเมจเพิ่มใส่ศัตรูระดับสูงกว่า)',lightning:'สายฟ้า',grow:'POWER เพิ่มขึ้น',paralyze:'ทำให้ชา',heal:'ฟื้นฟู HP',gate:'Gate of Babylon',ghost:'ผีเมาช่วยโจมตี',possess:'เข้าสิง (ศัตรูมีโอกาสโจมตีตัวเอง)',gmax:'แปลงสถานะลบเป็น POWER',double:'โจมตี 2 ครั้ง + เลือดไหล',scythe:'สุ่มการโจมตี 3 รูปแบบ',turbo:'สัญลักษณ์เทอร์โบ',crux:'กลุ่มดาวกางเขนใต้ (เรียกอุปสรรคพุ่งใส่)',garo:'โจมตี 2 ครั้ง + หลบ 40%',kiblast:'กระสุนพลัง 2-5 ครั้ง',icecrystal:'ผลึกน้ำแข็ง (แช่แข็ง + ดาเมจตกค้าง)',paper:'กระดาษวิเศษ (ลดดาเมจ / ระเบิด)'};
+const AN={truebossimm:'สถานะลบไม่มีผล + แปลงเป็นสเตตัส',truelord:'บาดแผลศักดิ์สิทธิ์',rimulord:'ล้างสถานะผิดปกติ + บาดแผลศักดิ์สิทธิ์',slime:'กลืนกินแล้วแปลงร่าง',rimuru:'ไร้ผลด้านลบ + โหมดผู้ไร้ความปราณี',immune:'ป้องกันสถานะผิดปกติให้ทีม',gate2:'Gate of Babylon (เรียกอาวุธ 3 เล่ม)',bomb:'ระเบิด (ดาเมจ ×2 + มึนงง)',shuna:'เสริมพลังทีม',boss3:'ดาเมจ ×3 ใส่บอส',boss5:'ดาเมจ ×5 ใส่บอส + หลบ 50%',ghoul:'ดูดเลือด + ตี 4 ครั้ง',mai:'โหมดไฟ (เผาไหม้) / โหมดระเบิด',questboss:'ไม่มี',pflame:'ไฟบริสุทธิ์',wheel:'ธรรมจักร (กงล้อหมุนสุ่มเสริมพลัง)',kyuubi:'จักระจิ้งจอก (ฟื้นฟู HP + ชะงัก)',getsuga:'เกตสึกะ (ดาเมจ ×3)',shiki:'ทศฉายา (เรียกชิกิกามิ)',upset:'ล้มยักษ์ (ดาเมจเพิ่มใส่ศัตรูระดับสูงกว่า)',lightning:'สายฟ้า',grow:'POWER เพิ่มขึ้น',paralyze:'ทำให้ชา',heal:'ฟื้นฟู HP',gate:'Gate of Babylon',ghost:'ผีเมาช่วยโจมตี',possess:'เข้าสิง (ศัตรูมีโอกาสโจมตีตัวเอง)',gmax:'แปลงสถานะลบเป็น POWER',double:'โจมตี 2 ครั้ง + เลือดไหล',scythe:'สุ่มการโจมตี 3 รูปแบบ',turbo:'สัญลักษณ์เทอร์โบ',crux:'กลุ่มดาวกางเขนใต้ (เรียกอุปสรรคพุ่งใส่)',garo:'โจมตี 2 ครั้ง + หลบ 40%',kiblast:'กระสุนพลัง 2-5 ครั้ง',icecrystal:'ผลึกน้ำแข็ง (แช่แข็ง + ดาเมจตกค้าง)',paper:'กระดาษวิเศษ (ลดดาเมจ / ระเบิด)'};
 /* ไอคอนมือ: นิ้วที่ใช้ในเทิร์นนั้นจะเรืองสีทอง */
 function handSvg(i,sz=40){
   const F=[['M10 66 L22 56 L36 84 L22 92Z','',''],['M24 16h12a2 2 0 0 1 2 2v44H22V18a2 2 0 0 1 2-2z'],['M38 8h12a2 2 0 0 1 2 2v52H36V10a2 2 0 0 1 2-2z'],['M52 14h12a2 2 0 0 1 2 2v46H50V16a2 2 0 0 1 2-2z'],['M66 28h11a2 2 0 0 1 2 2v32H64V30a2 2 0 0 1 2-2z']];

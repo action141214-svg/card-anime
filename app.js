@@ -946,7 +946,7 @@ const EVOS=[{from:'naruto',to:'naruto1',need:{cards:50,items:{seal9:1},coins:100
   /* บอส 2 เฟส: เฟส 1 ตายแล้วเปลี่ยนเป็นเฟส 2 · drops: first = โอกาสออกเมื่อชนะครั้งแรก (rate = ครั้งต่อๆ ไป) · safe = กันจุดตายทันที */
   {from:'rimulord',to:'truerimuru',need:{cards:5,more:{slime:100,rimuru:10},items:{shisu:20,rsword:1},kills:20000,coins:1000000000},grant:{lv:1,star:6},
   boss:{card:'rimulordboss',name:'จอมมาร ริมุรุ เทมเพสต์ (เฟส 1)',hp:10000,power:200,lv:1,coins:100,safe:true,
-    phase2:{card:'truerimuruboss',name:'จอมมารที่แท้จริง ริมุรุ เทมเพสต์ (เฟส 2)',hp:50000,power:300},
+    phase2:{card:'truerimuruboss',name:'จอมมารที่แท้จริง ริมุรุ เทมเพสต์ (เฟส 2)',hp:100000,power:300},
     drops:[{item:'shisu',rate:.1},{item:'rsword',rate:.005,first:1}]}}];
 const evDropRate=(e,d)=>(d.first!=null&&!SV.evoWin[e.from])?d.first:d.rate;   /* โอกาสออกตอนนี้ (ชนะครั้งแรกอาจได้โอกาสพิเศษ) */
 let evoSel=null,evoKeep=false,questTab='char';
