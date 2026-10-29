@@ -979,7 +979,7 @@ const EVOS=[{from:'naruto',to:'naruto1',need:{cards:50,items:{seal9:1},coins:100
   {from:'garomon',to:'garocosmic',need:{cards:5,more:{garo:300,garored:30},items:{cosmic:1},pmk:5000,pmd:5000,pma:1000,pmc:100,win:true,coins:1000000000},grant:{star:6},
   boss:{card:'garocosmicboss',name:'คอสมิค กาโร่',hp:50000,power:100,lv:1,coins:100,drops:[{item:'cosmic',rate:1}]}},
   /* drops แบบ pick = โอกาสออกรวม rate แล้วสุ่มหนึ่งชิ้นจากรายการ (ออกอีกา 5% → จริง/ปลอม อย่างละ 50%) */
-  {from:'shichi',to:'susanoo',need:{cards:1,items:{crowr:5,crowf:10},coins:0},grant:{star:6},
+  {from:'shichi',to:'susanoo',need:{cards:1,items:{crowr:5,crowf:10},coins:10000000000},grant:{star:6},
   boss:{card:'susanooboss',name:'อิทาจิและชิซุย ซูซาโนะอุขั้นสมบูรณ์',hp:50000,power:300,lv:1,coins:100,drops:[{item:'crowr',pick:['crowr','crowf'],rate:.05}]}}];
 const dropName=d=>d.pick?d.pick.map(k=>ITEMS[k].name).join(' / '):ITEMS[d.item].name;
 const evDropRate=(e,d)=>(d.first!=null&&!SV.evoWin[e.from])?d.first:d.rate;   /* โอกาสออกตอนนี้ (ชนะครั้งแรกอาจได้โอกาสพิเศษ) */
