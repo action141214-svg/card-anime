@@ -956,26 +956,60 @@ function ifEnd(quit,r){
    บอสถูกปราบ → ปิดทันที ทุกคนที่ช่วยตีได้ทหารเงาสุ่ม 1 ใน 3 (อิกริส / เบรุ / ไออน) และนับเป็น "ผ่านดันเจี้ยน" 1 ครั้ง
    ต้องล็อกอินออนไลน์จึงจะเล่นได้ · ค่า HP/เวลา/สิทธิ์ตั้งที่ dungeon.sql (ที่นี่ใช้แสดงผลและตั้ง POWER บอส) */
 const DG={tries:5,power:99};
+let DGLB=null,dgLbAt=0;
 let DGS=null,dgBusy=false,dgClaiming=false,dgInBattle=false,dgPollAt=0;
 const dgFmt=sec=>{sec=Math.max(0,Math.ceil(sec));const m=Math.floor(sec/60),s=sec%60;return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')};
 const dgErrTxt=e=>({login:'ต้องล็อกอินออนไลน์ก่อน',offline:'ต้องล็อกอินออนไลน์ก่อน',notopen:'ดันเจี้ยนยังไม่เปิด',ended:'ดันเจี้ยนหมดเวลาแล้ว',cleared:'ดันเจี้ยนถูกปราบไปแล้ว',notries:'หมดสิทธิ์ลงรอบนี้แล้ว',error:'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ'})[e]||'ทำรายการไม่สำเร็จ';
+const dgEsc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* โอกาสได้ของตามอันดับ (ต้องตรงกับ dungeon_chance ใน dungeon_rank.sql): ท็อป 1-5 = 100% · อันดับ 6 = 50% แล้วไล่ลงเป็นเส้นตรงถึงอันดับ 50 = 5% · 51+ = 0% */
+const dgChance=r=>r<=5?1:r<=50?0.5-(r-6)*(0.45/44):0;
+const dgTag=r=>r<=5?'🏆 ได้ของ 100%':dgChance(r)>0?'🎲 ลุ้น '+Math.round(dgChance(r)*100)+'%':'ไม่มีโอกาส';
 const dgOnline=()=>typeof Online!=='undefined'&&Online.me&&Online.dungeon;
 async function dgRefresh(){
   if(!dgOnline()){DGS={error:'offline'};return DGS}
   const s=await Online.dungeon.status();
   if(s&&!s.error){s._endAt=Date.now()+(s.end_in||0)*1000;s._nextAt=Date.now()+(s.next_in||0)*1000}
   DGS=s;dgPollAt=Date.now();
+  const scr=$('#dungeonScr');
+  if(s&&!s.error&&scr&&!scr.classList.contains('hidden')&&Online.dungeon.leaderboard&&Date.now()-dgLbAt>7000){
+    dgLbAt=Date.now();const lb=await Online.dungeon.leaderboard();DGLB=lb&&lb.ok&&Array.isArray(lb.rows)?lb:null;
+  }
   if(s&&s.unclaimed!=null&&!dgInBattle)dgClaimFlow(s.unclaimed);
   return s;
 }
 async function dgClaimFlow(hr,extra=''){
   if(dgClaiming)return;dgClaiming=true;
   const r=await Online.dungeon.claim(hr);dgClaiming=false;
-  if(!r||!r.ok||!ITEMS[r.reward])return false;
-  const k=r.reward;SV.items[k]=itemN(k)+1;SV.dgw=(SV.dgw||0)+1;save();hud();
-  modal(`<h2>ดันเจี้ยนถูกปราบแล้ว! 🎉</h2><p>ทุกคนที่ช่วยกันตีได้รับรางวัล</p>${extra}<div class="dropbox"><img src="${ITEMS[k].img}" alt=""><div><b>ได้รับ ${ITEMS[k].name}!</b><br><small>มีทั้งหมด ×${itemN(k)}</small></div></div><div class="two"><button id="dgBack">ตกลง</button></div>`);
+  if(!r||!r.ok)return false;
+  const k=ITEMS[r.reward]?r.reward:null,rk=r.rank|0;
+  SV.dgw=(SV.dgw||0)+1;if(k)SV.items[k]=itemN(k)+1;save();hud();
+  const rkTxt=rk?`<p>อันดับดาเมจของคุณ <b>#${rk}</b> · ${dgTag(rk)}</p>`:'';
+  const prize=k?`<div class="dropbox"><img src="${ITEMS[k].img}" alt=""><div><b>ได้รับ ${ITEMS[k].name}!</b><br><small>มีทั้งหมด ×${itemN(k)}</small></div></div>`:`<div class="dropbox"><div><b>รอบนี้ไม่ได้ทหารเงา 😢</b><br><small>ยังนับเป็นผ่านดันเจี้ยน 1 ครั้ง · ตีให้ติดอันดับสูงขึ้นเพื่อเพิ่มโอกาส</small></div></div>`;
+  modal(`<h2>ดันเจี้ยนถูกปราบแล้ว! 🎉</h2>${rkTxt}${extra}${prize}<div class="two"><button id="dgBack">ตกลง</button></div>`);
   $('#dgBack').onclick=()=>{closeModal();if(!$('#dungeonScr').classList.contains('hidden'))renderDungeon()};
   return true;
+}
+function dgLbRow(r,P){
+  const on=P[r.user_id],meId=Online.me&&Online.me.id;
+  return `<div class="fr dglb${r.user_id===meId?' me':''}"><b class="rk">#${r.rank}</b><i class="od${on?' on':''}"></i><b>${dgEsc(r.name||'ผู้เล่น')}</b><small>${(r.damage||0).toLocaleString()}</small><span class="sp"></span>${on?Online.setHtml(on.team):''}<small class="chn">${dgTag(r.rank)}</small></div>`;
+}
+function dgLbHtml(){
+  const lb=DGLB;if(!lb||!Array.isArray(lb.rows))return '';
+  const P=Online.presence?Online.presence():{},meId=Online.me&&Online.me.id,rows=lb.rows,top=rows.slice(0,10),mine=lb.me;
+  const myRow=mine&&mine.rank&&!top.some(r=>r.user_id===meId)?dgLbRow({rank:mine.rank,user_id:meId,name:Online.me.name||Online.me.username,damage:mine.damage},P):'';
+  return `<h3>🏆 อันดับดาเมจรอบนี้</h3>
+    <p class="mute">ท็อป 1-5 ได้ทหารเงา 100% · อันดับ 6-50 ลุ้น 50% ไล่ลงมา · 🟢 = ออนไลน์ (โชว์เซ็ตการ์ด)</p>
+    <div class="frlist">${top.length?top.map(r=>dgLbRow(r,P)).join(''):'<p class="mute">ยังไม่มีใครตีบอสรอบนี้</p>'}${myRow?'<div class="dgsep">⋯</div>'+myRow:''}</div>
+    ${rows.length>10?'<button class="sec small" id="dgLbAll">ดูทั้งหมด ('+rows.length+')</button>':''}`;
+}
+function dgPaintLb(){   // อัปเดตเฉพาะตาราง (เมื่อคนเข้า/ออนไลน์เปลี่ยน) ไม่วาดทั้งหน้า
+  const b=$('#dgLb');if(!b||!$('#mdl').classList.contains('hidden'))return;
+  b.innerHTML=dgLbHtml();const x=$('#dgLbAll');if(x)x.onclick=dgLbModal;
+}
+function dgLbModal(){
+  if(!DGLB)return;const P=Online.presence?Online.presence():{};
+  modal(`<h2>🏆 อันดับดาเมจ</h2><div class="frlist dgall">${DGLB.rows.slice(0,50).map(r=>dgLbRow(r,P)).join('')}</div><div class="two"><button id="dgLbX">ปิด</button></div>`);
+  $('#dgLbX').onclick=closeModal;
 }
 function dgPaint(){
   const s=DGS,bc=CARDS.shadowempboss,team=SV.team.filter(x=>SV.owned.includes(x));
@@ -991,10 +1025,12 @@ function dgPaint(){
   else if(s.state==='ended')st=`<div class="dgtime">🌙 หมดเวลา</div><p>รอบนี้ไม่มีใครปราบบอสได้ · รอบถัดไปใน <b id="dgCd">${dgFmt((s._nextAt-Date.now())/1000)}</b></p>`;
   else st=`<div class="dgtime">⏳ ยังไม่เปิด</div><p>ดันเจี้ยนรอบนี้จะโผล่แบบสุ่มภายใน 30 นาทีแรกของชั่วโมง · เปิดหน้านี้ค้างไว้ได้ (ปุ่มดันเจี้ยนที่หน้าหลักจะเรืองแสงเมื่อเปิด)</p>`;
   $('#dgRaid').innerHTML=box(`${bar}${st}
-    <div class="ebrule"><b>กติกา</b><br>• ทุกคนช่วยกันตีบอสตัวเดียวกัน ดาเมจรวมหัก HP บอสรวม (แพ้ก็นับดาเมจที่ทำได้)<br>• ลงได้คนละ ${DG.tries} ครั้งต่อรอบ หักสิทธิ์ทันทีที่ลง แพ้หรือออกกลางคันก็เสียสิทธิ์<br>• บอสถูกปราบ → ดันเจี้ยนปิดทันที ทุกคนที่ช่วยตีได้ทหารเงาสุ่ม 1 ใน 3: <b>อิกริส / เบรุ / ไออน</b> และนับเป็นผ่านดันเจี้ยน 1 ครั้ง<br>• ไม่มีใครปราบทันภายในเวลา → ไม่มีรางวัล</div>
+    <div class="ebrule"><b>กติกา</b><br>• ทุกคนช่วยกันตีบอสตัวเดียวกัน ดาเมจรวมหัก HP บอสรวม (แพ้ก็นับดาเมจที่ทำได้)<br>• ลงได้คนละ ${DG.tries} ครั้งต่อรอบ หักสิทธิ์ทันทีที่ลง แพ้หรือออกกลางคันก็เสียสิทธิ์<br>• บอสถูกปราบ → ดันเจี้ยนปิดทันที ทุกคนที่ช่วยตีนับเป็นผ่านดันเจี้ยน 1 ครั้ง · ของรางวัลคือทหารเงาสุ่ม 1 ใน 3 (<b>อิกริส / เบรุ / ไออน</b>) จัดตามอันดับดาเมจรวม: <b>ท็อป 1-5 ได้ 100%</b> · อันดับ 6 ลุ้น 50% แล้วไล่ลงทีละน้อยถึงอันดับ 50 (5%) · อันดับ 51 ขึ้นไปไม่มีของ<br>• ไม่มีใครปราบทันภายในเวลา → ไม่มีรางวัล</div>
+    <div class="box dglbbox" id="dgLb">${dgLbHtml()}</div>
     <div class="myteam"><span>ทีมของคุณ</span><div>${team.length?team.map(t=>`<img class="th" src="${CARDS[t].img}" alt="${CARDS[t].name}">`).join(''):'<small>ยังไม่มีการ์ดในทีม</small>'}</div><button class="sec small" data-go="team">จัดทีม</button></div>
     <div class="two"><button id="dgGo" ${open&&left>0&&team.length?'':'disabled'}>${open?(left>0?'⚔ เข้าดันเจี้ยน (สิทธิ์เหลือ '+left+')':'หมดสิทธิ์ลงรอบนี้แล้ว'):'ยังเข้าไม่ได้'}</button><button class="sec small" id="dgRef">🔄 รีเฟรช</button></div>`);
-  $('#dgGo').onclick=startDungeon;$('#dgRef').onclick=()=>renderDungeon();
+  $('#dgGo').onclick=startDungeon;$('#dgRef').onclick=()=>{dgLbAt=0;renderDungeon()};
+  const la=$('#dgLbAll');if(la)la.onclick=dgLbModal;
 }
 function renderDungeon(){
   $('#dgRaid').innerHTML='<div class="rinfo"><h2>🕳️ ดันเจี้ยน</h2><p class="mute">กำลังโหลดข้อมูลจากเซิร์ฟเวอร์…</p></div>';
@@ -1043,6 +1079,7 @@ async function dgTick(){
   if(onDg){const cd=$('#dgCd');if(cd&&s&&!s.error)cd.textContent=dgFmt((((s.state==='open')?s._endAt:s._nextAt)-Date.now())/1000)}
 }
 setInterval(dgTick,1000);
+addEventListener('load',()=>{if(typeof Online!=='undefined')Online.onPres=()=>{if(!$('#dungeonScr').classList.contains('hidden'))dgPaintLb()}});   // online.js โหลดหลัง app.js
 /* ---------- เควสพัฒนา (Evolution Quest) ---------- */
 /* วัตถุดิบ (ไอเทม) */
 const ITEMS={shadoworb:{name:'ลูกแก้วเงา',img:'shadoworb.jpeg',rar:'USR',color:'#a24dff',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้ EVOLUTION ปลุกพลังขั้นสอง ซอง จิน วู'},igris:{name:'อิกริส',img:'igrisevo.jpeg',rar:'SSR',color:'#8a5cff',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้ EVOLUTION ปลุกพลังขั้นสอง ซอง จิน วู (ได้จากดันเจี้ยน)'},beru:{name:'เบรุ',img:'beruevo.jpeg',rar:'SSR',color:'#8a5cff',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้ EVOLUTION ปลุกพลังขั้นสอง ซอง จิน วู (ได้จากดันเจี้ยน)'},ion:{name:'ไออน',img:'ionevo.jpeg',rar:'SSR',color:'#8a5cff',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้ EVOLUTION ปลุกพลังขั้นสอง ซอง จิน วู (ได้จากดันเจี้ยน)'},hojin:{name:'ธรรมจักรแปดซี่',img:'hojin.jpeg',rar:'UR',color:'#ffc93d',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้ EVOLUTION ให้กับการ์ดฟุชิงุโระ เมงุมิ'},sealc:{name:'อักขระต้องคำสาป',img:'sasuke_seal.jpeg',rar:'S',color:'#a06cff',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดอุจิวะ ซาสึเกะ (ร่างเด็ก)'},sword:{name:'ดาบของชา แฮ อิน',img:'swordcha.jpeg',rar:'SSR',color:'#e24b5b',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดชา แฮ อิน'},shisu:{name:'หน้ากากของชิสุ',img:'shisu.jpeg',rar:'SR',color:'#cfd8ff',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดริมุรุ ร่างสไลม์'},rsword:{name:'ดาบของจอมมารริมุรุ',img:'swordrimuru.jpeg',rar:'USR',color:'#8a5cff',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION จอมมาร ริมุรุ เทมเพสต์'},dagger:{name:'มีดนักฆ่าอัศวิน',img:'dagger.jpeg',rar:'SR',color:'#ff7a3d',desc:'วัตถุดิบวิวัฒนาการ ไว้สำหรับ EVOLUTION ซอง จิน วู'},kasaga:{name:'มีดเขี้ยวงูของคาสากะ',img:'kasaga.jpeg',rar:'SR',color:'#8a5cff',desc:'วัตถุดิบวิวัฒนาการ ไว้ EVOLUTION ซอง จิน วู'},crowr:{name:'อีกา (จริง)',img:'crow.jpeg',rar:'UR',color:'#ff4a3a',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้ EVOLUTION สองอัจฉริยะแห่งตระกูลอุจิวะ ชิซุยและอิทาจิ'},crowf:{name:'อีกา (ปลอม)',img:'crow_fake.jpeg',rar:'UR',color:'#9aa0b4',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้ EVOLUTION สองอัจฉริยะแห่งตระกูลอุจิวะ ชิซุยและอิทาจิ'},cosmic:{name:'คอสมิค',img:'cosmicevo.jpeg',rar:'UR',color:'#4aa8ff',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดสัตว์ประหลาดที่สมบูรณ์แบบ กาโร่'},seal9:{name:'ตราประทับ 9 หาง',img:'narutoevo.jpeg',rar:'S',color:'#ffcf4a',desc:'วัตถุดิบวิวัฒนาการ ไว้ใช้สำหรับ EVOLUTION ให้กับการ์ดอุซึมากิ นารูโตะ'}};

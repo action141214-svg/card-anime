@@ -807,3 +807,15 @@ body{padding:0}
 @keyframes dgpulse{50%{transform:scale(1.04)}}
 #dungeonScr .rinfo h2{color:#d9b8ff}
 .dgtime{font-size:1.5em;font-weight:800;letter-spacing:.04em;color:#ffd34d}
+/* ===== รายชื่อคนออนไลน์ + เซ็ตการ์ด + อันดับดันเจี้ยน ===== */
+.pset{display:inline-flex;gap:3px;flex-wrap:nowrap;max-width:100%;overflow-x:auto}
+.pset .pt{height:clamp(34px,6vh,48px);flex:none}
+.onlistbox h3,.dglbbox h3{margin:0 0 6px}
+#onList{max-height:42vh;overflow-y:auto}
+.dglbbox{width:100%;margin:8px 0}
+.dglb .rk{font-family:Kanit;min-width:2.4em;color:var(--gold)}
+.dglb.me{border-color:#a24dff;box-shadow:0 0 0 1px #a24dff88}
+.dglb .chn{color:#d9b8ff;white-space:nowrap}
+.dgsep{text-align:center;color:var(--mute);line-height:1}
+.dgall{max-height:60vh;overflow-y:auto}
+@media(max-width:760px){.dglb .pset{order:9;width:100%}}

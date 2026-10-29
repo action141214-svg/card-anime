@@ -14,6 +14,7 @@ const EMAIL=u=>u+'@cardduel.app';
 const UNAME=/^[a-z0-9_]{3,16}$/;
 const NAME_RE=/^[\p{L}\p{M}\p{N}_ ]{2,14}$/u;
 let me=null,lobbyCh=null,userCh=null,frCh=null,chatCh=null,saveT=null,saving=false;
+let onlinePres={},lastSetSig='',setT=null;
 let onlineIds=new Set(),FR={rows:[],profs:{}},chatMsgs=[],lastChat=0,R=null;
 const cur=()=>{const l=['onlineScr','roomScr','friendsScr','chatScr'].find(i=>!$('#'+i).classList.contains('hidden'));return l||''};
 
@@ -107,7 +108,7 @@ async function syncSave(){
   load();hud();
   if(push||!cloud)scheduleUpload(300);
 }
-function onSave(){if(sb&&me)scheduleUpload(2500)}
+function onSave(){if(sb&&me){scheduleUpload(2500);retrack()}}
 function scheduleUpload(ms){clearTimeout(saveT);saveT=setTimeout(uploadSave,ms)}
 let saveOkShown=false,lastSaveMsg='';   /* แจ้งสถานะเซฟบนจอ (เปิด F12 ไม่ได้ก็เห็นว่าเซฟขึ้นเซิร์ฟเวอร์ไหม) */
 async function uploadSave(){
@@ -149,7 +150,7 @@ function askName(force){
       $('#nmGo').disabled=true;err('กำลังบันทึก…');
       const r=await sb.from('profiles').update({display_name:n}).eq('id',me.id);
       if(r.error){$('#nmGo').disabled=false;return err(r.error.code==='23505'||/duplicate|unique/i.test(r.error.message)?'ชื่อนี้มีคนใช้แล้ว':'บันทึกไม่สำเร็จ: '+r.error.message)}
-      me.name=n;updateMe();if(lobbyCh)lobbyCh.track({name:n});closeModal();toast('ตั้งชื่อเป็น "'+n+'" แล้ว');res(true);if(cur()==='onlineScr')hub();
+      me.name=n;updateMe();if(lobbyCh){const p=presPayload();lastSetSig=JSON.stringify(p);lobbyCh.track(p)}closeModal();toast('ตั้งชื่อเป็น "'+n+'" แล้ว');res(true);if(cur()==='onlineScr')hub();
     };
     setTimeout(()=>{const i=$('#nmI');if(i){i.focus();i.select()}},50);
   });
@@ -157,23 +158,46 @@ function askName(force){
 
 /* ---------------- Realtime: ออนไลน์ / คำเชิญ / เพื่อน ---------------- */
 /* จำนวนผู้เล่นออนไลน์ (นับจาก presence ของห้อง 'lobby' · 1 บัญชี = 1 คน แม้เปิดหลายแท็บ) — อัปเดตที่ปุ่มหน้าหลักและหน้าออนไลน์ */
+/* เซ็ตการ์ดที่แสดงให้คนอื่นเห็น (การ์ดในทีม · เลเวล · ดาว) ส่งไปกับ presence ของห้อง lobby */
+const mySet=()=>{try{return SV.team.filter(x=>SV.owned.includes(x)).slice(0,8).map(id=>[id,SV.lv[id]||1,SV.star[id]||1])}catch(e){return[]}};
+const presPayload=()=>({name:me.name||me.username,team:mySet()});
+const cleanTeam=t=>Array.isArray(t)?t.slice(0,8).filter(x=>Array.isArray(x)&&typeof x[0]==='string'&&CARDS[x[0]]).map(x=>[x[0],Math.max(1,x[1]|0),Math.max(1,x[2]|0)]):[];
+function retrack(){   // เซ็ตเปลี่ยนเมื่อไหร่ ส่งให้คนอื่นเห็น (หน่วง 2 วิ กันยิงถี่)
+  if(!lobbyCh||!me)return;
+  const p=presPayload(),sig=JSON.stringify(p);if(sig===lastSetSig)return;
+  clearTimeout(setT);setT=setTimeout(()=>{if(lobbyCh){lastSetSig=sig;lobbyCh.track(p)}},2000);
+}
+const setHtml=team=>team&&team.length?`<span class="pset">${team.map(([id,l,s])=>`<img class="th pt" src="${CARDS[id].img}" alt="" title="${esc(CARDS[id].name)} Lv.${l} ${s}★">`).join('')}</span>`:'<small class="mute">ยังไม่มีทีม</small>';
+/* รายชื่อคนออนไลน์ตอนนี้ + เซ็ตการ์ดของแต่ละคน (หน้าออนไลน์) */
+function renderOnlineList(){
+  const b=document.getElementById('onList');if(!b||!me)return;
+  const ids=Object.keys(onlinePres).sort((x,y)=>(x===me.id?-1:y===me.id?1:0)||onlinePres[x].name.localeCompare(onlinePres[y].name));
+  const isFr=id=>FR.rows.some(r=>r.status==='accepted'&&(r.requester===id||r.addressee===id));
+  b.innerHTML=ids.length?ids.map(id=>{const p=onlinePres[id];return `<div class="fr"><i class="od on"></i><b>${esc(p.name)}</b>${id===me.id?'<small>(คุณ)</small>':isFr(id)?'<small>👥 เพื่อน</small>':''}<span class="sp"></span>${setHtml(p.team)}</div>`}).join(''):'<p class="mute">กำลังโหลด…</p>';
+}
 function updOnCount(){
   const n=onlineIds.size,live=!!(me&&lobbyCh);
   const hb=document.getElementById('onCnt');if(hb)hb.textContent=live?' 🟢'+n:'';
   const hh=document.getElementById('onHubCnt');if(hh)hh.textContent=n;
+  renderOnlineList();
 }
 function startRealtime(){
   stopRealtime();
   lobbyCh=sb.channel('lobby',{config:{presence:{key:me.id}}});
-  lobbyCh.on('presence',{event:'sync'},()=>{onlineIds=new Set(Object.keys(lobbyCh.presenceState()));updOnCount();if(cur()==='friendsScr')renderFriends()});
-  lobbyCh.subscribe(st=>{if(st==='SUBSCRIBED')lobbyCh.track({name:me.name||me.username})});
+  lobbyCh.on('presence',{event:'sync'},()=>{
+    const ps=lobbyCh.presenceState();onlineIds=new Set(Object.keys(ps));
+    onlinePres={};Object.entries(ps).forEach(([id,a])=>{const p=(a&&a[a.length-1])||{};onlinePres[id]={name:String(p.name||'ผู้เล่น').slice(0,20),team:cleanTeam(p.team)}});
+    updOnCount();if(cur()==='friendsScr')renderFriends();
+    if(window.Online&&typeof window.Online.onPres==='function')window.Online.onPres();
+  });
+  lobbyCh.subscribe(st=>{if(st==='SUBSCRIBED'){const p=presPayload();lastSetSig=JSON.stringify(p);lobbyCh.track(p)}});
   userCh=sb.channel('user-'+me.id);
   userCh.on('broadcast',{event:'invite'},m=>onInvite(m.payload)).subscribe();
   frCh=sb.channel('fr-'+me.id);
   frCh.on('postgres_changes',{event:'*',schema:'public',table:'friendships'},()=>loadFriends()).subscribe();
   loadFriends();
 }
-function stopRealtime(){[lobbyCh,userCh,frCh,chatCh].forEach(c=>{if(c)try{sb.removeChannel(c)}catch(e){}});lobbyCh=userCh=frCh=chatCh=null;onlineIds=new Set();updOnCount()}
+function stopRealtime(){[lobbyCh,userCh,frCh,chatCh].forEach(c=>{if(c)try{sb.removeChannel(c)}catch(e){}});lobbyCh=userCh=frCh=chatCh=null;onlineIds=new Set();onlinePres={};lastSetSig='';updOnCount()}
 function onInvite(p){
   if(!p||!/^\d{6}$/.test(p.code||'')||R)return;
   if(!$('#battleScr').classList.contains('hidden'))return;
@@ -274,6 +298,7 @@ function hub(){
   if(!me){b.innerHTML=`<div class="box onmsg"><h2>ยังไม่ได้เข้าสู่ระบบ</h2><p>ต้องล็อคอินก่อนจึงจะเล่นออนไลน์ได้</p><button id="onLogin">เข้าสู่ระบบ</button></div>`;$('#onLogin').onclick=()=>openAuth(()=>hub());return}
   const pend=FR.rows.filter(r=>r.status==='pending'&&r.addressee===me.id).length;
   b.innerHTML=`<div class="box onprof"><div><b class="nm">${esc(me.name||me.username)}</b><small>ไอดี: ${esc(me.username)} · ☁ เซฟบนเซิร์ฟเวอร์อัตโนมัติ</small><small class=\"oncount\">🟢 ผู้เล่นออนไลน์ตอนนี้ <b id=\"onHubCnt\">${onlineIds.size}</b> คน</small></div><div class="two"><button class="sec small" id="onRn">✏ เปลี่ยนชื่อ</button><button class="sec small" id="onOut">ออกจากระบบ</button></div></div>
+    <div class="box onlistbox"><h3>🟢 ใครออนไลน์ตอนนี้ (พร้อมเซ็ตการ์ด)</h3><div class="frlist" id="onList"></div></div>
     <div class="ontiles">
       <button class="mode m-stage" id="onCreate1"><span class="mi">⚔️</span><b>สร้างห้อง 1 ต่อ 1</b><small>ผู้เล่น 2 คน · เลขห้อง 6 หลัก<br>ส่งให้เพื่อนเข้ามาสู้</small></button>
       <button class="mode m-hws" id="onCreate2"><span class="mi">🛡️</span><b>สร้างห้อง 2 ต่อ 2</b><small>ผู้เล่น 4 คน ทีมละ 2 คน<br>คุมการ์ดคนละชุด เลือกเป้าโจมตีเอง</small></button>
@@ -282,6 +307,7 @@ function hub(){
       <button class="mode m-hwg" data-go="chat"><span class="mi">💬</span><b>แชทโลก</b><small>คุยกับผู้เล่นทุกคน</small></button>
     </div>
     <p class="mute onnote">ต่อสู้ออนไลน์: เลือกโหมด 1 ต่อ 1 หรือ 2 ต่อ 2 ตอนสร้างห้อง · เลือก ${PICK_N} ใบ → แบนของคู่ตรงข้ามคนละ ${BAN_N} ใบ → สู้ด้วย ${PICK_N-BAN_N} ใบ · ทุกการ์ดใช้ Lv.${ONLINE_LV} ${ONLINE_STAR}★ เท่ากัน</p>`;
+  renderOnlineList();
   $('#onRn').onclick=()=>askName(false);
   $('#onOut').onclick=logout;
   $('#onCreate1').onclick=()=>createRoom('1v1');$('#onCreate2').onclick=()=>createRoom('2v2');
@@ -577,6 +603,6 @@ async function dgCall(fn,args){
   if(!sb||!me)return {error:'offline'};
   try{const {data,error}=await sb.rpc(fn,args||{});if(error)return {error:'error'};return data||{error:'error'}}catch(e){return {error:'error'}}
 }
-const dungeon={status:()=>dgCall('dungeon_status'),enter:()=>dgCall('dungeon_enter'),report:(hr,d)=>dgCall('dungeon_report',{p_hr:hr,p_damage:Math.max(0,Math.floor(d||0))}),claim:hr=>dgCall('dungeon_claim',{p_hr:hr})};
-window.Online={dungeon,redeem,gate,onSave,hub,friends,chat,room,logout,get me(){return me},_test:{get R(){return R},joinRoom,createRoom}};
+const dungeon={status:()=>dgCall('dungeon_status'),enter:()=>dgCall('dungeon_enter'),report:(hr,d)=>dgCall('dungeon_report',{p_hr:hr,p_damage:Math.max(0,Math.floor(d||0))}),claim:hr=>dgCall('dungeon_claim',{p_hr:hr}),leaderboard:()=>dgCall('dungeon_leaderboard')};
+window.Online={presence:()=>onlinePres,setHtml,onPres:null,dungeon,redeem,gate,onSave,hub,friends,chat,room,logout,get me(){return me},_test:{get R(){return R},joinRoom,createRoom}};
 })();
