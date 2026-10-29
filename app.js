@@ -438,34 +438,37 @@ const totalCards=()=>Object.values(SV.count||{}).reduce((t,n)=>t+(n||0),0);
 function onKillHook(id){SV.kills=(SV.kills||0)+1;   /* นับสังหารศัตรูรวม (ใช้เป็นเงื่อนไขอีโว จอมมาร ริมุรุ) */
   if(id!=='gil')return;SV.cq=SV.cq||{};SV.cq.kills=(SV.cq.kills||0)+1}
 const CQ=[{id:'gilq',card:'gilqueen',name:'ราชินีแห่งวีรชน กิลกาเมช',
-  reqs:[{t:'ใช้กิลกาเมชสังหารศัตรู',unit:'ครั้ง',need:1000,cur:()=>cqN('kills')},
+  reqs:[{t:'ใช้กิลกาเมชสังหารศัตรู',unit:'ครั้ง',need:1000,key:'kills',cur:()=>cqN('kills')},
         {t:'มีการ์ดกิลกาเมช',unit:'ใบ',need:100,cur:()=>SV.count.gil||0},
-        {t:'ลงชาเลนจ์ให้ชนะ',unit:'ครั้ง',need:500,cur:()=>cqN('chal')}]},
+        {t:'ลงชาเลนจ์ให้ชนะ',unit:'ครั้ง',need:500,key:'chal',cur:()=>cqN('chal')}]},
   {id:'cc',card:'cc',name:'ซีซี',
-  reqs:[{t:'ฟื้นฟู HP ด้วยความสามารถอะไรก็ได้',unit:'HP',need:100000,cur:()=>Math.floor(cqN('heal'))},
-        {t:'สร้างความเสียหายรวม',unit:'ดาเมจ',need:1000000,cur:()=>Math.floor(cqN('dmg'))},
+  reqs:[{t:'ฟื้นฟู HP ด้วยความสามารถอะไรก็ได้',unit:'HP',need:100000,key:'heal',cur:()=>Math.floor(cqN('heal'))},
+        {t:'สร้างความเสียหายรวม',unit:'ดาเมจ',need:1000000,key:'dmg',cur:()=>Math.floor(cqN('dmg'))},
         {t:'มีการ์ดรวม',unit:'ใบ',need:5000,cur:totalCards}]},
   {id:'slime',card:'slime',name:'ริมุรุ ร่างสไลม์',
-  reqs:[{t:'ใช้เงิน',unit:'💰',need:1000000,cur:()=>Math.floor(cqN('spent'))}]}];
-const cqDone=q=>!!(SV.cq&&SV.cq.done&&SV.cq.done[q.id]);
+  reqs:[{t:'ใช้เงิน',unit:'💰',need:1000000,key:'spent',cur:()=>Math.floor(cqN('spent'))}]}];
+/* เควสทำซ้ำได้ไม่จำกัด (ไว้เก็บการ์ดซ้ำเพื่ออัปดาว): done[id] = จำนวนครั้งที่รับแล้ว (เซฟเก่าที่เป็น true นับเป็น 1 ครั้ง)
+   ตัวนับสะสม (key) จะถูกหักตามจำนวนที่ใช้ เหลือส่วนเกินไว้รอบหน้า · เงื่อนไข "มีการ์ด" ไม่ถูกหัก */
+const cqTimes=q=>{const d=SV.cq&&SV.cq.done&&SV.cq.done[q.id];return d===true?1:(+d||0)};
 const cqReady=q=>q.reqs.every(r=>r.cur()>=r.need);
 function renderCharQ(){
-  const done=CQ.filter(cqDone).length;
-  $('#thInfo').textContent='รับรางวัลแล้ว '+done+'/'+CQ.length+' เควส';
+  const done=CQ.reduce((t,q)=>t+cqTimes(q),0);
+  $('#thInfo').textContent='รับรางวัลแล้วรวม '+done+' ครั้ง · ทำซ้ำได้เรื่อยๆ (ได้การ์ดซ้ำไว้อัปดาว)';
   $('#thList').innerHTML=CQ.map(q=>{
-    const c=CARDS[q.card],fin=cqDone(q),ok=cqReady(q);
-    return `<div class="tcard cq${fin?' fin':''}" style="--c:${c.color}">
+    const c=CARDS[q.card],n=cqTimes(q),ok=cqReady(q);
+    return `<div class="tcard cq" style="--c:${c.color}">
       <div class="thd"><div><div class="no">เควสตัวละคร</div><h2>${c.name}</h2></div><span class="diff d-hell">${c.rar}</span></div>
-      <div class="cqrw"><img src="${c.img}" alt="${c.name}"><div class="mute">รางวัล: การ์ด <b>${c.name}</b><br>POWER ${c.power} · HP ${c.hp}</div></div>
+      <div class="cqrw"><img src="${c.img}" alt="${c.name}"><div class="mute">รางวัล: การ์ด <b>${c.name}</b><br>POWER ${c.power} · HP ${c.hp}<br>รับแล้ว <b>${n}</b> ครั้ง</div></div>
       <ul class="cqreq">${q.reqs.map(r=>{const v=Math.min(r.cur(),r.need),p=v/r.need*100;return `<li class="${v>=r.need?'ok':''}"><span>${v>=r.need?'✔':'✖'} ${r.t}</span><b>${v.toLocaleString()} / ${r.need.toLocaleString()} ${r.unit}</b><i class="cqbar"><u style="width:${p}%"></u></i></li>`}).join('')}</ul>
-      <button data-cq="${q.id}" ${fin||!ok?'disabled':''}>${fin?'รับรางวัลแล้ว ✔':ok?'🎁 รับการ์ด':'ยังทำไม่ครบเงื่อนไข'}</button></div>`}).join('');
+      <button data-cq="${q.id}" ${ok?'':'disabled'}>${ok?'🎁 รับการ์ด'+(n?' (ซ้ำ)':''):'ยังทำไม่ครบเงื่อนไข'}</button>${q.reqs.some(r=>r.key)?'<div class="mute" style="font-size:.78em;margin-top:6px">ความคืบหน้าที่นับสะสมจะถูกหักตามที่ใช้ แล้วทำรอบต่อไปได้ (ส่วนเกินเก็บไว้ให้) · เงื่อนไข "มีการ์ด" ไม่ถูกหัก</div>':''}</div>`}).join('');
 }
 $('#thList').onclick=e=>{const b=e.target.closest('[data-cq]');if(!b||b.disabled)return;
-  const q=CQ.find(x=>x.id===b.dataset.cq);if(!q||cqDone(q)||!cqReady(q))return;
-  SV.cq=SV.cq||{};SV.cq.done=SV.cq.done||{};SV.cq.done[q.id]=true;
+  const q=CQ.find(x=>x.id===b.dataset.cq);if(!q||!cqReady(q))return;
+  SV.cq=SV.cq||{};SV.cq.done=SV.cq.done||{};SV.cq.done[q.id]=cqTimes(q)+1;
+  q.reqs.forEach(r=>{if(r.key)SV.cq[r.key]=Math.max(0,cqN(r.key)-r.need)});   /* หักตัวนับที่ใช้ไป เหลือส่วนเกินไว้รอบหน้า */
   if(SV.owned.includes(q.card))SV.count[q.card]=(SV.count[q.card]||1)+1;else{SV.owned.push(q.card);SV.count[q.card]=1}
   save();hud();renderCharQ();
-  modal(`<h2>ผ่านเควส! 🎉</h2><p>ได้รับการ์ด <b>${CARDS[q.card].name}</b></p><div class="reward"><img src="${CARDS[q.card].img}" alt="" style="max-height:34vh;border-radius:10px"></div><button id="cqOk">ตกลง</button>`);
+  modal(`<h2>ผ่านเควส! 🎉</h2><p>ได้รับการ์ด <b>${CARDS[q.card].name}</b>${cqTimes(q)>1?' (ครั้งที่ '+cqTimes(q)+' · ได้การ์ดซ้ำไว้อัปดาว)':''}</p><div class="reward"><img src="${CARDS[q.card].img}" alt="" style="max-height:34vh;border-radius:10px"></div><button id="cqOk">ตกลง</button>`);
   $('#cqOk').onclick=closeModal};
 
 /* --- เรด --- */
