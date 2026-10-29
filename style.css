@@ -189,7 +189,7 @@ input,select{background:#0a0c18;color:var(--ink);border:1px solid var(--line);bo
 .hud .lv{display:flex;align-items:center;gap:10px;font-family:Kanit}
 .xp{width:clamp(90px,16vw,170px);height:10px;background:#0a0c18;border:1px solid var(--line);border-radius:99px;overflow:hidden}
 .xp i{display:block;height:100%;width:0;background:linear-gradient(90deg,#4fc3ff,#a06cff);transition:width .5s}
-.menu{flex:1;min-height:0;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:clamp(8px,1.6vw,20px);align-content:center;width:100%;max-width:1280px;margin:0 auto}
+.menu{flex:1;min-height:0;display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:clamp(8px,1.6vw,20px);align-content:center;width:100%;max-width:1280px;margin:0 auto}
 .mbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:clamp(110px,22vh,190px);background:var(--panel);color:var(--ink);border:2px solid var(--line);box-shadow:0 4px 0 #0007;font-weight:400;padding:10px}
 .mbtn span{font-size:clamp(28px,6vh,48px)}.mbtn b{font-family:Kanit;font-size:1.2em}.mbtn small{color:var(--mute)}
 .mbtn:hover{border-color:var(--gold)}
@@ -340,7 +340,7 @@ button.mini{min-height:28px;padding:2px 8px;font-size:.8em;box-shadow:none;borde
   .gmini img,.gmini.sm img{height:110px}.reveal{height:min(40vh,300px)}
   .line{gap:4px}
 }
-@media (max-height:480px){.menu{grid-template-columns:repeat(8,1fr)}.fan.sm{display:none}}
+@media (max-height:480px){.menu{grid-template-columns:repeat(9,1fr)}.fan.sm{display:none}}
 .tg{display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--ink)}
 .tg input{width:20px;height:20px;min-height:0;accent-color:var(--gold)}
 .cnt{font-style:normal;font-family:Kanit;color:var(--gold);font-size:.85em}
@@ -802,3 +802,8 @@ body{padding:0}
 .teams2{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:560px;margin:8px auto}
 .teams2 h3{margin:0 0 6px;text-align:center}
 .teams2 .pl.empty{opacity:.5}
+/* ===== ดันเจี้ยน ===== */
+#dgBtn.open{animation:dgpulse 1.4s ease-in-out infinite;box-shadow:0 0 0 2px #ff6a8a,0 0 22px #ff3d6e88}
+@keyframes dgpulse{50%{transform:scale(1.04)}}
+#dungeonScr .rinfo h2{color:#d9b8ff}
+.dgtime{font-size:1.5em;font-weight:800;letter-spacing:.04em;color:#ffd34d}

@@ -33,6 +33,7 @@
     <button class="mbtn" data-go="up"><span>⬆️</span><b>อัพเกรด</b><small>อัพเลเวล / อัพดาว</small></button>
     <button class="mbtn" data-go="inv"><span>📦</span><b>คลัง</b><small>วัตถุดิบ / ไอเทม</small></button>
     <button class="mbtn" data-go="evo" data-tab="char"><span>📜</span><b>เควส</b><small>ตัวละคร / พัฒนา</small></button>
+    <button class="mbtn" data-go="dungeon" id="dgBtn"><span>🕳️</span><b>ดันเจี้ยน</b><small id="dgSub">เปิดสุ่มทุกชั่วโมง</small></button>
     <button class="mbtn" id="howBtn"><span>📖</span><b>วิธีเล่น</b><small>ดูบทสอนอีกครั้ง</small></button>
   </nav>
   <footer class="bar"><button class="sec small" id="codeBtn">🎁 ใส่โค้ดรับของขวัญ</button><button class="sec small" id="musicBtn">🔊 เพลง: เปิด</button><button class="sec small hidden" id="logoutBtn">🚪 ออกจากระบบ</button></footer>
@@ -104,6 +105,12 @@
 <section class="screen hidden" id="endlessScr">
   <header class="top"><button class="sec small" data-go="event">← กลับ</button><h1>ไม่มีที่สิ้นสุด ♾️</h1><div class="hudr"><div class="coin candy">🍬 <b class="candyN">0</b></div><div class="coin">💰 <b class="coinN">0</b></div></div></header>
   <div class="raid" id="elRaid"></div>
+</section>
+
+<!-- ดันเจี้ยน (เปิดสุ่มในช่วง 30 นาทีแรกของทุกชั่วโมง) -->
+<section class="screen hidden" id="dungeonScr">
+  <header class="top"><button class="sec small" data-go="home">← กลับ</button><h1>ดันเจี้ยน 🕳️</h1><div class="coin">💰 <b class="coinN">0</b></div></header>
+  <div class="raid" id="dgRaid"></div>
 </section>
 
 <!-- ออนไลน์: หน้าหลัก -->
@@ -293,6 +300,7 @@
     <b>มิลิม นาวา</b><label for="mlP">POWER</label><input id="mlP" type="number" value="39" min="1"><label for="mlH">HP</label><input id="mlH" type="number" value="400" min="1"><label for="mlA">ความโกรธเพิ่มเมื่อโจมตี 1 ครั้ง</label><input id="mlA" type="number" value="8" min="0"><label for="mlD">ความโกรธเพิ่มเมื่อรับดาเมจ 1 ครั้ง</label><input id="mlD" type="number" value="10" min="0"><label for="mlS">ความโกรธเพิ่มเติมเมื่อถูกสกิลโจมตี</label><input id="mlS" type="number" value="10" min="0"><label for="mlM">ค่าความโกรธสูงสุด (หลอดเต็ม)</label><input id="mlM" type="number" value="100" min="1"><label for="mlT">โหมดซาตานาเอลนานกี่เทิร์น</label><input id="mlT" type="number" value="10" min="1"><label for="mlX">สเตตัสคูณกี่เท่า</label><input id="mlX" type="number" value="3" min="1" step="0.1">
     <b>ซอง จิน วู</b><label for="jwP">POWER</label><input id="jwP" type="number" value="25" min="1"><label for="jwH">HP</label><input id="jwH" type="number" value="290" min="1"><label for="jwT">HP เหลือ 1 นานกี่เทิร์น</label><input id="jwT" type="number" value="5" min="1">
     <b>ปลุกพลังขั้นสอง ซอง จิน วู</b><label for="j2P">POWER</label><input id="j2P" type="number" value="38" min="1"><label for="j2H">HP</label><input id="j2H" type="number" value="340" min="1"><label for="j2N">จำนวนครั้งที่โจมตีต่อเทิร์น (รวมโจมตีปกติ)</label><input id="j2N" type="number" value="2" min="2"><label for="j2S">พิษ / เลือดไหล เสีย HP ต่อสถานะ (% ของ HP สูงสุดศัตรู)</label><input id="j2S" type="number" value="7.5" min="0" step="0.5">
+    <b>จักรพรรดิเงา ซอง จิน วู</b><label for="swP">POWER</label><input id="swP" type="number" value="40" min="1"><label for="swH">HP</label><input id="swH" type="number" value="450" min="1"><label for="swB">อนธการกังวาน: เพิ่มสเตตัสทีม (%)</label><input id="swB" type="number" value="20" min="0"><label for="swI">อิกริส: ดาเมจ (เท่าของ POWER)</label><input id="swI" type="number" value="1.5" min="0" step="0.1"><label for="swS">เบรุ: พิษ (% ของ HP สูงสุดศัตรู)</label><input id="swS" type="number" value="8" min="0"><label for="swZ">ไออน: ลด POWER ศัตรู (%)</label><input id="swZ" type="number" value="50" min="0" max="100">
     <b>กติกา</b><label for="first">ใครโจมตีก่อน</label><select id="first"><option value="a">ฝั่งผู้เล่น</option><option value="b">ฝั่งศัตรู</option><option value="r">สุ่ม</option></select>
     <b>เครื่องมือทดสอบ</b>
   </div>
