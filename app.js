@@ -950,7 +950,7 @@ const EVOS=[{from:'naruto',to:'naruto1',need:{cards:50,items:{seal9:1},coins:100
     phase2:{card:'truerimuruboss',name:'จอมมารที่แท้จริง ริมุรุ เทมเพสต์ (เฟส 2)',hp:100000,power:300},
     drops:[{item:'shisu',rate:.1},{item:'rsword',rate:.005,first:1}]}},
   /* need.gk / need.gd = กาโร่ (R) สังหาร / หลบหลีกสะสม · need.win = ต้องชนะบอสเควสอย่างน้อย 1 ครั้ง (ไม่ถูกใช้หมดไป) */
-  {from:'garo',to:'garored',need:{cards:100,items:{},gk:100,gd:100,win:true,coins:0},
+  {from:'garo',to:'garored',need:{cards:100,items:{},gk:100,gd:100,win:true,coins:2000000},
   boss:{card:'garoredboss',name:'ลูกครึ่งสัตว์ประหลาด กาโร่',hp:15000,power:75,lv:1,coins:100,drops:[]}}];
 const evDropRate=(e,d)=>(d.first!=null&&!SV.evoWin[e.from])?d.first:d.rate;   /* โอกาสออกตอนนี้ (ชนะครั้งแรกอาจได้โอกาสพิเศษ) */
 let evoSel=null,evoKeep=false,questTab='char';
