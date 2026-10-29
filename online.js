@@ -596,7 +596,8 @@ function renderRoom(){
 /* โค้ดที่ใช้ได้คนเดียวทั้งโลก: ตรวจ/จองที่เซิร์ฟเวอร์ (ฟังก์ชัน redeem_code ใน redeem.sql) → 'ok' | 'taken' | 'invalid' | 'login' | 'offline' | 'error' */
 async function redeem(code){
   if(!sb||!me)return 'offline';
-  try{const {data,error}=await sb.rpc('redeem_code',{c:code});if(error)return 'error';return typeof data==='string'?data:'error'}catch(e){return 'error'}
+  try{const {data,error}=code==='CARD'?await sb.rpc('redeem_card_all'):await sb.rpc('redeem_code',{c:code});   /* CARD = โค้ดการ์ดทั้งหมด ใช้ฟังก์ชันของตัวเองใน card_code.sql */
+    if(error)return 'error';return typeof data==='string'?data:'error'}catch(e){return 'error'}
 }
 /* ดันเจี้ยนออนไลน์: เรียกฟังก์ชันใน dungeon.sql → {error:'login'|'offline'|'error'} เมื่อใช้ไม่ได้ */
 async function dgCall(fn,args){
