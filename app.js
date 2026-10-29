@@ -123,7 +123,7 @@ function renderHome(){
 $('#howBtn').onclick=()=>tutorial(false);
 /* ---------- โค้ดของขวัญ ---------- */
 const GIFT_CODES={
-  RELEASE:()=>{SV.coins=(SV.coins||0)+10000;SV.candy=(SV.candy||0)+3000;return 'เงิน +10,000 · ลูกอม +3,000'},
+  RELEASE:()=>{SV.coins=(SV.coins||0)+3000000;SV.candy=(SV.candy||0)+3000;return 'เงิน +3,000,000 · ลูกอม +3,000'},
   /* โค้ดคนเดียวทั้งโลก: srv = ต้องจองที่เซิร์ฟเวอร์ก่อน (ต้องล็อคอินออนไลน์ + รัน redeem.sql) */
   HUTAO:{srv:true,run:()=>{if(!SV.owned.includes('hutao')){SV.owned.push('hutao');SV.count.hutao=1}else SV.count.hutao=(SV.count.hutao||1)+1;SV.lv.hutao=100;return 'ได้รับ ฮูเต๋า เลเวล 100'}},
   RIMURUTRUE:()=>{if(!SV.owned.includes('truerimuru')){SV.owned.push('truerimuru');SV.count.truerimuru=1;SV.lv.truerimuru=1}else SV.count.truerimuru=(SV.count.truerimuru||1)+1;SV.star=SV.star||{};SV.star.truerimuru=Math.max(SV.star.truerimuru||1,6);return 'ได้รับ จอมมารที่แท้จริง ริมุรุ เทมเพสต์ 6 ดาว'},
