@@ -572,5 +572,11 @@ async function redeem(code){
   if(!sb||!me)return 'offline';
   try{const {data,error}=await sb.rpc('redeem_code',{c:code});if(error)return 'error';return typeof data==='string'?data:'error'}catch(e){return 'error'}
 }
-window.Online={redeem,gate,onSave,hub,friends,chat,room,logout,get me(){return me},_test:{get R(){return R},joinRoom,createRoom}};
+/* ดันเจี้ยนออนไลน์: เรียกฟังก์ชันใน dungeon.sql → {error:'login'|'offline'|'error'} เมื่อใช้ไม่ได้ */
+async function dgCall(fn,args){
+  if(!sb||!me)return {error:'offline'};
+  try{const {data,error}=await sb.rpc(fn,args||{});if(error)return {error:'error'};return data||{error:'error'}}catch(e){return {error:'error'}}
+}
+const dungeon={status:()=>dgCall('dungeon_status'),enter:()=>dgCall('dungeon_enter'),report:(hr,d)=>dgCall('dungeon_report',{p_hr:hr,p_damage:Math.max(0,Math.floor(d||0))}),claim:hr=>dgCall('dungeon_claim',{p_hr:hr})};
+window.Online={dungeon,redeem,gate,onSave,hub,friends,chat,room,logout,get me(){return me},_test:{get R(){return R},joinRoom,createRoom}};
 })();

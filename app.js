@@ -950,76 +950,97 @@ function ifEnd(quit,r){
   $('#ifAgain').onclick=()=>{closeModal();startInfRun()};$('#ifBack').onclick=()=>go('inf');
 }
 
-/* ---------- ดันเจี้ยน (บอสจักรพรรดิเงา) ----------
-   ทุกชั่วโมง (นับตามนาฬิกาโลก/UTC ตรงกับเวลาไทยทุกชั่วโมงเต็ม) จะมีดันเจี้ยนโผล่ขึ้น "แบบสุ่ม" ภายใน `win` นาทีแรกของชั่วโมง
-   เปิดอยู่นาน `dur` นาที · ผู้เล่นแต่ละคนลงได้ `tries` ครั้งต่อรอบ · แพ้ลงใหม่ได้จนหมดสิทธิ์/หมดเวลา · ชนะ → ปิดทันทีสำหรับผู้เล่นนั้น รอชั่วโมงถัดไป
-   ชนะได้ทหารเงาสุ่ม 1 ใน 3 (อิกริส / เบรุ / ไออน) · เวลาเปิดคำนวณจากนาฬิกาเครื่อง (ทุกเครื่องได้ผลตรงกัน) ปรับตัวเลขได้ที่ DG */
-const DG={win:30,dur:30,tries:5,hp:1000000,power:99,drops:['igris','beru','ion']};
-function dgHash(n){n=(n^61)^(n>>>16);n=Math.imul(n,9)>>>0;n=(n^(n>>>4))>>>0;n=Math.imul(n,0x27d4eb2d)>>>0;n=(n^(n>>>15))>>>0;return n}
-const dgOpenAt=hr=>hr*3600000+(dgHash(hr)%(DG.win*60))*1000;
-function dgInfo(now=Date.now()){
-  const hr=Math.floor(now/3600000),open=dgOpenAt(hr),end=open+DG.dur*60000;
-  return{hr,open,end,active:now>=open&&now<end,nextHr:(hr+1)*3600000}
+/* ---------- ดันเจี้ยนออนไลน์ (บอสจักรพรรดิเงา · ทุกคนช่วยกันตีบอสตัวเดียวกัน) ----------
+   เซิร์ฟเวอร์ (Supabase · dungeon.sql) คุมทั้งหมด: ทุกชั่วโมงดันเจี้ยนโผล่แบบสุ่มภายใน 30 นาทีแรก เปิดนาน 30 นาที · HP บอสรวม 1,000,000
+   ลงได้คนละ 5 ครั้งต่อรอบ (หักสิทธิ์ทันทีที่ลง แพ้/ออกกลางคันก็เสียสิทธิ์) · ดาเมจที่ทำได้หักจาก HP บอสรวม แม้แพ้ก็นับ
+   บอสถูกปราบ → ปิดทันที ทุกคนที่ช่วยตีได้ทหารเงาสุ่ม 1 ใน 3 (อิกริส / เบรุ / ไออน) และนับเป็น "ผ่านดันเจี้ยน" 1 ครั้ง
+   ต้องล็อกอินออนไลน์จึงจะเล่นได้ · ค่า HP/เวลา/สิทธิ์ตั้งที่ dungeon.sql (ที่นี่ใช้แสดงผลและตั้ง POWER บอส) */
+const DG={tries:5,power:99};
+let DGS=null,dgBusy=false,dgClaiming=false,dgInBattle=false,dgPollAt=0;
+const dgFmt=sec=>{sec=Math.max(0,Math.ceil(sec));const m=Math.floor(sec/60),s=sec%60;return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')};
+const dgErrTxt=e=>({login:'ต้องล็อกอินออนไลน์ก่อน',offline:'ต้องล็อกอินออนไลน์ก่อน',notopen:'ดันเจี้ยนยังไม่เปิด',ended:'ดันเจี้ยนหมดเวลาแล้ว',cleared:'ดันเจี้ยนถูกปราบไปแล้ว',notries:'หมดสิทธิ์ลงรอบนี้แล้ว',error:'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ'})[e]||'ทำรายการไม่สำเร็จ';
+const dgOnline=()=>typeof Online!=='undefined'&&Online.me&&Online.dungeon;
+async function dgRefresh(){
+  if(!dgOnline()){DGS={error:'offline'};return DGS}
+  const s=await Online.dungeon.status();
+  if(s&&!s.error){s._endAt=Date.now()+(s.end_in||0)*1000;s._nextAt=Date.now()+(s.next_in||0)*1000}
+  DGS=s;dgPollAt=Date.now();
+  if(s&&s.unclaimed!=null&&!dgInBattle)dgClaimFlow(s.unclaimed);
+  return s;
 }
-function dgState(hr){
-  if(!SV.dg||SV.dg.hr!==hr)SV.dg={hr,tries:0,won:false};
-  return SV.dg;
+async function dgClaimFlow(hr,extra=''){
+  if(dgClaiming)return;dgClaiming=true;
+  const r=await Online.dungeon.claim(hr);dgClaiming=false;
+  if(!r||!r.ok||!ITEMS[r.reward])return false;
+  const k=r.reward;SV.items[k]=itemN(k)+1;SV.dgw=(SV.dgw||0)+1;save();hud();
+  modal(`<h2>ดันเจี้ยนถูกปราบแล้ว! 🎉</h2><p>ทุกคนที่ช่วยกันตีได้รับรางวัล</p>${extra}<div class="dropbox"><img src="${ITEMS[k].img}" alt=""><div><b>ได้รับ ${ITEMS[k].name}!</b><br><small>มีทั้งหมด ×${itemN(k)}</small></div></div><div class="two"><button id="dgBack">ตกลง</button></div>`);
+  $('#dgBack').onclick=()=>{closeModal();if(!$('#dungeonScr').classList.contains('hidden'))renderDungeon()};
+  return true;
 }
-const dgFmt=ms=>{ms=Math.max(0,Math.ceil(ms/1000));const m=Math.floor(ms/60),s=ms%60;return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')};
-let dgKey='';
-function dgComputeKey(){const i=dgInfo(),st=dgState(i.hr);return i.hr+'|'+(i.active?1:0)+'|'+st.tries+'|'+(st.won?1:0)}
-function renderDungeon(){
-  const i=dgInfo(),st=dgState(i.hr),bc=CARDS.shadowempboss,left=DG.tries-st.tries;dgKey=dgComputeKey();
-  const open=i.active&&!st.won,team=SV.team.filter(x=>SV.owned.includes(x));
-  let status;
-  if(open)status=`<div class="dgtime">🔴 เปิดอยู่! เหลือเวลา <span id="dgCd">${dgFmt(i.end-Date.now())}</span></div><p>สิทธิ์ลงวันนี้ (รอบนี้) เหลือ <b>${Math.max(0,left)}/${DG.tries}</b> ครั้ง · ชนะแล้วดันเจี้ยนจะปิดทันที</p>`;
-  else if(st.won)status=`<div class="dgtime">✅ ผ่านดันเจี้ยนรอบนี้แล้ว</div><p>ดันเจี้ยนปิดแล้ว · รอบถัดไปใน <b id="dgCd">${dgFmt(i.nextHr-Date.now())}</b> (จะโผล่แบบสุ่มภายใน ${DG.win} นาทีแรกของชั่วโมงหน้า)</p>`;
-  else if(i.active===false&&Date.now()<i.open)status=`<div class="dgtime">⏳ ยังไม่เปิด</div><p>ดันเจี้ยนรอบนี้จะโผล่แบบสุ่มภายใน ${DG.win} นาทีแรกของชั่วโมง · เปิดหน้านี้ค้างไว้ หรือเช็กปุ่มดันเจี้ยนที่หน้าหลัก (จะเรืองแสงเมื่อเปิด)</p>`;
-  else status=`<div class="dgtime">🌙 ปิดแล้ว</div><p>รอบถัดไปใน <b id="dgCd">${dgFmt(i.nextHr-Date.now())}</b> (จะโผล่แบบสุ่มภายใน ${DG.win} นาทีแรกของชั่วโมงหน้า)</p>`;
-  $('#dgRaid').innerHTML=`<div class="rboss"><img src="${bc.img}" alt="${bc.name}" style="border-color:#a24dff;box-shadow:0 0 44px #a24dff77,0 14px 40px #000a"></div>
-  <div class="rinfo"><h2>🕳️ ดันเจี้ยน · ${bc.name}</h2>
-    <div class="rhpt"><b>HP ${DG.hp.toLocaleString()}</b><span>POWER ${DG.power}</span></div>
-    ${status}
-    <div class="ebrule"><b>กติกา</b><br>• ทุกชั่วโมงมีดันเจี้ยนโผล่แบบสุ่มภายใน ${DG.win} นาทีแรก เปิดนาน ${DG.dur} นาที<br>• ลงได้คนละ ${DG.tries} ครั้งต่อรอบ แพ้แล้วลงใหม่ได้จนหมดสิทธิ์หรือหมดเวลา<br>• ชนะแล้วได้ทหารเงาสุ่ม 1 ใน 3: <b>อิกริส / เบรุ / ไออน</b> (ใช้อีโวจักรพรรดิเงา) และดันเจี้ยนปิดทันที<br>• บอสใช้ความสามารถเรียกทหารเงาทุกครั้งที่โจมตี</div>
+function dgPaint(){
+  const s=DGS,bc=CARDS.shadowempboss,team=SV.team.filter(x=>SV.owned.includes(x));
+  const box=h=>`<div class="rboss"><img src="${bc.img}" alt="${bc.name}" style="border-color:#a24dff;box-shadow:0 0 44px #a24dff77,0 14px 40px #000a"></div><div class="rinfo"><h2>🕳️ ดันเจี้ยน · ${bc.name}</h2>${h}</div>`;
+  if(!s||s.error){
+    $('#dgRaid').innerHTML=box(`<div class="dgtime">🔌 ${s&&s.error==='error'?'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ':'ต้องล็อกอินออนไลน์'}</div><p>ดันเจี้ยนเป็นโหมดออนไลน์ ทุกคนช่วยกันตีบอสตัวเดียวกัน ต้องล็อกอินก่อนจึงจะเล่นได้</p><div class="two"><button id="dgLogin">${s&&s.error==='error'?'ลองใหม่':'ไปหน้าออนไลน์'}</button></div>`);
+    $('#dgLogin').onclick=()=>{if(s&&s.error==='error')renderDungeon();else go('online')};return}
+  const pct=Math.max(0,Math.min(100,s.hp/s.max_hp*100)),left=DG.tries-s.tries,open=s.state==='open';
+  const bar=`<div style="margin:6px 0 2px;height:18px;border-radius:10px;background:#2a2342;overflow:hidden;box-shadow:inset 0 0 0 1px #a24dff66"><i style="display:block;height:100%;width:${pct}%;background:linear-gradient(90deg,#7a3dff,#d17bff)"></i></div><div class="rhpt"><b>HP บอสรวม ${Math.max(0,Math.ceil(s.hp)).toLocaleString()} / ${s.max_hp.toLocaleString()}</b><span>POWER ${DG.power}</span></div>`;
+  let st;
+  if(open)st=`<div class="dgtime">🔴 เปิดอยู่! เหลือเวลา <span id="dgCd">${dgFmt((s._endAt-Date.now())/1000)}</span></div><p>สิทธิ์ลงรอบนี้เหลือ <b>${Math.max(0,left)}/${DG.tries}</b> ครั้ง · ดาเมจของคุณรอบนี้ <b>${(s.damage||0).toLocaleString()}</b> · แพ้/ออกกลางคันก็เสียสิทธิ์ 1 ครั้ง</p>`;
+  else if(s.state==='cleared')st=`<div class="dgtime">✅ บอสถูกปราบแล้ว</div><p>ดันเจี้ยนปิดแล้ว · รอบถัดไปใน <b id="dgCd">${dgFmt((s._nextAt-Date.now())/1000)}</b> (โผล่แบบสุ่มภายใน 30 นาทีแรกของชั่วโมงหน้า)${s.damage>0&&s.claimed?'<br>คุณช่วยตี '+s.damage.toLocaleString()+' ดาเมจ · รับรางวัลแล้ว':''}</p>`;
+  else if(s.state==='ended')st=`<div class="dgtime">🌙 หมดเวลา</div><p>รอบนี้ไม่มีใครปราบบอสได้ · รอบถัดไปใน <b id="dgCd">${dgFmt((s._nextAt-Date.now())/1000)}</b></p>`;
+  else st=`<div class="dgtime">⏳ ยังไม่เปิด</div><p>ดันเจี้ยนรอบนี้จะโผล่แบบสุ่มภายใน 30 นาทีแรกของชั่วโมง · เปิดหน้านี้ค้างไว้ได้ (ปุ่มดันเจี้ยนที่หน้าหลักจะเรืองแสงเมื่อเปิด)</p>`;
+  $('#dgRaid').innerHTML=box(`${bar}${st}
+    <div class="ebrule"><b>กติกา</b><br>• ทุกคนช่วยกันตีบอสตัวเดียวกัน ดาเมจรวมหัก HP บอสรวม (แพ้ก็นับดาเมจที่ทำได้)<br>• ลงได้คนละ ${DG.tries} ครั้งต่อรอบ หักสิทธิ์ทันทีที่ลง แพ้หรือออกกลางคันก็เสียสิทธิ์<br>• บอสถูกปราบ → ดันเจี้ยนปิดทันที ทุกคนที่ช่วยตีได้ทหารเงาสุ่ม 1 ใน 3: <b>อิกริส / เบรุ / ไออน</b> และนับเป็นผ่านดันเจี้ยน 1 ครั้ง<br>• ไม่มีใครปราบทันภายในเวลา → ไม่มีรางวัล</div>
     <div class="myteam"><span>ทีมของคุณ</span><div>${team.length?team.map(t=>`<img class="th" src="${CARDS[t].img}" alt="${CARDS[t].name}">`).join(''):'<small>ยังไม่มีการ์ดในทีม</small>'}</div><button class="sec small" data-go="team">จัดทีม</button></div>
-    <div class="two"><button id="dgGo" ${open&&left>0&&team.length?'':'disabled'}>${open?(left>0?'⚔ เข้าดันเจี้ยน':'หมดสิทธิ์ลงรอบนี้แล้ว'):'ยังเข้าไม่ได้'}</button></div>
-  </div>`;
-  $('#dgGo').onclick=startDungeon;
+    <div class="two"><button id="dgGo" ${open&&left>0&&team.length?'':'disabled'}>${open?(left>0?'⚔ เข้าดันเจี้ยน (สิทธิ์เหลือ '+left+')':'หมดสิทธิ์ลงรอบนี้แล้ว'):'ยังเข้าไม่ได้'}</button><button class="sec small" id="dgRef">🔄 รีเฟรช</button></div>`);
+  $('#dgGo').onclick=startDungeon;$('#dgRef').onclick=()=>renderDungeon();
 }
-function startDungeon(){
-  const i=dgInfo(),st=dgState(i.hr);
-  if(!i.active||st.won)return toast('ดันเจี้ยนยังไม่เปิด');
-  if(st.tries>=DG.tries)return toast('หมดสิทธิ์ลงรอบนี้แล้ว');
+function renderDungeon(){
+  $('#dgRaid').innerHTML='<div class="rinfo"><h2>🕳️ ดันเจี้ยน</h2><p class="mute">กำลังโหลดข้อมูลจากเซิร์ฟเวอร์…</p></div>';
+  dgRefresh().then(()=>{if(!$('#dungeonScr').classList.contains('hidden'))dgPaint()});
+}
+async function startDungeon(){
+  if(dgBusy||!dgOnline())return;
   const team=SV.team.filter(x=>SV.owned.includes(x));
   if(!team.length){toast('ต้องมีการ์ดในทีมอย่างน้อย 1 ใบ');return go('team')}
-  st.tries++;save();clearAuto();setAutoBtn();
-  Battle.start({auto:false,a:team,la:team.map(clv),sa:team.map(cstar),b:['shadowempboss'],lb:[1],bossHp:{max:DG.hp,cur:DG.hp},bossP:DG.power,noHeal:true,first:'a',
-    title:'ดันเจี้ยน · จักรพรรดิเงา ซอง จิน วู (ครั้งที่ '+st.tries+'/'+DG.tries+')',
-    onExit:()=>go('dungeon'),onEnd:r=>finishDungeon(r,i.hr)});
+  dgBusy=true;const e=await Online.dungeon.enter();dgBusy=false;
+  if(!e||!e.ok){toast(dgErrTxt(e&&(e.err||e.error)));return renderDungeon()}
+  clearAuto();setAutoBtn();dgInBattle=true;
+  const hp0=Math.max(1,Math.ceil(e.hp));
+  Battle.start({auto:false,a:team,la:team.map(clv),sa:team.map(cstar),b:['shadowempboss'],lb:[1],bossHp:{max:e.max_hp,cur:hp0},bossP:DG.power,noHeal:true,first:'a',
+    title:'ดันเจี้ยน · จักรพรรดิเงา ซอง จิน วู (ลงครั้งที่ '+e.try+'/'+DG.tries+')',
+    onExit:async()=>{dgInBattle=false;go('dungeon');await Online.dungeon.report(e.hr,0)},   // ออกกลางคัน: เสียสิทธิ์ ไม่นับดาเมจ
+    onEnd:r=>finishDungeon(r,e,hp0)});
 }
-function finishDungeon(r,hr){
-  const st=dgState(hr),back=()=>go('dungeon');
-  if(!r.win){
-    const left=DG.tries-st.tries,still=dgInfo().active&&dgInfo().hr===hr&&left>0;
-    modal(`<h2>พ่ายแพ้…</h2><p>บอสแข็งแกร่งเกินไป ${still?'เหลือสิทธิ์ลงรอบนี้ '+left+' ครั้ง':'หมดสิทธิ์/หมดเวลารอบนี้แล้ว'}</p><div class="two">${still?'<button id="dgAgain">ลองใหม่</button>':''}<button class="sec" id="dgTeam">จัดทีม</button><button class="sec" id="dgBack">กลับ</button></div>`);
-    if(still)$('#dgAgain').onclick=()=>{closeModal();startDungeon()};$('#dgTeam').onclick=()=>go('team');$('#dgBack').onclick=back;return}
-  st.won=true;SV.dgw=(SV.dgw||0)+1;
-  const k=DG.drops[Math.floor(Math.random()*DG.drops.length)];SV.items[k]=itemN(k)+1;save();hud();
-  modal(`<h2>ผ่านดันเจี้ยน! 🎉</h2><p>ใช้ ${r.turns} เทิร์น · ดันเจี้ยนปิดแล้ว รอรอบถัดไป</p><div class="dropbox"><img src="${ITEMS[k].img}" alt=""><div><b>ได้รับ ${ITEMS[k].name}!</b><br><small>มีทั้งหมด ×${itemN(k)}</small></div></div><div class="two"><button id="dgBack">กลับ</button></div>`);
-  $('#dgBack').onclick=back;
-}
-/* ทุกวินาที: อัปเดตเวลานับถอยหลัง / เปิดหน้าใหม่เมื่อสถานะเปลี่ยน / ไฟกระพริบที่ปุ่มดันเจี้ยนหน้าหลัก */
-function dgTick(){
-  if(typeof SV==='undefined'||!SV)return;
-  const i=dgInfo(),st=dgState(i.hr),open=i.active&&!st.won&&st.tries<DG.tries;
-  const b=$('#dgBtn'),sub=$('#dgSub');
-  if(b){b.classList.toggle('open',open)}
-  if(sub)sub.textContent=open?'🔴 เปิดอยู่! เข้าเลย':st.won?'ผ่านรอบนี้แล้ว':'เปิดสุ่มทุกชั่วโมง';
-  const scr=$('#dungeonScr');
-  if(scr&&!scr.classList.contains('hidden')){
-    if(dgComputeKey()!==dgKey)renderDungeon();
-    else{const cd=$('#dgCd');if(cd)cd.textContent=dgFmt(((i.active&&!st.won)?i.end:i.nextHr)-Date.now())}
+async function finishDungeon(r,e,hp0){
+  const dmg=r.win?hp0:Math.max(0,hp0-Math.max(0,Math.ceil(r.bossHp==null?hp0:r.bossHp)));
+  let res=null;
+  for(let i=0;i<3&&!(res&&res.ok);i++){res=await Online.dungeon.report(e.hr,dmg);if(res&&res.ok)break;if(res&&res.err==='noticket')break;await new Promise(z=>setTimeout(z,900))}
+  dgInBattle=false;
+  const me=res&&res.ok?res.applied:0,head=r.win?'ปราบบอสสำเร็จ! 🎉':'พ่ายแพ้…';
+  const line=`<p>ใช้ ${r.turns} เทิร์น · ดาเมจที่ทำได้ <b>${dmg.toLocaleString()}</b>${res&&res.ok?` (เซิร์ฟเวอร์นับ <b>${me.toLocaleString()}</b>${me<dmg?' · เกินเพดานต่อครั้ง':''})`:' · <span style="color:#ff8a8a">ส่งผลไปเซิร์ฟเวอร์ไม่สำเร็จ</span>'}</p>`;
+  if(res&&res.ok&&res.cleared){   // เราเป็นคนปราบ หรือปิดรอบพอดี → รับรางวัลทันที
+    const ok=await dgClaimFlow(e.hr,line);if(ok)return;
   }
+  await dgRefresh();
+  const left=DG.tries-(DGS&&!DGS.error?DGS.tries:e.try),still=DGS&&!DGS.error&&DGS.state==='open'&&left>0;
+  modal(`<h2>${head}</h2>${line}${DGS&&!DGS.error?`<p>HP บอสรวมเหลือ <b>${Math.max(0,Math.ceil(DGS.hp)).toLocaleString()}</b> / ${DGS.max_hp.toLocaleString()} ${still?'· สิทธิ์ลงเหลือ '+left+' ครั้ง':'· หมดสิทธิ์หรือปิดแล้ว'}</p>`:''}<div class="two">${still?'<button id="dgAgain">ลงอีกครั้ง</button>':''}<button class="sec" id="dgTeam">จัดทีม</button><button class="sec" id="dgBack">กลับ</button></div>`);
+  if(still)$('#dgAgain').onclick=()=>{closeModal();startDungeon()};
+  $('#dgTeam').onclick=()=>go('team');$('#dgBack').onclick=()=>go('dungeon');
+}
+/* ทุกวินาที: นับถอยหลัง · โพลสถานะ (หน้าดันเจี้ยน 5 วิ / หน้าหลัก 30 วิ) · ไฟกระพริบปุ่มดันเจี้ยน */
+async function dgTick(){
+  if(typeof SV==='undefined'||!SV||!dgOnline())return;
+  const scr=$('#dungeonScr'),onDg=scr&&!scr.classList.contains('hidden'),onHome=!$('#homeScr').classList.contains('hidden');
+  if(!onDg&&!onHome)return;
+  const every=onDg?5000:30000;
+  if(!dgBusy&&!dgInBattle&&Date.now()-dgPollAt>every){dgPollAt=Date.now();await dgRefresh();if(onDg&&!$('#dungeonScr').classList.contains('hidden')&&$('#mdl').classList.contains('hidden'))dgPaint()}
+  const s=DGS,open=!!(s&&!s.error&&s.state==='open'&&s.tries<DG.tries);
+  const b=$('#dgBtn'),sub=$('#dgSub');
+  if(b)b.classList.toggle('open',open);
+  if(sub)sub.textContent=open?'🔴 เปิดอยู่! เข้าเลย':(s&&!s.error&&s.state==='cleared')?'ปราบแล้ว รอรอบหน้า':'เปิดสุ่มทุกชั่วโมง · ออนไลน์';
+  if(onDg){const cd=$('#dgCd');if(cd&&s&&!s.error)cd.textContent=dgFmt((((s.state==='open')?s._endAt:s._nextAt)-Date.now())/1000)}
 }
 setInterval(dgTick,1000);
 /* ---------- เควสพัฒนา (Evolution Quest) ---------- */
