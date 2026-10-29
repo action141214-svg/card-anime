@@ -56,6 +56,8 @@ const CARDS={
         desc:'ติดสถานะสายฟ้าให้ศัตรู (รับดาเมจเพิ่ม 20% ของ POWER ผู้โจมตี) และมีโอกาส 45% ทำให้ชา'},
   cc:{name:'ซีซี',rar:'LTD',img:'cc.jpeg',power:20,hp:600,color:'#7ddf6a',ability:'immune',
         desc:'เมื่อการ์ดใบนี้อยู่ในทีมจะป้องกันสถานะผิดปกติทั้งหมดให้แก่ทีม (ได้จากเควสตัวละคร หรือโค้ดพิเศษ)'},
+  milim:{name:'มิลิม นาวา',rar:'SSR',img:'milim.jpeg',power:39,hp:400,color:'#ff7ab8',ability:'milim',
+        desc:'หลอดความโกรธ ยิ่งโจมตี ยิ่งรับดาเมจ ยิ่งถูกสกิลโจมตี ค่าความโกรธจะเพิ่มขึ้น · เมื่อหลอดความโกรธเต็ม เข้าสู่โหมด "ซาตานาเอล" สเตตัสเพิ่มเป็น 3 เท่า และกันสถานะทุกอย่าง จนครบ 10 เทิร์น'},
   rias:{name:'รีอัส เกรโมรี่',rar:'UR',img:'rias.jpeg',power:32,hp:400,color:'#e0364b',ability:'rias',
         desc:'ลบสถานะผิดปกติให้ตัวเองแล้วสะท้อนกลับไปหาศัตรู · มีโอกาส 30% ที่จะทำลายการ์ดของศัตรูได้ในครั้งเดียว · มี Void Shield กันดาเมจและสกิล 3 ครั้ง'},
   issei:{name:'เฮียวโด อิซเซย์',rar:'SR',img:'issei.jpeg',power:30,hp:300,color:'#d63a2e',ability:'issei',
@@ -126,7 +128,7 @@ const CARDS={
 /* ลำดับระดับการ์ด จากน้อยไปมาก */
 const R_ORDER=['R','S','SR','SSR','UR','USR','LTD'];
 const rIdx=r=>R_ORDER.indexOf(r);
-const ID={susanoo:{p:'#suP',h:'#suH'},shichi:{p:'#ucP',h:'#ucH'},kabuto:{p:'#kbP',h:'#kbH'},rias:{p:'#rsP',h:'#rsH'},issei:{p:'#isP',h:'#isH'},garocosmic:{p:'#voP',h:'#voH'},garomon:{p:'#pfP',h:'#pfH'},garored:{p:'#grP',h:'#grH'},truerimuru:{p:'#trP',h:'#trH'},rimulord:{p:'#rlP',h:'#rlH'},slime:{p:'#slP',h:'#slH'},rimuru:{p:'#riP',h:'#riH'},cc:{p:'#ccP',h:'#ccH'},gilqueen:{p:'#gqP',h:'#gqH'},reze:{p:'#rzP',h:'#rzH'},shuna:{p:'#shP',h:'#shH'},chahaein:{p:'#chP',h:'#chH'},chaevo:{p:'#ceP',h:'#ceH'},kaneki:{p:'#kkP',h:'#kkH'},mai:{p:'#maP',h:'#maH'},kdash:{p:'#kyP',h:'#kyH'},mahoraga:{p:'#mhP',h:'#mhH'},sasukecurse:{p:'#scP',h:'#scH'},sasukekid:{p:'#kdP',h:'#kdH'},naruto1:{p:'#n1P',h:'#n1H'},ino:{p:'#inP',h:'#inH'},gekko:{p:'#qP',h:'#qH'},naruto:{p:'#wP',h:'#wH'},ichigo:{p:'#oP',h:'#oH'},megumi:{p:'#mP',h:'#mH'},yuji:{p:'#yP',h:'#yH'},goku:{p:'#gP',h:'#gH'},zenitsu:{p:'#zP',h:'#zH'},kirito:{p:'#kP',h:'#kH'},gil:{p:'#iP',h:'#iH'},kurapika:{p:'#rP',h:'#rH'},sasuke:{p:'#sP',h:'#sH'},hutao:{p:'#hP',h:'#hH'},luffy:{p:'#fP',h:'#fH'},gengar:{p:'#eP',h:'#eH'},alucard:{p:'#aP',h:'#aH'},isaac:{p:'#xP',h:'#xH'},okarun:{p:'#uP',h:'#uH'},kirara:{p:'#krP',h:'#krH'},garo:{p:'#gaP',h:'#gaH'},vegeta:{p:'#vgP',h:'#vgH'},kula:{p:'#kuP',h:'#kuH'},konan:{p:'#knP',h:'#knH'}};
+const ID={milim:{p:'#mlP',h:'#mlH'},susanoo:{p:'#suP',h:'#suH'},shichi:{p:'#ucP',h:'#ucH'},kabuto:{p:'#kbP',h:'#kbH'},rias:{p:'#rsP',h:'#rsH'},issei:{p:'#isP',h:'#isH'},garocosmic:{p:'#voP',h:'#voH'},garomon:{p:'#pfP',h:'#pfH'},garored:{p:'#grP',h:'#grH'},truerimuru:{p:'#trP',h:'#trH'},rimulord:{p:'#rlP',h:'#rlH'},slime:{p:'#slP',h:'#slH'},rimuru:{p:'#riP',h:'#riH'},cc:{p:'#ccP',h:'#ccH'},gilqueen:{p:'#gqP',h:'#gqH'},reze:{p:'#rzP',h:'#rzH'},shuna:{p:'#shP',h:'#shH'},chahaein:{p:'#chP',h:'#chH'},chaevo:{p:'#ceP',h:'#ceH'},kaneki:{p:'#kkP',h:'#kkH'},mai:{p:'#maP',h:'#maH'},kdash:{p:'#kyP',h:'#kyH'},mahoraga:{p:'#mhP',h:'#mhH'},sasukecurse:{p:'#scP',h:'#scH'},sasukekid:{p:'#kdP',h:'#kdH'},naruto1:{p:'#n1P',h:'#n1H'},ino:{p:'#inP',h:'#inH'},gekko:{p:'#qP',h:'#qH'},naruto:{p:'#wP',h:'#wH'},ichigo:{p:'#oP',h:'#oH'},megumi:{p:'#mP',h:'#mH'},yuji:{p:'#yP',h:'#yH'},goku:{p:'#gP',h:'#gH'},zenitsu:{p:'#zP',h:'#zH'},kirito:{p:'#kP',h:'#kH'},gil:{p:'#iP',h:'#iH'},kurapika:{p:'#rP',h:'#rH'},sasuke:{p:'#sP',h:'#sH'},hutao:{p:'#hP',h:'#hH'},luffy:{p:'#fP',h:'#fH'},gengar:{p:'#eP',h:'#eH'},alucard:{p:'#aP',h:'#aH'},isaac:{p:'#xP',h:'#xH'},okarun:{p:'#uP',h:'#uH'},kirara:{p:'#krP',h:'#krH'},garo:{p:'#gaP',h:'#gaH'},vegeta:{p:'#vgP',h:'#vgH'},kula:{p:'#kuP',h:'#kuH'},konan:{p:'#knP',h:'#knH'}};
 
 /* อาวุธ Gate of Babylon (SVG หันไปทางขวา) */
 const WEAPONS=[
@@ -151,7 +153,7 @@ const num=s=>+(FIXED?$(s).defaultValue:$(s).value);   /* ออนไลน์: 
 /* ---------- ต่อสู้ ---------- */
 function nm(k){const same=S.a&&S.b&&S.a.id===S.b.id;return CARDS[S[k].id].name+(S[k].cl?' (ร่างแยก)':'')+(same?(k==='a'?' (ซ้าย)':' (ขวา)'):'')}
 function log(t,c='',ic=''){const d=document.createElement('div');d.className=c;if(ic){d.innerHTML=ic;d.classList.add('ic')}d.appendChild(document.createTextNode(t));if(S&&S[c])d.style.borderLeftColor=CARDS[S[c].id].color;$('#log').appendChild(d);$('#log').scrollTop=1e5}
-function sideHtml(k){return `<div class="fighter" id="f${k}"><div class="cardbox"><div class="cw"><img alt=""><span class="badge pb">⚡ ชา</span><span class="badge zp">🌩 สายฟ้า</span><span class="badge bl">🐇 สับสน</span><span class="badge ch">⚔ พลังสะสม ×3</span><span class="badge lock">🔒 ผนึกความสามารถ</span><span class="badge bn">🔥 เผาไหม้</span><span class="badge sv">⚡ ชารุนแรง</span><span class="badge ps">👻 เข้าสิง</span><span class="badge bd">🩸 เลือดไหล</span><span class="badge pz">☠ ติดพิษ</span><span class="badge tb">⚡ เทอร์โบ</span><span class="badge cx">✦ กางเขนใต้</span><span class="badge fz">❄ แช่แข็ง</span><span class="badge hwb">✝ บาดแผลศักดิ์สิทธิ์</span><div class="fgr"></div></div></div><div class="stat"><div class="row"><b class="nm"></b><span>POWER <span class="num pw"></span></span></div><div class="bar-hp"><div class="fill"></div></div><div class="hpt"></div></div><div class="line"></div></div>`}
+function sideHtml(k){return `<div class="fighter" id="f${k}"><div class="cardbox"><div class="cw"><img alt=""><span class="badge pb">⚡ ชา</span><span class="badge zp">🌩 สายฟ้า</span><span class="badge bl">🐇 สับสน</span><span class="badge ch">⚔ พลังสะสม ×3</span><span class="badge lock">🔒 ผนึกความสามารถ</span><span class="badge bn">🔥 เผาไหม้</span><span class="badge sv">⚡ ชารุนแรง</span><span class="badge ps">👻 เข้าสิง</span><span class="badge bd">🩸 เลือดไหล</span><span class="badge pz">☠ ติดพิษ</span><span class="badge tb">⚡ เทอร์โบ</span><span class="badge cx">✦ กางเขนใต้</span><span class="badge fz">❄ แช่แข็ง</span><span class="badge hwb">✝ บาดแผลศักดิ์สิทธิ์</span><div class="fgr"></div></div></div><div class="stat"><div class="row"><b class="nm"></b><span>POWER <span class="num pw"></span></span></div><div class="bar-hp"><div class="fill"></div></div><div class="hpt"></div><div class="rage"><div class="rfill"></div><span class="rtx"></span></div></div><div class="line"></div></div>`}
 function setFighter(k){
   const f=$('#f'+k),c=CARDS[S[k].id],cw=$('.cw',f);
   cw.classList.remove('ko','para','seal','zap','lungea','lungeb','hit','gold','heal');
@@ -228,7 +230,7 @@ async function duoPrep(my){
 function startBattle(opts){
   OPT=opts;FIXED=!!opts.online;RNG=opts.seed!=null?mulberry(opts.seed>>>0):null;if(opts.online){speed=1;$('#speedBtn').textContent='ความเร็ว x1'}
   run++;paused=false;$('#pauseBtn').textContent='หยุด';$('#fx').innerHTML='';$('#autoBtn').classList.toggle('hidden',!opts.auto);
-  C={sub:num('#suB')/100,sun:Math.max(1,Math.round(num('#suN'))),rsk:num('#rsK')/100,rvs:Math.max(0,Math.round(num('#rsV'))),isx:num('#isX'),isn:Math.max(1,Math.round(num('#isN'))),mih:num('#maT')/100,mib:num('#maB')/100,mit:Math.max(1,Math.round(num('#maN'))),mim:num('#maM'),mis:num('#maS')/100,kkd:num('#kkD')/100,kkc:num('#kkC')/100,kkn:Math.max(2,Math.round(num('#kkN'))),cem:num('#ceM'),ced:num('#ceD')/100,gr:num('#gr')/100,zc:num('#zc')/100,kh:num('#kh')/100,ki:Math.max(1,num('#ki')),gc:num('#gc'),gd:num('#gd')/100,nh:num('#nh')/100,rm:num('#rm'),lb:num('#lb')/100,lc:num('#lc')/100,ym:num('#ym'),gm:num('#oM'),gn:Math.max(1,num('#oN')),sd:num('#mD')/100,sn:num('#mN')/100,se:num('#mE'),sr:num('#mR')/100,bd:num('#hB')/100,bt:Math.max(1,num('#hT')),gh:num('#hG')/100,pc:num('#fC')/100,gx:num('#eG')/100,ab:num('#aB')/100,kf:num('#kdF')/100,sv:num('#scV')/100,sc:num('#scC')/100,st:Math.max(1,num('#scT')),kb:num('#kdB')/100,kt:Math.max(1,num('#kdT')),xn:num('#xN'),xk:num('#xK'),xm:num('#xM'),ot:num('#uT')/100,od:num('#uD')/100,nr:num('#wR')/100,gk:num('#qR')/100,ni:Math.max(1,Math.round(num('#inI'))),nx:num('#inX'),n1h:num('#n1h')/100,n1c:num('#n1c')/100,wp:num('#mhW'),gqw:num('#gqW')/100,gqc:Math.max(1,Math.round(num('#gqC'))),gqe:num('#gqE')/100,gqm:num('#gqM'),wr:num('#mhR')/100,zb:num('#rzB')/100,zm:num('#rzM'),zs:num('#rzS')/100,rb:num('#rzX'),shh:num('#shA')/100,shp:num('#shB')/100,cm:num('#chM'),kyd:num('#kyD')/100,kyt:Math.max(1,num('#kyT')),kyr:num('#kyR')/100,krn:Math.max(1,Math.round(num('#krN'))),krc:num('#krC')/100,krr:num('#krR')/100,krs:num('#krS')/100,krk:num('#krK')/100,krb:num('#krB')/100,gad:num('#gaD')/100,vgd:num('#vgD')/100,vgn:Math.max(1,Math.round(num('#vgA'))),vgx:Math.max(1,Math.round(num('#vgB'))),kuc:num('#kuC')/100,kud:num('#kuD')/100,kut:Math.max(1,Math.round(num('#kuT'))),knb:num('#knB')/100,knr:num('#knR')/100,knx:num('#knX')/100,rit:num('#riT')/100,rib:num('#riB')/100,rin:Math.max(1,Math.round(num('#riN'))),pcd:num('#voD')/100,pcn:Math.max(2,Math.round(num('#voN'))),pcc:num('#voC')/100,pcs:Math.max(0,Math.round(num('#voS'))),pfd:num('#pfD')/100,pfn:Math.max(2,Math.round(num('#pfN'))),pfc:num('#pfC')/100,pfb:num('#pfB')/100,pft:Math.max(1,Math.round(num('#pfT'))),grd:num('#grD')/100,kbd:num('#kbD')/100,shc:num('#ucC')/100,kbm:num('#kbM'),kbr:num('#kbR')/100,grn:Math.max(2,Math.round(num('#grN'))),hwd:num('#rlD')/100,hwn:Math.max(1,Math.round(num('#rlN'))),trg:num('#trG')/100,tri:Math.max(1,Math.round(num('#trI'))),trh:num('#trR')/100};
+  C={mla:num('#mlA'),mld:num('#mlD'),mls:num('#mlS'),mlm:Math.max(1,num('#mlM')),mlt:Math.max(1,Math.round(num('#mlT'))),mlx:Math.max(1,num('#mlX')),sub:num('#suB')/100,sun:Math.max(1,Math.round(num('#suN'))),rsk:num('#rsK')/100,rvs:Math.max(0,Math.round(num('#rsV'))),isx:num('#isX'),isn:Math.max(1,Math.round(num('#isN'))),mih:num('#maT')/100,mib:num('#maB')/100,mit:Math.max(1,Math.round(num('#maN'))),mim:num('#maM'),mis:num('#maS')/100,kkd:num('#kkD')/100,kkc:num('#kkC')/100,kkn:Math.max(2,Math.round(num('#kkN'))),cem:num('#ceM'),ced:num('#ceD')/100,gr:num('#gr')/100,zc:num('#zc')/100,kh:num('#kh')/100,ki:Math.max(1,num('#ki')),gc:num('#gc'),gd:num('#gd')/100,nh:num('#nh')/100,rm:num('#rm'),lb:num('#lb')/100,lc:num('#lc')/100,ym:num('#ym'),gm:num('#oM'),gn:Math.max(1,num('#oN')),sd:num('#mD')/100,sn:num('#mN')/100,se:num('#mE'),sr:num('#mR')/100,bd:num('#hB')/100,bt:Math.max(1,num('#hT')),gh:num('#hG')/100,pc:num('#fC')/100,gx:num('#eG')/100,ab:num('#aB')/100,kf:num('#kdF')/100,sv:num('#scV')/100,sc:num('#scC')/100,st:Math.max(1,num('#scT')),kb:num('#kdB')/100,kt:Math.max(1,num('#kdT')),xn:num('#xN'),xk:num('#xK'),xm:num('#xM'),ot:num('#uT')/100,od:num('#uD')/100,nr:num('#wR')/100,gk:num('#qR')/100,ni:Math.max(1,Math.round(num('#inI'))),nx:num('#inX'),n1h:num('#n1h')/100,n1c:num('#n1c')/100,wp:num('#mhW'),gqw:num('#gqW')/100,gqc:Math.max(1,Math.round(num('#gqC'))),gqe:num('#gqE')/100,gqm:num('#gqM'),wr:num('#mhR')/100,zb:num('#rzB')/100,zm:num('#rzM'),zs:num('#rzS')/100,rb:num('#rzX'),shh:num('#shA')/100,shp:num('#shB')/100,cm:num('#chM'),kyd:num('#kyD')/100,kyt:Math.max(1,num('#kyT')),kyr:num('#kyR')/100,krn:Math.max(1,Math.round(num('#krN'))),krc:num('#krC')/100,krr:num('#krR')/100,krs:num('#krS')/100,krk:num('#krK')/100,krb:num('#krB')/100,gad:num('#gaD')/100,vgd:num('#vgD')/100,vgn:Math.max(1,Math.round(num('#vgA'))),vgx:Math.max(1,Math.round(num('#vgB'))),kuc:num('#kuC')/100,kud:num('#kuD')/100,kut:Math.max(1,Math.round(num('#kuT'))),knb:num('#knB')/100,knr:num('#knR')/100,knx:num('#knX')/100,rit:num('#riT')/100,rib:num('#riB')/100,rin:Math.max(1,Math.round(num('#riN'))),pcd:num('#voD')/100,pcn:Math.max(2,Math.round(num('#voN'))),pcc:num('#voC')/100,pcs:Math.max(0,Math.round(num('#voS'))),pfd:num('#pfD')/100,pfn:Math.max(2,Math.round(num('#pfN'))),pfc:num('#pfC')/100,pfb:num('#pfB')/100,pft:Math.max(1,Math.round(num('#pfT'))),grd:num('#grD')/100,kbd:num('#kbD')/100,shc:num('#ucC')/100,kbm:num('#kbM'),kbr:num('#kbR')/100,grn:Math.max(2,Math.round(num('#grN'))),hwd:num('#rlD')/100,hwn:Math.max(1,Math.round(num('#rlN'))),trg:num('#trG')/100,tri:Math.max(1,Math.round(num('#trI'))),trh:num('#trR')/100};
   const mk=(lvs,sts)=>(id,i)=>{const l=(lvs&&lvs[i])||1,sr=(sts&&sts[i])||1,s=statAt(id,l,sr);return{id,lv:l,star:sr,p:s.p,hp:s.hp,max:s.hp,para:false,sealed:false,lightning:false,miss:false,burn:0,burnDmg:0,sev:0,poss:false,bleed:false,hb:0,ps:0,hw:0,hwDmg:0,turbo:false,cx:0,frz:false,ice:0,iceDmg:0,wkr:0,vs:CARDS[id].ability==='garocosmic'?C.pcs:(CARDS[id].ability==='rias'?C.rvs:0),p0:s.p,slime:id==='slime',rm:0,rmOn:false,rmUsed:false,rmP:0,rmH:0,rmT:0,rmHeal:false,fg:null,t:0}};
   let first=opts.first||$('#first').value;if(first==='r')first=RR()<.5?'a':'b';
   S={a:null,b:null,roster:{a:opts.a.map(mk(opts.la,opts.sa)),b:opts.b.map(mk(opts.lb,opts.sb))},idx:{a:0,b:0},turn:first,n:1,over:false,phase2:opts.phase2||null};
@@ -330,7 +332,7 @@ function paintF(f,s,k,act){const pc=Math.max(0,s.hp/s.max*100);
     const fl=$('.fill',f);fl.style.width=pc+'%';fl.classList.toggle('low',pc<30);
     $('.hpt',f).textContent='HP '+Math.max(0,Math.ceil(s.hp)).toLocaleString()+' / '+s.max.toLocaleString();
     $('.pw',f).textContent=Number.isInteger(s.p)?s.p:s.p.toFixed(1);
-    $('.cw',f).classList.toggle('para',s.para);$('.cw',f).classList.toggle('seal',s.sealed);$('.cw',f).classList.toggle('zap',s.lightning);$('.cw',f).classList.toggle('blind',s.miss);$('.cw',f).classList.toggle('burning',s.burn>0);$('.cw',f).classList.toggle('sevr',s.sev>0);$('.cw',f).classList.toggle('possessed',!!s.poss);$('.cw',f).classList.toggle('bleeding',!!s.bleed||s.hb>0);$('.cw',f).classList.toggle('poisoned',s.ps>0);$('.cw',f).classList.toggle('holywound',s.hw>0);$('.cw',f).classList.toggle('turbo',!!s.turbo);$('.cw',f).classList.toggle('vshield',s.vs>0);$('.cw',f).classList.toggle('charged',CARDS[s.id].ability==='getsuga'&&s.t%(C.gn+1)===C.gn&&!S.over);{const g=$('.fgr',f);g.style.display=s.fg==null?'none':'flex';g.innerHTML=s.fg==null?'':handSvg(s.fg,26)+'<span>'+FN[s.fg]+'</span>'}{const cwx=$('.cw',f);cwx.classList.toggle('crossed',s.cx>0);cwx.classList.toggle('frozen',!!s.frz||s.ice>0);const bx=$('.badge.cx',f),bz=$('.badge.fz',f);if(bx)bx.textContent='✦ กางเขนใต้ ×'+(s.cx||0);if(bz)bz.textContent=s.frz?'❄ แช่แข็ง':'❄ ผลึกน้ำแข็ง'+(s.ice>1?' ×'+s.ice:'')}f.classList.toggle('active',!!act)}
+    $('.cw',f).classList.toggle('para',s.para);$('.cw',f).classList.toggle('seal',s.sealed);$('.cw',f).classList.toggle('zap',s.lightning);$('.cw',f).classList.toggle('blind',s.miss);$('.cw',f).classList.toggle('burning',s.burn>0);$('.cw',f).classList.toggle('sevr',s.sev>0);$('.cw',f).classList.toggle('possessed',!!s.poss);$('.cw',f).classList.toggle('bleeding',!!s.bleed||s.hb>0);$('.cw',f).classList.toggle('poisoned',s.ps>0);$('.cw',f).classList.toggle('holywound',s.hw>0);$('.cw',f).classList.toggle('turbo',!!s.turbo);$('.cw',f).classList.toggle('vshield',s.vs>0);milimUI(f,s);$('.cw',f).classList.toggle('charged',CARDS[s.id].ability==='getsuga'&&s.t%(C.gn+1)===C.gn&&!S.over);{const g=$('.fgr',f);g.style.display=s.fg==null?'none':'flex';g.innerHTML=s.fg==null?'':handSvg(s.fg,26)+'<span>'+FN[s.fg]+'</span>'}{const cwx=$('.cw',f);cwx.classList.toggle('crossed',s.cx>0);cwx.classList.toggle('frozen',!!s.frz||s.ice>0);const bx=$('.badge.cx',f),bz=$('.badge.fz',f);if(bx)bx.textContent='✦ กางเขนใต้ ×'+(s.cx||0);if(bz)bz.textContent=s.frz?'❄ แช่แข็ง':'❄ ผลึกน้ำแข็ง'+(s.ice>1?' ×'+s.ice:'')}f.classList.toggle('active',!!act)}
 function render(){
   qTrack();
   if(S&&!S.over){riasReflect('a');riasReflect('b');gmaxPurify('a');gmaxPurify('b');for(const k of['a','b']){pflameImmune(k);enterField(k);rimuruCheck(k);kabutoAura(k)}}
@@ -407,7 +409,7 @@ function getsugaFx(ak,dk){
 /* ---------- คุราปิก้า: สุ่มนิ้ว (โอกาสเท่ากัน 20% ต่อนิ้ว) ---------- */
 const FN=['นิ้วโป้ง','นิ้วชี้','นิ้วกลาง','นิ้วนาง','นิ้วก้อย'];
 const FD=['ฟื้นฟู HP','ขโมยความสามารถ','ผนึกความสามารถศัตรู','ลบสถานะด้านลบ','โจมตีซ้ำ'];
-const AN={susanoo:'ทะลุ Void Shield + สะท้อนสกิลจุดตาย/สถานะ + เพิ่มสเตตัสเมื่อเพื่อนร่วมทีมถูกทำลาย',shichi:'ควบคุมศัตรูโจมตีตัวเอง 50% + สะท้อนสกิลจุดตาย + กันสถานะ',kabuto:'หลบ 50% + ดาเมจ ×5 ใส่บอส + ลด POWER ศัตรู 10%',rias:'สะท้อนสถานะ + ทำลายในครั้งเดียว + Void Shield',issei:'สเตตัส ×2 ชั่วคราว',garocosmic:'โจมตี 4 ครั้ง + หลบ 55% + โต้กลับ + Void Shield',garomon:'โจมตี 3 ครั้ง + หลบ 45% + โต้กลับ + เพิ่มสเตตัส',garored:'โจมตี 3 ครั้ง + หลบ 40%',truebossimm:'สถานะลบไม่มีผล + แปลงเป็นสเตตัส',truelord:'บาดแผลศักดิ์สิทธิ์',rimulord:'ล้างสถานะผิดปกติ + บาดแผลศักดิ์สิทธิ์',slime:'กลืนกินแล้วแปลงร่าง',rimuru:'ไร้ผลด้านลบ + โหมดผู้ไร้ความปราณี',immune:'ป้องกันสถานะผิดปกติให้ทีม',gate2:'Gate of Babylon (เรียกอาวุธ 3 เล่ม)',bomb:'ระเบิด (ดาเมจ ×2 + มึนงง)',shuna:'เสริมพลังทีม',boss3:'ดาเมจ ×3 ใส่บอส',boss5:'ดาเมจ ×5 ใส่บอส + หลบ 50%',ghoul:'ดูดเลือด + ตี 4 ครั้ง',mai:'โหมดไฟ (เผาไหม้) / โหมดระเบิด',questboss:'ไม่มี',pflame:'ไฟบริสุทธิ์',wheel:'ธรรมจักร (กงล้อหมุนสุ่มเสริมพลัง)',kyuubi:'จักระจิ้งจอก (ฟื้นฟู HP + ชะงัก)',getsuga:'เกตสึกะ (ดาเมจ ×3)',shiki:'ทศฉายา (เรียกชิกิกามิ)',upset:'ล้มยักษ์ (ดาเมจเพิ่มใส่ศัตรูระดับสูงกว่า)',lightning:'สายฟ้า',grow:'POWER เพิ่มขึ้น',paralyze:'ทำให้ชา',heal:'ฟื้นฟู HP',gate:'Gate of Babylon',ghost:'ผีเมาช่วยโจมตี',possess:'เข้าสิง (ศัตรูมีโอกาสโจมตีตัวเอง)',gmax:'แปลงสถานะลบเป็น POWER',double:'โจมตี 2 ครั้ง + เลือดไหล',scythe:'สุ่มการโจมตี 3 รูปแบบ',turbo:'สัญลักษณ์เทอร์โบ',crux:'กลุ่มดาวกางเขนใต้ (เรียกอุปสรรคพุ่งใส่)',garo:'โจมตี 2 ครั้ง + หลบ 40%',kiblast:'กระสุนพลัง 2-5 ครั้ง',icecrystal:'ผลึกน้ำแข็ง (แช่แข็ง + ดาเมจตกค้าง)',paper:'กระดาษวิเศษ (ลดดาเมจ / ระเบิด)'};
+const AN={milim:'หลอดความโกรธ → โหมดซาตานาเอล (สเตตัส ×3 + กันสถานะ)',susanoo:'ทะลุ Void Shield + สะท้อนสกิลจุดตาย/สถานะ + เพิ่มสเตตัสเมื่อเพื่อนร่วมทีมถูกทำลาย',shichi:'ควบคุมศัตรูโจมตีตัวเอง 50% + สะท้อนสกิลจุดตาย + กันสถานะ',kabuto:'หลบ 50% + ดาเมจ ×5 ใส่บอส + ลด POWER ศัตรู 10%',rias:'สะท้อนสถานะ + ทำลายในครั้งเดียว + Void Shield',issei:'สเตตัส ×2 ชั่วคราว',garocosmic:'โจมตี 4 ครั้ง + หลบ 55% + โต้กลับ + Void Shield',garomon:'โจมตี 3 ครั้ง + หลบ 45% + โต้กลับ + เพิ่มสเตตัส',garored:'โจมตี 3 ครั้ง + หลบ 40%',truebossimm:'สถานะลบไม่มีผล + แปลงเป็นสเตตัส',truelord:'บาดแผลศักดิ์สิทธิ์',rimulord:'ล้างสถานะผิดปกติ + บาดแผลศักดิ์สิทธิ์',slime:'กลืนกินแล้วแปลงร่าง',rimuru:'ไร้ผลด้านลบ + โหมดผู้ไร้ความปราณี',immune:'ป้องกันสถานะผิดปกติให้ทีม',gate2:'Gate of Babylon (เรียกอาวุธ 3 เล่ม)',bomb:'ระเบิด (ดาเมจ ×2 + มึนงง)',shuna:'เสริมพลังทีม',boss3:'ดาเมจ ×3 ใส่บอส',boss5:'ดาเมจ ×5 ใส่บอส + หลบ 50%',ghoul:'ดูดเลือด + ตี 4 ครั้ง',mai:'โหมดไฟ (เผาไหม้) / โหมดระเบิด',questboss:'ไม่มี',pflame:'ไฟบริสุทธิ์',wheel:'ธรรมจักร (กงล้อหมุนสุ่มเสริมพลัง)',kyuubi:'จักระจิ้งจอก (ฟื้นฟู HP + ชะงัก)',getsuga:'เกตสึกะ (ดาเมจ ×3)',shiki:'ทศฉายา (เรียกชิกิกามิ)',upset:'ล้มยักษ์ (ดาเมจเพิ่มใส่ศัตรูระดับสูงกว่า)',lightning:'สายฟ้า',grow:'POWER เพิ่มขึ้น',paralyze:'ทำให้ชา',heal:'ฟื้นฟู HP',gate:'Gate of Babylon',ghost:'ผีเมาช่วยโจมตี',possess:'เข้าสิง (ศัตรูมีโอกาสโจมตีตัวเอง)',gmax:'แปลงสถานะลบเป็น POWER',double:'โจมตี 2 ครั้ง + เลือดไหล',scythe:'สุ่มการโจมตี 3 รูปแบบ',turbo:'สัญลักษณ์เทอร์โบ',crux:'กลุ่มดาวกางเขนใต้ (เรียกอุปสรรคพุ่งใส่)',garo:'โจมตี 2 ครั้ง + หลบ 40%',kiblast:'กระสุนพลัง 2-5 ครั้ง',icecrystal:'ผลึกน้ำแข็ง (แช่แข็ง + ดาเมจตกค้าง)',paper:'กระดาษวิเศษ (ลดดาเมจ / ระเบิด)'};
 /* ไอคอนมือ: นิ้วที่ใช้ในเทิร์นนั้นจะเรืองสีทอง */
 function handSvg(i,sz=40){
   const F=[['M10 66 L22 56 L36 84 L22 92Z','',''],['M24 16h12a2 2 0 0 1 2 2v44H22V18a2 2 0 0 1 2-2z'],['M38 8h12a2 2 0 0 1 2 2v52H36V10a2 2 0 0 1 2-2z'],['M52 14h12a2 2 0 0 1 2 2v46H50V16a2 2 0 0 1 2-2z'],['M66 28h11a2 2 0 0 1 2 2v32H64V30a2 2 0 0 1 2-2z']];
@@ -432,6 +434,7 @@ async function hit(ak,dk,mult=1){
   const a=S[ak],d=S[dk],aw=$('#f'+ak+' .cw'),dw=$('#f'+dk+' .cw');
   aw.classList.add('lunge'+ak);await sl(260);
   if(ak==='a'&&a.id==='garomon'&&!S.ctr&&typeof onAtkHook==='function'&&!OPT.online)onAtkHook(a.id);   /* นับจำนวนครั้งที่โจมตี (เงื่อนไขอีโว คอสมิค กาโร่ · ไม่นับการโต้กลับ) */
+  if(CARDS[a.id].ability==='milim')milimRage(ak,C.mla);   /* มิลิม: โจมตี → ความโกรธเพิ่ม */
   if(dodges(dk)){S.lb=0;S.up=false;floatTxt(dw,'หลบ!','miss');log('💨 '+nm(dk)+' หลบการโจมตีได้!',dk);aw.classList.remove('lungea','lungeb');render();return 0}
   if(d.vs>0&&CARDS[a.id].ability!=='susanoo'){d.vs--;S.lb=0;S.up=false;floatTxt(dw,'🛡 Void Shield','miss');log('🛡 '+nm(dk)+' ใช้ Void Shield กันการโจมตี! (เหลือ '+d.vs+' ครั้ง)',dk);aw.classList.remove('lungea','lungeb');render();return 0}   /* Void Shield: กันการโจมตี (หลบก่อน ถ้าไม่หลบจึงใช้โล่) */
   let tb=0;if(a.turbo&&!S.noAb&&CARDS[a.id].ability==='turbo'){tb=Math.round(a.p*C.ot);a.turbo=false;log('⚡ สัญลักษณ์เทอร์โบ! ดาเมจเพิ่ม +'+tb,ak)}
@@ -440,6 +443,7 @@ async function hit(ak,dk,mult=1){
   const dmg=Math.round(a.p*mult*(up?C.ym:1)*bm)+bonus+tb;d.hp-=dmg;
   if(up){const r=dw.getBoundingClientRect(),x=fxEl('bfx',r.left+r.width/2,r.top+r.height/2,200,200);setTimeout(()=>x.remove(),550);dw.classList.remove('bflash');void dw.offsetWidth;dw.classList.add('bflash')}
   floatTxt(dw,'-'+dmg,up||mult>=3||bm>1?'crit':bonus?'zp':'');dw.classList.remove('hit');void dw.offsetWidth;dw.classList.add('hit');aw.classList.remove('lungea','lungeb');
+  if(dmg>0&&CARDS[d.id].ability==='milim')milimRage(dk,C.mld+((mult>1||S.inSkill>0)?C.mls:0));   /* มิลิม: รับดาเมจ (ถ้าเป็นสกิลโจมตี เพิ่มมากกว่า) */
   render();return dmg;
 }
 function boltFx(ak,dk){
@@ -472,7 +476,14 @@ async function kuramaFx(ak,dk){
   await sl(450);dw.classList.remove('hit');void dw.offsetWidth;dw.classList.add('hit');floatTxt(dw,'ชะงัก!','sm');await sl(350);
 }
 /* ความสามารถของการ์ดแต่ละใบ (opt.force = ถูกขโมยมาใช้ จึงทำงานทันที) */
+/* ตัวห่อ applyAb: ถ้าเป้าหมายคือมิลิม นับสกิลที่ทำให้เสีย HP เป็น "ถูกสกิลโจมตี" (ความโกรธเพิ่ม) */
 async function applyAb(name,ak,dk,opt={}){
+  const d=S[dk];if(!d||CARDS[d.id].ability!=='milim')return applyAb0(name,ak,dk,opt);
+  const h0=d.hp;S.inSkill=(S.inSkill||0)+1;S.mlGot=0;
+  try{await applyAb0(name,ak,dk,opt)}finally{S.inSkill--}
+  if(S[dk]===d&&d.hp<h0&&!S.mlGot)milimRage(dk,C.mld+C.mls);   /* ดาเมจจากสกิลที่ไม่ผ่านการโจมตีปกติ */
+}
+async function applyAb0(name,ak,dk,opt={}){
   const a=S[ak],d=S[dk];if(d.hp<=0)return;
   if(d.vs>0&&CARDS[a.id].ability!=='susanoo'&&VS_SKILL.includes(name)){d.vs--;floatTxt($('#f'+dk+' .cw'),'🛡 Void Shield','miss');log('🛡 '+nm(dk)+' ใช้ Void Shield กันสกิลของ '+nm(ak)+'! (เหลือ '+d.vs+' ครั้ง)',dk);render();await sl(350);return}   /* Void Shield: กันสกิลที่ใช้กับเรา */
   if(name==='paralyze'){if(!d.para&&RR()<C.zc){d.para=true;log('⚡ '+nm(dk)+' ถูกทำให้ชา! ข้ามการโจมตีเทิร์นหน้า',ak)}}
@@ -799,6 +810,33 @@ function riasReflect(k){
     g.slice(1).forEach(f=>{if(f==='burnTx')t.burnTx=snap.burnTx;else t[f]=Math.max(t[f]||0,snap[f]||0)})});
   log('🔁 '+nm(k)+' ลบสถานะผิดปกติ '+got+' อย่างของตัวเอง แล้วสะท้อนกลับไปที่ '+nm(o)+'!',k);render();
 }
+/* ---------- มิลิม นาวา: หลอดความโกรธ → เต็มแล้วเข้าโหมด "ซาตานาเอล" สเตตัส ×C.mlx + กันสถานะทุกอย่าง นาน C.mlt เทิร์นของตน ---------- */
+function milimRage(k,n){
+  const r=S[k];if(!r||r.hp<=0||CARDS[r.id].ability!=='milim'||r.mlOn||n<=0)return;
+  r.rg=Math.min(C.mlm,(r.rg||0)+n);S.mlGot=(S.mlGot||0)+1;
+  if(r.rg>=C.mlm)milimSatan(k);else render();
+}
+function milimSatan(k){
+  const r=S[k];if(!r||r.mlOn)return;
+  const ap=Math.round(r.p*(C.mlx-1)*10)/10,ah=Math.round(r.max*(C.mlx-1));
+  r.mlP=ap;r.mlH=ah;r.p=Math.round((r.p+ap)*10)/10;r.max+=ah;r.hp+=ah;r.mlOn=true;r.mlN=C.mlt+1;r.resist=true;r.rg=C.mlm;
+  const cw=$('#f'+k+' .cw');floatTxt(cw,'ซาตานาเอล!','crit');cw.classList.remove('gold');void cw.offsetWidth;cw.classList.add('gold');setTimeout(()=>cw.classList.remove('gold'),1600);
+  log('😈 หลอดความโกรธเต็ม! '+nm(k)+' เข้าสู่โหมด "ซาตานาเอล" สเตตัส ×'+C.mlx+' (POWER '+r.p+' · HP '+Math.ceil(r.hp).toLocaleString()+'/'+r.max.toLocaleString()+') กันสถานะทุกอย่าง นาน '+C.mlt+' เทิร์น',k);
+  gmaxPurify(k);render();
+}
+function milimEnd(r,k){
+  r.mlOn=false;r.resist=false;r.rg=0;r.p=Math.max(1,Math.round((r.p-r.mlP)*10)/10);r.max=Math.max(1,r.max-r.mlH);r.hp=Math.min(r.hp,r.max);r.mlP=r.mlH=0;
+  log('😈 โหมดซาตานาเอลของ '+CARDS[r.id].name+' สิ้นสุด สเตตัสกลับเป็นปกติ ความโกรธเริ่มสะสมใหม่ (POWER '+r.p+' · HP '+Math.ceil(r.hp)+'/'+r.max+')',k);render();
+}
+/* นับถอยหลังเฉพาะเทิร์นของมิลิมเองตอนอยู่ในสนาม */
+function milimTick(k){const r=S[k];if(!r||!r.mlOn||r.hp<=0)return;r.mlN--;if(r.mlN<=0)milimEnd(r,k)}
+function milimUI(f,s){
+  const rg=$('.rage',f);if(!rg)return;const m=CARDS[s.id].ability==='milim';
+  rg.style.display=m?'block':'none';$('.cw',f).classList.toggle('satan',m&&!!s.mlOn);if(!m)return;
+  rg.classList.toggle('on',!!s.mlOn);
+  $('.rfill',rg).style.width=(s.mlOn?Math.max(0,(s.mlN-1)/C.mlt*100):Math.min(100,(s.rg||0)/C.mlm*100))+'%';
+  $('.rtx',rg).textContent=s.mlOn?'ซาตานาเอล · เหลือ '+Math.max(0,s.mlN-1)+' เทิร์น':'ความโกรธ '+Math.round(s.rg||0)+' / '+C.mlm;
+}
 /* ---------- อิซเซย์: นับถอยหลังทุกครั้งที่ทีมเจ้าของได้เล่น เมื่อครบสเตตัสกลับเป็นเท่าเดิม ---------- */
 function isseiEnd(r,k){
   r.isOn=false;r.p=Math.max(1,Math.round((r.p-r.isP)*10)/10);r.max=Math.max(1,r.max-r.isH);r.hp=Math.min(r.hp,r.max);r.isP=r.isH=0;
@@ -967,7 +1005,7 @@ async function handleKO(dk,ak){
 async function doTurn(){
   const ak=S.turn,dk=ak==='a'?'b':'a',a=S[ak],d=S[dk],ac=CARDS[a.id];
   if(a.rmOn&&a.rm<=0)rimuruEnd(ak);
-  isseiTick(ak);
+  isseiTick(ak);milimTick(ak);
   a.t++;
   if(a.burn>0){   /* เผาไหม้: เสีย HP ต้นเทิร์นของการ์ดที่ติดสถานะ */
     const bd=a.burnDmg,cw=$('#f'+ak+' .cw');a.hp-=bd;a.burn--;floatTxt(cw,'-'+bd,'sm');cw.classList.remove('hit');void cw.offsetWidth;cw.classList.add('hit');

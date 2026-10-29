@@ -786,3 +786,10 @@ body{padding:0}
 .tgtmsg{background:#ffd34d;color:#201600;font-family:Kanit,sans-serif;font-weight:700;padding:6px 12px;border-radius:10px;text-align:center;box-shadow:0 0 18px #ffd34d88;animation:tgtp .7s ease-in-out infinite alternate}
 .mode2{display:flex;gap:8px;justify-content:center;margin:6px 0}
 .mode2 button.on{background:var(--gold);color:#201600}
+/* มิลิม นาวา: หลอดความโกรธ / โหมดซาตานาเอล */
+.rage{display:none;position:relative;height:14px;margin-top:4px;border-radius:7px;background:#2a1216;border:1px solid #6b2230;overflow:hidden}
+.rage .rfill{height:100%;width:0;background:linear-gradient(90deg,#ff9a3d,#ff2b2b);transition:width .25s}
+.rage .rtx{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;text-shadow:0 0 3px #000;white-space:nowrap}
+.rage.on .rfill{background:linear-gradient(90deg,#b100ff,#ff2bd6,#ff2b2b);animation:ragepulse .9s infinite alternate}
+@keyframes ragepulse{from{filter:brightness(1)}to{filter:brightness(1.6)}}
+.cw.satan{box-shadow:0 0 0 2px rgba(255,60,120,.9),0 0 26px 8px rgba(190,40,255,.8)}
