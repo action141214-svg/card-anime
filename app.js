@@ -962,7 +962,7 @@ const EVOS=[{from:'naruto',to:'naruto1',need:{cards:50,items:{seal9:1},coins:100
   boss:{card:'garomonboss',name:'สัตว์ประหลาดที่สมบูรณ์แบบ กาโร่',hp:30000,power:100,lv:1,coins:100,drops:[]}},
   /* need.pmk / pmd / pma / pmc = สัตว์ประหลาดที่สมบูรณ์แบบ กาโร่ สังหาร / หลบหลีก / โจมตี / โต้กลับ สะสม (นับตั้งแต่อัปเดตนี้) */
   {from:'garomon',to:'garocosmic',need:{cards:5,more:{garo:300,garored:30},items:{cosmic:1},pmk:5000,pmd:5000,pma:1000,pmc:100,win:true,coins:1000000000},grant:{star:6},
-  boss:{card:'garocosmicboss',name:'คอสมิค กาโร่',hp:50000,power:100,lv:1,coins:100,drops:[{item:'cosmic',rate:.005}]}}];
+  boss:{card:'garocosmicboss',name:'คอสมิค กาโร่',hp:50000,power:100,lv:1,coins:100,drops:[{item:'cosmic',rate:1}]}}];
 const evDropRate=(e,d)=>(d.first!=null&&!SV.evoWin[e.from])?d.first:d.rate;   /* โอกาสออกตอนนี้ (ชนะครั้งแรกอาจได้โอกาสพิเศษ) */
 let evoSel=null,evoKeep=false,questTab='char';
 /* หน้า "เควส" มี 2 แท็บ: เควสตัวละคร (char) และ เควสพัฒนา (evo) */

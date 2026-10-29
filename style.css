@@ -771,3 +771,18 @@ body{padding:0}
 .cw.holywound img{filter:sepia(.35) saturate(1.4) drop-shadow(0 0 8px #ffd54a)}
 /* Void Shield (คอสมิค กาโร่) */
 .cw.vshield{box-shadow:0 0 0 2px rgba(127,200,255,.9),0 0 22px 6px rgba(127,170,255,.75)}
+/* ---------- ต่อสู้ 2v2 (ออนไลน์): การ์ด 2 ใบต่อฝั่ง ---------- */
+.team.duo{gap:4px}
+.team.duo .duo2{flex:1;min-height:0;display:flex;gap:6px}
+.team.duo .duo2 .fighter{flex:1;min-width:0;border-radius:12px;position:relative}
+.team.duo .fighter .line{display:none}
+.team.duo .stat{width:100%;padding:3px 6px;font-size:.78em}
+.team.duo .stat .row{flex-direction:column;gap:0;align-items:flex-start}
+.team.duo .rsv{display:flex}
+.team.duo .rsv .lu{height:clamp(24px,5dvh,40px)}
+.fighter.tgt{cursor:pointer;outline:3px solid #ffd34d;outline-offset:2px;animation:tgtp .7s ease-in-out infinite alternate}
+.fighter.tgt::after{content:"🎯";position:absolute;top:2px;left:50%;transform:translateX(-50%);font-size:1.6em;pointer-events:none;filter:drop-shadow(0 0 6px #000)}
+@keyframes tgtp{from{box-shadow:0 0 0 0 #ffd34d00}to{box-shadow:0 0 22px 4px #ffd34daa}}
+.tgtmsg{background:#ffd34d;color:#201600;font-family:Kanit,sans-serif;font-weight:700;padding:6px 12px;border-radius:10px;text-align:center;box-shadow:0 0 18px #ffd34d88;animation:tgtp .7s ease-in-out infinite alternate}
+.mode2{display:flex;gap:8px;justify-content:center;margin:6px 0}
+.mode2 button.on{background:var(--gold);color:#201600}

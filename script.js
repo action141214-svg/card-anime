@@ -150,13 +150,81 @@ function setFighter(k){
   cw.classList.toggle('kcloak',c.ability==='kyuubi');
   f.style.setProperty('--c',c.color);const im=$('img',f);im.src=c.img;im.alt=c.name;$('.nm',f).textContent=nm(k)+' Lv.'+S[k].lv;
 }
+
+/* ---------- 2v2: ลงสนามฝั่งละ 2 ใบ · สลับกันโจมตี · ผู้เล่นเลือกเป้าได้ ---------- */
+function duoHtml(k){
+  const one=n=>sideHtml(k).replace('id="f'+k+'"','id="f'+k+'x'+n+'" data-k="'+k+'" data-s="'+n+'"');
+  return '<div class="duo2">'+one(0)+one(1)+'</div><div class="line rsv" id="rsv'+k+'"></div>'}
+const duoAlive=k=>S.slots[k].filter(i=>i>=0&&S.roster[k][i]&&S.roster[k][i].hp>0);
+/* ผูก id ของช่องการ์ด: ตัวที่กำลังเล่น/ถูกเลือกเป็น #fa / #fb (โค้ดเดิมใช้ id นี้ทั้งหมด) ตัวอื่นเป็น #fa x0/x1 */
+function bindDuo(){
+  if(!S||!S.duo)return;
+  for(const k of['a','b']){
+    const els=[...document.querySelectorAll('#team'+k.toUpperCase()+' .fighter')];
+    if(!S.slots[k].includes(S.idx[k])){const al=duoAlive(k);S.idx[k]=al.length?al[0]:S.slots[k][0]}
+    S[k]=S.roster[k][S.idx[k]];
+    els.forEach((el,n)=>{const ri=S.slots[k][n];el.dataset.ri=ri;el.id=(ri===S.idx[k])?'f'+k:'f'+k+'x'+n});
+    setFighter(k);
+  }
+  paintBench();
+}
+function paintBench(){
+  if(!S||!S.duo)return;
+  for(const k of['a','b']){
+    document.querySelectorAll('#team'+k.toUpperCase()+' .fighter').forEach(el=>{
+      if(el.id==='f'+k)return;
+      const r=S.roster[k][+el.dataset.ri];if(!r)return;const c=CARDS[r.id];
+      el.style.setProperty('--c',c.color);const im=$('img',el);if(im.getAttribute('src')!==c.img)im.src=c.img;im.alt=c.name;
+      $('.nm',el).textContent=c.name+(r.cl?' (ร่างแยก)':'')+' Lv.'+r.lv;
+      $('.cw',el).classList.toggle('ko',r.hp<=0);
+      paintF(el,r,k,false);
+    });
+    const rs=$('#rsv'+k);if(rs)rs.innerHTML=S.roster[k].map((r,i)=>`<span class="lu${S.slots[k].includes(i)&&r.hp>0&&!S.over?' on':''}${r.hp<=0?' dead':''}" style="--c:${CARDS[r.id].color}"><img src="${CARDS[r.id].img}" alt="${CARDS[r.id].name}"></span>`).join('');
+  }
+}
+/* เลือกเป้าหมาย: ผู้เล่นเจ้าของตาแตะการ์ดศัตรู (หมดเวลา 20 วิ = เลือกใบแรก) */
+function pickTargetUi(dk,list,my){
+  return new Promise(res=>{
+    const els=[...document.querySelectorAll('#team'+dk.toUpperCase()+' .fighter')].filter(e=>list.includes(+e.dataset.ri));
+    let done=false,left=20;
+    const msg=document.createElement('div');msg.className='tgtmsg';$('.center').appendChild(msg);
+    const fin=v=>{if(done)return;done=true;clearInterval(iv);msg.remove();els.forEach(e=>{e.classList.remove('tgt');e.removeEventListener('click',e._tg)});res(v)};
+    const show=()=>{msg.textContent='🎯 แตะเลือกเป้าหมายที่จะโจมตี ('+left+')'};show();
+    const iv=setInterval(()=>{if(run!==my){fin(list[0]);return}left--;if(left<=0)fin(list[0]);else show()},1000);
+    els.forEach(e=>{e.classList.add('tgt');e._tg=()=>fin(+e.dataset.ri);e.addEventListener('click',e._tg)});
+  });
+}
+async function chooseTarget(ak,dk,list,my){
+  const n=S.n;let v=list[0];
+  if(OPT.mySide&&OPT.mySide!==ak&&OPT.recvTarget){v=await OPT.recvTarget(n,my);if(run!==my)throw 'cancel'}
+  else{
+    if(OPT.autoTarget)v=OPT.autoTarget(list,S);
+    else v=await pickTargetUi(dk,list,my);
+    if(run!==my)throw 'cancel';
+    if(OPT.sendTarget)OPT.sendTarget(n,v);
+  }
+  return list.includes(v)?v:list[0];
+}
+async function duoPrep(my){
+  const ak=S.turn,dk=ak==='a'?'b':'a';
+  const fa=duoAlive(ak),fd=duoAlive(dk);
+  if(!fa.length||!fd.length)return;
+  S.idx[ak]=fa[S.rot[ak]%fa.length];S.rot[ak]++;
+  S.idx[dk]=fd[0];S[ak]=S.roster[ak][S.idx[ak]];S[dk]=S.roster[dk][S.idx[dk]];bindDuo();render();
+  if(fd.length>1){
+    const t=await chooseTarget(ak,dk,fd,my);
+    S.idx[dk]=t;bindDuo();render();
+    log('🎯 '+nm(ak)+' เลือกโจมตี '+nm(dk),ak);
+  }
+}
 function startBattle(opts){
   OPT=opts;FIXED=!!opts.online;RNG=opts.seed!=null?mulberry(opts.seed>>>0):null;if(opts.online){speed=1;$('#speedBtn').textContent='ความเร็ว x1'}
   run++;paused=false;$('#pauseBtn').textContent='หยุด';$('#fx').innerHTML='';$('#autoBtn').classList.toggle('hidden',!opts.auto);
   C={rsk:num('#rsK')/100,rvs:Math.max(0,Math.round(num('#rsV'))),isx:num('#isX'),isn:Math.max(1,Math.round(num('#isN'))),mih:num('#maT')/100,mib:num('#maB')/100,mit:Math.max(1,Math.round(num('#maN'))),mim:num('#maM'),mis:num('#maS')/100,kkd:num('#kkD')/100,kkc:num('#kkC')/100,kkn:Math.max(2,Math.round(num('#kkN'))),cem:num('#ceM'),ced:num('#ceD')/100,gr:num('#gr')/100,zc:num('#zc')/100,kh:num('#kh')/100,ki:Math.max(1,num('#ki')),gc:num('#gc'),gd:num('#gd')/100,nh:num('#nh')/100,rm:num('#rm'),lb:num('#lb')/100,lc:num('#lc')/100,ym:num('#ym'),gm:num('#oM'),gn:Math.max(1,num('#oN')),sd:num('#mD')/100,sn:num('#mN')/100,se:num('#mE'),sr:num('#mR')/100,bd:num('#hB')/100,bt:Math.max(1,num('#hT')),gh:num('#hG')/100,pc:num('#fC')/100,gx:num('#eG')/100,ab:num('#aB')/100,kf:num('#kdF')/100,sv:num('#scV')/100,sc:num('#scC')/100,st:Math.max(1,num('#scT')),kb:num('#kdB')/100,kt:Math.max(1,num('#kdT')),xn:num('#xN'),xk:num('#xK'),xm:num('#xM'),ot:num('#uT')/100,od:num('#uD')/100,nr:num('#wR')/100,gk:num('#qR')/100,ni:Math.max(1,Math.round(num('#inI'))),nx:num('#inX'),n1h:num('#n1h')/100,n1c:num('#n1c')/100,wp:num('#mhW'),gqw:num('#gqW')/100,gqc:Math.max(1,Math.round(num('#gqC'))),gqe:num('#gqE')/100,gqm:num('#gqM'),wr:num('#mhR')/100,zb:num('#rzB')/100,zm:num('#rzM'),zs:num('#rzS')/100,rb:num('#rzX'),shh:num('#shA')/100,shp:num('#shB')/100,cm:num('#chM'),kyd:num('#kyD')/100,kyt:Math.max(1,num('#kyT')),kyr:num('#kyR')/100,krn:Math.max(1,Math.round(num('#krN'))),krc:num('#krC')/100,krr:num('#krR')/100,krs:num('#krS')/100,krk:num('#krK')/100,krb:num('#krB')/100,gad:num('#gaD')/100,vgd:num('#vgD')/100,vgn:Math.max(1,Math.round(num('#vgA'))),vgx:Math.max(1,Math.round(num('#vgB'))),kuc:num('#kuC')/100,kud:num('#kuD')/100,kut:Math.max(1,Math.round(num('#kuT'))),knb:num('#knB')/100,knr:num('#knR')/100,knx:num('#knX')/100,rit:num('#riT')/100,rib:num('#riB')/100,rin:Math.max(1,Math.round(num('#riN'))),pcd:num('#voD')/100,pcn:Math.max(2,Math.round(num('#voN'))),pcc:num('#voC')/100,pcs:Math.max(0,Math.round(num('#voS'))),pfd:num('#pfD')/100,pfn:Math.max(2,Math.round(num('#pfN'))),pfc:num('#pfC')/100,pfb:num('#pfB')/100,pft:Math.max(1,Math.round(num('#pfT'))),grd:num('#grD')/100,grn:Math.max(2,Math.round(num('#grN'))),hwd:num('#rlD')/100,hwn:Math.max(1,Math.round(num('#rlN'))),trg:num('#trG')/100,tri:Math.max(1,Math.round(num('#trI'))),trh:num('#trR')/100};
   const mk=(lvs,sts)=>(id,i)=>{const l=(lvs&&lvs[i])||1,sr=(sts&&sts[i])||1,s=statAt(id,l,sr);return{id,lv:l,star:sr,p:s.p,hp:s.hp,max:s.hp,para:false,sealed:false,lightning:false,miss:false,burn:0,burnDmg:0,sev:0,poss:false,bleed:false,hb:0,ps:0,hw:0,hwDmg:0,turbo:false,cx:0,frz:false,ice:0,iceDmg:0,wkr:0,vs:CARDS[id].ability==='garocosmic'?C.pcs:(CARDS[id].ability==='rias'?C.rvs:0),p0:s.p,slime:id==='slime',rm:0,rmOn:false,rmUsed:false,rmP:0,rmH:0,rmT:0,rmHeal:false,fg:null,t:0}};
   let first=opts.first||$('#first').value;if(first==='r')first=RR()<.5?'a':'b';
-  S={a:null,b:null,roster:{a:opts.a.map(mk(opts.la,opts.sa)),b:opts.b.map(mk(opts.lb,opts.sb))},idx:{a:0,b:0},turn:first,n:1,over:false,phase2:opts.phase2||null};   /* phase2 = บอสเควส 2 เฟส: เมื่อเฟส 1 ตาย บอสตัวเดิมเปลี่ยนเป็นเฟส 2 */
+  S={a:null,b:null,roster:{a:opts.a.map(mk(opts.la,opts.sa)),b:opts.b.map(mk(opts.lb,opts.sb))},idx:{a:0,b:0},turn:first,n:1,over:false,phase2:opts.phase2||null};
+  if(opts.duo){S.duo=true;S.slots={a:[0,opts.a.length>1?1:-1],b:[0,opts.b.length>1?1:-1]};S.next={a:Math.min(2,opts.a.length),b:Math.min(2,opts.b.length)};S.rot={a:0,b:0}}   /* 2v2: ลงสนามฝั่งละ 2 ใบ ที่เหลือเป็นตัวสำรอง */   /* phase2 = บอสเควส 2 เฟส: เมื่อเฟส 1 ตาย บอสตัวเดิมเปลี่ยนเป็นเฟส 2 */
   if(opts.bossHp){const r=S.roster.b[0];r.max=opts.bossHp.max;r.hp=opts.bossHp.cur;r.boss=true;
     if(opts.noHeal)r.noHeal=true;   /* เควสพัฒนา: บอสไม่ฟื้นฟู HP */
     if(opts.bossP!=null)r.p=opts.bossP;   /* อีเว้นท์: กำหนด POWER บอสเอง */
@@ -175,12 +243,13 @@ function startBattle(opts){
   for(const k of['a','b'])S.roster[k].forEach(r=>{   /* อิซเซย์: เริ่มเกมสเตตัส ×isx นาน isn เทิร์นของทีม แล้วกลับเป็นเท่าเดิม */
     if(CARDS[r.id].ability!=='issei'||r.boss)return;
     const ap=Math.round(r.p*(C.isx-1)*10)/10,ah=Math.round(r.max*(C.isx-1));
-    r.isP=ap;r.isH=ah;r.p=Math.round((r.p+ap)*10)/10;r.max+=ah;r.hp+=ah;r.isOn=true;r.isN=C.isn;
+    r.isP=ap;r.isH=ah;r.p=Math.round((r.p+ap)*10)/10;r.max+=ah;r.hp+=ah;r.isOn=true;r.isN=C.isn+1;
     sbLogs.push([k,'🔥 '+CARDS[r.id].name+': สเตตัสทุกอย่าง ×'+C.isx+' (POWER '+r.p+' · HP '+r.max+') นาน '+C.isn+' เทิร์น']);
   });
   S.a=S.roster.a[0];S.b=S.roster.b[0];
-  $('#teamA').innerHTML=sideHtml('a');$('#teamB').innerHTML=sideHtml('b');
-  setFighter('a');setFighter('b');$('#stgName').textContent=opts.title||'';
+  $('#teamA').innerHTML=S.duo?duoHtml('a'):sideHtml('a');$('#teamB').innerHTML=S.duo?duoHtml('b'):sideHtml('b');
+  $('#teamA').classList.toggle('duo',!!S.duo);$('#teamB').classList.toggle('duo',!!S.duo);
+  if(S.duo)bindDuo();else{setFighter('a');setFighter('b')}$('#stgName').textContent=opts.title||'';
   $('#log').innerHTML='';show('battleScr');
   log('เริ่มการต่อสู้! '+nm(S.turn)+' โจมตีก่อน','sys');sbLogs.forEach(x=>log(x[1],x[0]));render();loop(run);
 }
@@ -240,14 +309,16 @@ function qTrack(){
     r.qh=hp;r.qm=r.max});
   if(heal||dmg)onStatHook(heal,dmg);
 }
-function render(){
-  qTrack();
-  if(S&&!S.over){riasReflect('a');riasReflect('b');gmaxPurify('a');gmaxPurify('b');for(const k of['a','b']){pflameImmune(k);enterField(k);rimuruCheck(k)}}
-  for(const k of['a','b']){const s=S[k],f=$('#f'+k),pc=Math.max(0,s.hp/s.max*100);
+function paintF(f,s,k,act){const pc=Math.max(0,s.hp/s.max*100);
     const fl=$('.fill',f);fl.style.width=pc+'%';fl.classList.toggle('low',pc<30);
     $('.hpt',f).textContent='HP '+Math.max(0,Math.ceil(s.hp)).toLocaleString()+' / '+s.max.toLocaleString();
     $('.pw',f).textContent=Number.isInteger(s.p)?s.p:s.p.toFixed(1);
-    $('.cw',f).classList.toggle('para',s.para);$('.cw',f).classList.toggle('seal',s.sealed);$('.cw',f).classList.toggle('zap',s.lightning);$('.cw',f).classList.toggle('blind',s.miss);$('.cw',f).classList.toggle('burning',s.burn>0);$('.cw',f).classList.toggle('sevr',s.sev>0);$('.cw',f).classList.toggle('possessed',!!s.poss);$('.cw',f).classList.toggle('bleeding',!!s.bleed||s.hb>0);$('.cw',f).classList.toggle('poisoned',s.ps>0);$('.cw',f).classList.toggle('holywound',s.hw>0);$('.cw',f).classList.toggle('turbo',!!s.turbo);$('.cw',f).classList.toggle('vshield',s.vs>0);$('.cw',f).classList.toggle('charged',CARDS[s.id].ability==='getsuga'&&s.t%(C.gn+1)===C.gn&&!S.over);{const g=$('.fgr',f);g.style.display=s.fg==null?'none':'flex';g.innerHTML=s.fg==null?'':handSvg(s.fg,26)+'<span>'+FN[s.fg]+'</span>'}{const cwx=$('.cw',f);cwx.classList.toggle('crossed',s.cx>0);cwx.classList.toggle('frozen',!!s.frz||s.ice>0);const bx=$('.badge.cx',f),bz=$('.badge.fz',f);if(bx)bx.textContent='✦ กางเขนใต้ ×'+(s.cx||0);if(bz)bz.textContent=s.frz?'❄ แช่แข็ง':'❄ ผลึกน้ำแข็ง'+(s.ice>1?' ×'+s.ice:'')}f.classList.toggle('active',!S.over&&S.turn===k)}
+    $('.cw',f).classList.toggle('para',s.para);$('.cw',f).classList.toggle('seal',s.sealed);$('.cw',f).classList.toggle('zap',s.lightning);$('.cw',f).classList.toggle('blind',s.miss);$('.cw',f).classList.toggle('burning',s.burn>0);$('.cw',f).classList.toggle('sevr',s.sev>0);$('.cw',f).classList.toggle('possessed',!!s.poss);$('.cw',f).classList.toggle('bleeding',!!s.bleed||s.hb>0);$('.cw',f).classList.toggle('poisoned',s.ps>0);$('.cw',f).classList.toggle('holywound',s.hw>0);$('.cw',f).classList.toggle('turbo',!!s.turbo);$('.cw',f).classList.toggle('vshield',s.vs>0);$('.cw',f).classList.toggle('charged',CARDS[s.id].ability==='getsuga'&&s.t%(C.gn+1)===C.gn&&!S.over);{const g=$('.fgr',f);g.style.display=s.fg==null?'none':'flex';g.innerHTML=s.fg==null?'':handSvg(s.fg,26)+'<span>'+FN[s.fg]+'</span>'}{const cwx=$('.cw',f);cwx.classList.toggle('crossed',s.cx>0);cwx.classList.toggle('frozen',!!s.frz||s.ice>0);const bx=$('.badge.cx',f),bz=$('.badge.fz',f);if(bx)bx.textContent='✦ กางเขนใต้ ×'+(s.cx||0);if(bz)bz.textContent=s.frz?'❄ แช่แข็ง':'❄ ผลึกน้ำแข็ง'+(s.ice>1?' ×'+s.ice:'')}f.classList.toggle('active',!!act)}
+function render(){
+  qTrack();
+  if(S&&!S.over){riasReflect('a');riasReflect('b');gmaxPurify('a');gmaxPurify('b');for(const k of['a','b']){pflameImmune(k);enterField(k);rimuruCheck(k)}}
+  for(const k of['a','b'])paintF($('#f'+k),S[k],k,!S.over&&S.turn===k);
+  if(S.duo)paintBench();
   for(const k of['a','b'])$('#f'+k+' .line').innerHTML=S.roster[k].map((r,i)=>`<span class="lu${i===S.idx[k]&&!S.over?' on':''}${r.hp<=0?' dead':''}" style="--c:${CARDS[r.id].color}"><img src="${CARDS[r.id].img}" alt="${CARDS[r.id].name}"></span>`).join('');
   $('#turnLbl').textContent=S.over?'จบเกม':'เทิร์นที่ '+S.n+(OPT.maxTurns?'/'+OPT.maxTurns:'')+' · ถึงตา '+nm(S.turn);
 }
@@ -703,7 +774,8 @@ function isseiEnd(r,k){
   r.isOn=false;r.p=Math.max(1,Math.round((r.p-r.isP)*10)/10);r.max=Math.max(1,r.max-r.isH);r.hp=Math.min(r.hp,r.max);r.isP=r.isH=0;
   log('🔥 พลัง ×'+C.isx+' ของ '+CARDS[r.id].name+' หมดลง สเตตัสกลับเป็นปกติ (POWER '+r.p+' · HP '+Math.ceil(r.hp)+'/'+r.max+')',k);render();
 }
-function isseiTick(k){S.roster[k].forEach(r=>{if(!r.isOn)return;r.isN--;if(r.isN<=0)isseiEnd(r,k)})}
+/* นับถอยหลังเฉพาะเทิร์นของอิซเซย์เองตอนที่เขาอยู่ในสนาม (ไม่นับตอนอยู่ตัวสำรอง) */
+function isseiTick(k){const r=S[k];if(!r||!r.isOn||r.hp<=0)return;r.isN--;if(r.isN<=0)isseiEnd(r,k)}
 /* สกิลที่ Void Shield (คอสมิค กาโร่) กันได้ — สกิลที่ใช้กับศัตรู (ไม่รวมสกิลเสริมพลังตัวเอง) */
 const VS_SKILL=['paralyze','lightning','kyuubi','sevpara','gekko','ghost','possess','double','crux','paper','garo','garored','garomon','garocosmic','ghoul','kiblast','icecrystal','fireball','ino','rimulord','truelord','gate','gate2','shiki'];
 function garomonBoost(k){
@@ -843,6 +915,17 @@ async function handleKO(dk,ak){
   const finish=async w=>{
     S.over=true;S.winner=w;render();log((OPT.names?OPT.names[w]:(w==='a'?'ฝั่งผู้เล่น':'ฝั่งศัตรู'))+' ชนะ!','sys');await sl(700);
     if(S&&S.over&&OPT.onEnd)OPT.onEnd({...endInfo(),win:w==='a',turns:S.n,left:S.roster.a.filter(x=>x.hp>0).length,bossHp:Math.max(0,S.roster.b[0].hp)});return true};
+  if(S.duo){   /* 2v2: ตัวที่ตายถูกแทนด้วยตัวสำรอง ถ้าไม่มีสำรองช่องนั้นว่าง */
+    const refill=k=>{const out=[];for(let n=0;n<2;n++){const ri=S.slots[k][n];if(ri>=0&&S.roster[k][ri].hp<=0){
+        while(S.next[k]<S.roster[k].length&&S.roster[k][S.next[k]].hp<=0)S.next[k]++;
+        if(S.next[k]<S.roster[k].length){const ni=S.next[k]++;S.slots[k][n]=ni;out.push(ni)}}}return out};
+    const nd=refill(dk),na=xko?refill(ak):[];
+    const dOut2=!duoAlive(dk).length,xOut2=xko&&!duoAlive(ak).length;
+    if(dOut2||xOut2)return finish(xOut2?dk:ak);
+    bindDuo();render();
+    nd.forEach(i=>log('▶ '+CARDS[S.roster[dk][i].id].name+' ลงสนามแทน!','sys'));na.forEach(i=>log('▶ '+CARDS[S.roster[ak][i].id].name+' ลงสนามแทน!','sys'));
+    return false;
+  }
   S.idx[dk]++;skipDead(dk);let xOut=false;
   if(xko){S.idx[ak]++;skipDead(ak);xOut=S.idx[ak]>=S.roster[ak].length}
   const dOut=S.idx[dk]>=S.roster[dk].length;
@@ -957,7 +1040,7 @@ async function loop(my){
   await sl(900);
   while(run===my&&!S.over){
     if(paused){await sleepRaw(120);continue}
-    try{await doTurn();await sl(550)}catch(x){if(x==='cancel')return;throw x}
+    try{if(S.duo)await duoPrep(my);await doTurn();await sl(550)}catch(x){if(x==='cancel')return;throw x}
   }
 }
 $('#pauseBtn').onclick=()=>{paused=!paused;$('#pauseBtn').textContent=paused?'เล่นต่อ':'หยุด'};

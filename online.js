@@ -7,7 +7,7 @@
 (()=>{
 const BASE_KEY='cardduel_save_v1';
 const sb=window.__SB_MOCK||((typeof SUPA_URL!=='undefined'&&SUPA_URL&&SUPA_KEY&&window.supabase)?window.supabase.createClient(SUPA_URL,SUPA_KEY):null);
-const PICK_N=6,BAN_N=2,ONLINE_LV=100,ONLINE_STAR=5,MAX_TURNS=100;
+const PICK_N=6,BAN_N=2,ONLINE_LV=100,ONLINE_STAR=5,MAX_TURNS=100,MAX_TURNS_DUO=160;
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const EMAIL=u=>u+'@cardduel.app';
@@ -312,7 +312,7 @@ function joinChannel(code,role){
   return new Promise(res=>{
     const ch=sb.channel('room-'+code,{config:{broadcast:{self:false},presence:{key:me.id}}});
     ch.on('presence',{event:'sync'},()=>roomSync());
-    ['phase','pick','ban','start','result','rematch','forfeit','bye'].forEach(ev=>ch.on('broadcast',{event:ev},m=>onMsg(ev,m.payload||{})));
+    ['phase','pick','ban','start','result','rematch','forfeit','bye','tgt'].forEach(ev=>ch.on('broadcast',{event:ev},m=>onMsg(ev,m.payload||{})));
     let done=false;
     ch.subscribe(st=>{
       if(st==='SUBSCRIBED'&&!done){done=true;ch.track({id:me.id,name:me.name||me.username,role});res(ch)}
@@ -321,7 +321,7 @@ function joinChannel(code,role){
   });
 }
 function newRoom(code,ch,role){
-  R={code,ch,role,phase:'lobby',myPick:null,oppPick:null,myBan:null,oppBan:null,myRematch:false,oppRematch:false,myResult:null,oppResult:null,rosters:null,sel:[],leftT:null,battle:false,over:false};
+  R={code,ch,role,duo:true,tgt:{},tgtW:null,phase:'lobby',myPick:null,oppPick:null,myBan:null,oppBan:null,myRematch:false,oppRematch:false,myResult:null,oppResult:null,rosters:null,sel:[],leftT:null,battle:false,over:false};
 }
 function needCards(){if(owned().length<PICK_N){toast('ต้องมีการ์ดอย่างน้อย '+PICK_N+' ใบจึงจะต่อสู้ออนไลน์ได้');return true}return false}
 async function createRoom(){
@@ -382,12 +382,14 @@ function oppLeft(){
 }
 function resetRound(){
   R.phase='pick';R.myPick=null;R.oppPick=null;R.myBan=null;R.oppBan=null;R.myRematch=false;R.oppRematch=false;
-  R.myResult=null;R.oppResult=null;R.rosters=null;R.sel=[];R.battle=false;R.over=false;
+  R.myResult=null;R.oppResult=null;R.rosters=null;R.sel=[];R.battle=false;R.over=false;R.tgt={};R.tgtW=null;
 }
 const validIds=(a,n)=>Array.isArray(a)&&a.length===n&&new Set(a).size===n&&a.every(x=>typeof x==='string'&&CARDS[x]);
 function onMsg(ev,p){
   if(!R)return;
-  if(ev==='phase'&&p.p==='pick'&&R.role==='guest'){resetRound();closeModal();go('room')}
+  if(ev==='phase'&&p.p==='mode'&&R.role==='guest'){R.duo=!!p.duo}
+  else if(ev==='phase'&&p.p==='pick'&&R.role==='guest'){R.duo=!!p.duo;resetRound();closeModal();go('room')}
+  else if(ev==='tgt'){if(R.battle&&Number.isInteger(p.n)&&Number.isInteger(p.i)&&p.i>=0&&p.i<PICK_N){R.tgt[p.n]=p.i;if(R.tgtW&&R.tgtW.n===p.n){const w=R.tgtW;R.tgtW=null;w.res(p.i)}}}
   else if(ev==='pick'){if(validIds(p.ids,PICK_N)&&!R.oppPick){R.oppPick=p.ids;advance()}}
   else if(ev==='ban'){if(R.myPick&&validIds(p.ids,BAN_N)&&p.ids.every(x=>R.myPick.includes(x))&&!R.oppBan){R.oppBan=p.ids;advance()}}
   else if(ev==='start'){if(R.role==='guest'&&(R.phase==='ban'||R.phase==='wait')&&validIds(p.a,PICK_N-BAN_N)&&validIds(p.b,PICK_N-BAN_N)&&Number.isInteger(p.seed))beginBattle(p)}
@@ -405,12 +407,12 @@ function finalize(){
   const mine=R.myPick.filter(x=>!R.oppBan.includes(x)),theirs=R.oppPick.filter(x=>!R.myBan.includes(x));
   R.rosters={mine,theirs};R.phase='wait';
   if(R.role==='host'){
-    const seed=(Math.random()*4294967295)>>>0,first=Math.random()<.5?'a':'b',pl={a:mine,b:theirs,seed,first,names:{a:me.name||me.username,b:(oppP()||{}).name||'ผู้เล่น 2'}};
+    const seed=(Math.random()*4294967295)>>>0,first=Math.random()<.5?'a':'b',pl={a:mine,b:theirs,seed,first,duo:!!R.duo,names:{a:me.name||me.username,b:(oppP()||{}).name||'ผู้เล่น 2'}};
     send('start',pl);beginBattle(pl);
   }else renderRoom();
 }
 function beginBattle(pl){
-  R.phase='battle';R.battle=true;R.over=false;R.startData=pl;
+  R.phase='battle';R.battle=true;R.over=false;R.startData=pl;R.duo=!!pl.duo;R.tgt={};R.tgtW=null;
   const names=pl.names||{a:'ผู้เล่น 1',b:'ผู้เล่น 2'};
   modal(`<h2>เตรียมสู้!</h2><div class="vsrow"><div><b>${esc(names.a)}</b><div class="vsc">${pl.a.map(id=>`<img src="${CARDS[id].img}" alt="">`).join('')}</div></div><div class="vs">VS</div><div><b>${esc(names.b)}</b><div class="vsc">${pl.b.map(id=>`<img src="${CARDS[id].img}" alt="">`).join('')}</div></div></div><p class="mute">เริ่มใน 3 วินาที…</p>`);
   setTimeout(()=>{
@@ -418,8 +420,18 @@ function beginBattle(pl){
     closeModal();
     const la=pl.a.map(()=>ONLINE_LV),sa=pl.a.map(()=>ONLINE_STAR),lb=pl.b.map(()=>ONLINE_LV),sbs=pl.b.map(()=>ONLINE_STAR);
     ['pauseBtn','speedBtn','autoBtn'].forEach(i=>$('#'+i).classList.add('hidden'));$('#backBtn').textContent='ยอมแพ้';
-    Battle.start({online:true,a:pl.a,b:pl.b,la,sa,lb,sb:sbs,seed:pl.seed,first:pl.first,maxTurns:MAX_TURNS,names,title:'ออนไลน์ · ห้อง '+R.code+' · '+names.a+' vs '+names.b,onBack:confirmForfeit,onEnd:onBattleEnd});
+    const duo=!!pl.duo,mySide=R.role==='host'?'a':'b';
+    Battle.start({online:true,duo,mySide,sendTarget:duo?sendTarget:null,recvTarget:duo?recvTarget:null,a:pl.a,b:pl.b,la,sa,lb,sb:sbs,seed:pl.seed,first:pl.first,maxTurns:duo?MAX_TURNS_DUO:MAX_TURNS,names,title:'ออนไลน์ · ห้อง '+R.code+' · '+names.a+' vs '+names.b,onBack:confirmForfeit,onEnd:onBattleEnd});
   },3000);
+}
+/* 2v2: ส่ง/รอรับ "เป้าหมายที่เลือก" ของแต่ละเทิร์น (ผู้เล่นฝั่งที่ถึงตาเป็นคนเลือก อีกฝั่งรอรับ) */
+function sendTarget(n,i){send('tgt',{n,i});setTimeout(()=>{if(R)send('tgt',{n,i})},1500);setTimeout(()=>{if(R)send('tgt',{n,i})},4000)}
+function recvTarget(n,my){
+  return new Promise(res=>{
+    if(!R)return;
+    if(R.tgt[n]!==undefined)return res(R.tgt[n]);
+    R.tgtW={n,res};
+  });
 }
 function endBattleUi(){
   $('#pauseBtn').classList.remove('hidden');$('#speedBtn').classList.remove('hidden');$('#backBtn').textContent='ออกจากด่าน';
@@ -460,7 +472,7 @@ function resultModal(kind,note){
   };
 }
 function checkRematch(){
-  if(R&&R.myRematch&&R.oppRematch){resetRound();closeModal();go('room');if(R.role==='host')send('phase',{p:'pick'})}
+  if(R&&R.myRematch&&R.oppRematch){resetRound();closeModal();go('room');if(R.role==='host')send('phase',{p:'pick',duo:R.duo})}
 }
 
 /* หน้าห้อง (แสดงตามช่วง: ล็อบบี้ → เลือก 6 → แบน → รอเริ่ม) */
@@ -482,9 +494,10 @@ function renderRoom(){
     b.innerHTML=`<div class="box lobby"><div class="code">${R.code}</div><small>เลขห้อง — ส่งให้เพื่อนเพื่อเข้ามา</small>
       <div class="plist"><div class="pl"><i class="od on"></i><b>${esc(me.name||me.username)}</b><small>${host?'เจ้าของห้อง':'ผู้เข้าร่วม'} (คุณ)</small></div>
       <div class="pl">${o?`<i class="od on"></i><b>${esc(o.name)}</b><small>${o.role==='host'?'เจ้าของห้อง':'ผู้เข้าร่วม'}</small>`:`<i class="od"></i><b class="mute">รอผู้เล่นอีกคน…</b>`}</div></div>
-      ${host?`<div class="two"><button id="rmStart" ${o?'':'disabled'}>เริ่มเลือกการ์ด</button><button class="sec" id="rmInv">👥 ชวนเพื่อน</button></div>`:'<p class="mute">รอเจ้าของห้องกดเริ่ม…</p>'}
-      <p class="mute">กติกา: เลือก ${PICK_N} ใบ → แบนการ์ดอีกฝ่ายคนละ ${BAN_N} ใบ → สู้ด้วย ${PICK_N-BAN_N} ใบที่เหลือ · ทุกใบ Lv.${ONLINE_LV} ${ONLINE_STAR}★</p></div>`;
-    if(host){$('#rmStart').onclick=()=>{if(!oppP())return;resetRound();send('phase',{p:'pick'});renderRoom()};$('#rmInv').onclick=()=>go('friends')}
+      ${host?`<div class="mode2"><button type="button" class="small${R.duo?'':' on'}" id="md1">1 ต่อ 1</button><button type="button" class="small${R.duo?' on':''}" id="md2">2 ต่อ 2 (เลือกเป้าโจมตี)</button></div><div class="two"><button id="rmStart" ${o?'':'disabled'}>เริ่มเลือกการ์ด</button><button class="sec" id="rmInv">👥 ชวนเพื่อน</button></div>`:'<p class="mute">รอเจ้าของห้องกดเริ่ม…</p>'}
+      <p class="mute">กติกา: เลือก ${PICK_N} ใบ → แบนการ์ดอีกฝ่ายคนละ ${BAN_N} ใบ → สู้ด้วย ${PICK_N-BAN_N} ใบที่เหลือ · ทุกใบ Lv.${ONLINE_LV} ${ONLINE_STAR}★<br>โหมด 2 ต่อ 2: ลงสนามฝั่งละ 2 ใบ (2 ใบที่เหลือเป็นตัวสำรอง) สลับกันโจมตี และผู้เล่นเลือกเป้าหมายได้เอง</p></div>`;
+    if(host){const setMode=d=>{R.duo=d;send('phase',{p:'mode',duo:d});renderRoom()};$('#md1').onclick=()=>setMode(false);$('#md2').onclick=()=>setMode(true);
+      $('#rmStart').onclick=()=>{if(!oppP())return;resetRound();send('phase',{p:'pick',duo:R.duo});renderRoom()};$('#rmInv').onclick=()=>go('friends')}
   }else if(R.phase==='pick'){
     const sel=R.sel,ids=owned();
     b.innerHTML=R.myPick?`<div class="box onmsg"><h2>ล็อกทีมแล้ว ✔</h2><p>รอ ${esc(o?o.name:'คู่ต่อสู้')} เลือกการ์ด…</p><div class="pickrow">${R.myPick.map(id=>tile(id,{})).join('')}</div></div>`
