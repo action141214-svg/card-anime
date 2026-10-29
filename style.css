@@ -793,3 +793,6 @@ body{padding:0}
 .rage.on .rfill{background:linear-gradient(90deg,#b100ff,#ff2bd6,#ff2b2b);animation:ragepulse .9s infinite alternate}
 @keyframes ragepulse{from{filter:brightness(1)}to{filter:brightness(1.6)}}
 .cw.satan{box-shadow:0 0 0 2px rgba(255,60,120,.9),0 0 26px 8px rgba(190,40,255,.8)}
+
+/* ซอง จิน วู: ช่วงไม่ตาย */
+.cw.jwon{box-shadow:0 0 0 2px rgba(90,170,255,.95),0 0 24px 7px rgba(40,90,255,.75)}
