@@ -131,6 +131,7 @@ const GIFT_CODES={
   HOJIN:()=>{SV.items=SV.items||{};SV.items.hojin=(SV.items.hojin||0)+3;return 'ได้รับ ธรรมจักรแปดซี่ ×3'},
   CC:()=>{if(!SV.owned.includes('cc')){SV.owned.push('cc');SV.count.cc=1}else SV.count.cc=(SV.count.cc||1)+1;SV.lv.cc=Math.max(SV.lv.cc||1,100);SV.star=SV.star||{};SV.star.cc=Math.max(SV.star.cc||1,5);return 'ได้รับ ซีซี เลเวล 100 · 5 ดาว'},
   LORD:()=>{if(!SV.owned.includes('rimulord')){SV.owned.push('rimulord');SV.count.rimulord=1;SV.lv.rimulord=1}else SV.count.rimulord=(SV.count.rimulord||1)+1;SV.star=SV.star||{};SV.star.rimulord=Math.max(SV.star.rimulord||1,6);return 'ได้รับ จอมมาร ริมุรุ เทมเพสต์ 6 ดาว'},
+  '6STAR':()=>{SV.star=SV.star||{};let n=0;SV.owned.forEach(id=>{if((SV.star[id]||1)<STAR_MAX){SV.star[id]=STAR_MAX;n++}});return 'การ์ดที่มีทุกใบเป็น '+STAR_MAX+' ดาวแล้ว (อัปให้ '+n+' ใบ)'},
   RIMURU:()=>{if(!SV.owned.includes('rimuru')){SV.owned.push('rimuru');SV.count.rimuru=1}else SV.count.rimuru=(SV.count.rimuru||1)+1;SV.lv.rimuru=Math.max(SV.lv.rimuru||1,100);SV.star=SV.star||{};SV.star.rimuru=Math.max(SV.star.rimuru||1,5);return 'ได้รับ ริมุรุ เทมเพสต์ เลเวล 100 · 5 ดาว'},
 };
 function codeModal(){
