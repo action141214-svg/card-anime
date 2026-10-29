@@ -80,6 +80,7 @@ async function afterLogin(user){
     await sleep(400);
   }
   await syncSave();
+  await srvInit();
   startRealtime();
   updateMe();
   if(!me.name)await askName(true);
@@ -368,7 +369,7 @@ async function doLogout(){
   try{clearTimeout(saveT);await uploadSave()}catch(e){}
   try{if(R)await leaveRoom(true)}catch(e){}
   stopRealtime();try{await sb.auth.signOut()}catch(e){}
-  me=null;location.reload();
+  srvOn=false;me=null;location.reload();
 }
 function friends(){if(!sb||!me){go('online');return}updateMe();bindFriends();renderFriends();loadFriends()}
 function chat(){if(!sb||!me){go('online');return}updateMe();chatOpen()}
@@ -648,5 +649,43 @@ async function dgCall(fn,args){
   try{const {data,error}=await sb.rpc(fn,args||{});if(error)return {error:'error'};return data||{error:'error'}}catch(e){return {error:'error'}}
 }
 const dungeon={status:()=>dgCall('dungeon_status'),enter:()=>dgCall('dungeon_enter'),report:(hr,d)=>dgCall('dungeon_report',{p_hr:hr,p_damage:Math.max(0,Math.floor(d||0))}),claim:hr=>dgCall('dungeon_claim',{p_hr:hr}),leaderboard:()=>dgCall('dungeon_leaderboard'),setTeam:(hr,t)=>dgCall('dungeon_set_team',{p_hr:hr,p_team:t})};
-window.Online={presence:()=>onlinePres,setHtml,onPres:null,dungeon,redeem,gate,onSave,hub,friends,chat,room,logout,get me(){return me},_test:{get R(){return R},joinRoom,createRoom}};
+/* ===== ระบบหลังบ้านเฟส 1: เซิร์ฟเวอร์เป็นเจ้าของ player_state — ฝั่งเกมขอทำ action แล้วรับค่าที่เซิร์ฟเวอร์คำนวณมาใส่ SV ===== */
+let srvOn=false,teamT=null;
+function applyState(st){
+  if(!st||typeof st!=='object')return;
+  const keep=teamT?SV.team:null;   /* มีการจัดทีมที่ยังไม่ส่ง → ใช้ทีมในเครื่องไปก่อน */
+  SV.coins=st.coins;SV.candy=st.candy;SV.exp=st.exp;
+  SV.owned=(st.owned||[]).slice();SV.count=st.count||{};SV.lv=st.lv||{};SV.star=st.star||{};
+  SV.items=st.items||{};SV.team=keep||(st.team||[]).slice();SV.cleared=st.cleared||{};SV.lvClaimed=st.lvClaimed||{};
+  SV.gp=st.gp||{ur:0,usr:0};SV.autoSell=!!st.autoSell;SV.started=true;SV.curve=2;
+  save();hud();
+}
+async function srvCall(fn,args){
+  if(!sb||!me||!srvOn)return{error:'offline'};
+  try{
+    const {data,error}=await sb.rpc(fn,args||{});
+    if(error)return{error:'error',msg:error.message};
+    if(!data)return{error:'error'};
+    if(data.state)applyState(data.state);
+    return data;
+  }catch(e){return{error:'error'}}
+}
+function syncTeam(){
+  if(!srvOn)return;
+  clearTimeout(teamT);
+  teamT=setTimeout(async()=>{teamT=null;const r=await srvCall('set_team',{p_team:(SV.team||[]).slice(0,4)});if(r.error&&r.error!=='offline')toast('บันทึกทีมไม่สำเร็จ')},500);
+}
+async function srvInit(){   /* หลังล็อกอิน: นำเข้าเซฟเก่า (ครั้งเดียว) แล้วโหลดสถานะจากเซิร์ฟเวอร์ */
+  srvOn=false;
+  try{
+    clearTimeout(saveT);if(syncReady)await uploadSave();   /* ให้เซฟเก่าบนคลาวด์เป็นปัจจุบันก่อนนำเข้า */
+    const im=await sb.rpc('import_legacy');if(im.error)throw im.error;
+    const d=im.data;
+    if(d&&d.state){applyState(d.state);if(d.flagged)toast('ตรวจพบค่าสูงผิดปกติในเซฟเก่า ระบบปรับให้อยู่ในเพดานแล้ว')}
+    else{const g=await sb.rpc('get_state');if(g.error)throw g.error;if(!g.data||!g.data.state)throw new Error('nostate');applyState(g.data.state)}
+    srvOn=true;
+  }catch(e){toast('เชื่อมต่อระบบข้อมูลผู้เล่นบนเซิร์ฟเวอร์ไม่สำเร็จ — เล่นโหมดออฟไลน์ไปก่อน')}
+}
+const srv={call:srvCall,syncTeam,get on(){return srvOn&&!!me}};
+window.Online={srv,presence:()=>onlinePres,setHtml,onPres:null,dungeon,redeem,gate,onSave,hub,friends,chat,room,logout,get me(){return me},_test:{get R(){return R},joinRoom,createRoom}};
 })();

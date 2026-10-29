@@ -58,6 +58,11 @@ function load(){try{SV=JSON.parse(localStorage.getItem(KEY))}catch(e){SV=null}if
   if(SV.curve!==2){SV.exp=0;SV.curve=2;save()}   /* สูตร EXP ใหม่: รีเซ็ตเลเวลผู้เล่นเป็น Lv.1 (เงิน การ์ด และด่านที่ผ่านยังอยู่) */
 }
 function save(){try{SV.savedAt=Date.now();localStorage.setItem(KEY,JSON.stringify(SV))}catch(e){}if(window.Online)Online.onSave()}
+/* ---------- ระบบหลังบ้าน (เซิร์ฟเวอร์เป็นเจ้าของเงิน/การ์ด/เลเวล/ด่าน) ---------- */
+const srvOn=()=>!!(window.Online&&Online.srv&&Online.srv.on);   /* true = ล็อกอินแล้วและเชื่อมระบบ player_state สำเร็จ */
+const sc=(fn,a)=>Online.srv.call(fn,a);
+const SRV_ERR={login:'ต้องล็อกอินก่อน',offline:'ยังไม่ได้เชื่อมต่อเซิร์ฟเวอร์',nomoney:'เงินไม่พอ',notowned:'ไม่มีการ์ดใบนี้',max:'ถึงระดับสูงสุดแล้ว',nodup:'การ์ดซ้ำไม่พอ',keep_one:'ต้องเก็บไว้อย่างน้อย 1 ใบ',locked:'ด่านนี้ยังล็อกอยู่',nostage:'ไม่พบด่านนี้',toofast:'เซิร์ฟเวอร์ไม่รับผลด่าน (จบเร็วผิดปกติ)',ratelimit:'เล่นถี่เกินไป รอสักครู่',badtoken:'ผลด่านหมดอายุ ลองเล่นใหม่อีกครั้ง',lowlv:'เลเวลยังไม่ถึง',claimed:'รับไปแล้ว',bad_lv:'เลเวลไม่ถูกต้อง',invalid:'โค้ดไม่ถูกต้อง',taken:'โค้ดนี้ถูกใช้ไปแล้ว',error:'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ ลองใหม่อีกครั้ง'};
+const srvMsg=r=>SRV_ERR[r&&r.error]||('ผิดพลาด: '+(r&&r.error));
 /* เลเวลผู้เล่น: EXP ที่ต้องใช้อัปเลเวลถัดไปเพิ่มขึ้นเรื่อยๆ (Lv.1→2 = 100, Lv.10→11 ≈ 236, Lv.30→31 ≈ 1,586) */
 const needExp=l=>Math.round(100*Math.pow(1.1,l-1));
 function lvInfo(exp){let l=1,e=exp;while(e>=needExp(l)){e-=needExp(l);l++}return{lv:l,cur:e,need:needExp(l)}}
@@ -151,6 +156,12 @@ function codeModal(){
     const c=$('#cdI').value.trim().toUpperCase(),f=GIFT_CODES[c];
     SV.codes=SV.codes||{};$('#cdOk').textContent='';
     if(!c){$('#cdE').textContent='กรุณาพิมพ์โค้ด';return}
+    if(srvOn()){   /* ออนไลน์: เซิร์ฟเวอร์ตรวจโค้ดและให้รางวัลเอง (ตาราง code_defs) */
+      busy=true;$('#cdE').textContent='กำลังตรวจสอบโค้ด…';
+      const r=await sc('redeem_gift',{p_code:c});busy=false;
+      if(!r.ok){$('#cdE').textContent=srvMsg(r);return}
+      SV.codes[c]=1;save();if(typeof renderHome==='function')renderHome();
+      $('#cdE').textContent='';$('#cdOk').textContent='✅ รับสำเร็จ: ได้รับของขวัญจากโค้ด '+c+' แล้ว';$('#cdI').value='';toast('รับของขวัญสำเร็จ!');return}
     if(!f){$('#cdE').textContent='โค้ดไม่ถูกต้อง';return}
     if(SV.codes[c]){$('#cdE').textContent='โค้ดนี้ใช้ไปแล้ว';return}
     if(f.srv){   /* โค้ดที่ใช้ได้คนเดียวทั้งโลก */
@@ -230,7 +241,7 @@ function renderTeam(){
     const act=()=>{
       if(!own)return toast(id==='cc'?'การ์ดนี้ได้จากเควสตัวละคร หรือโค้ดพิเศษเท่านั้น':CARDS[id].endless?'การ์ดนี้ได้จากด่านไม่มีที่สิ้นสุด (อีเว้นท์) เท่านั้น':HW.pool.includes(id)?'การ์ดนี้ได้จากตู้ฮาโลวีน (อีเว้นท์) เท่านั้น':inPool(id)?'การ์ดนี้ยังล็อกอยู่ ต้องสุ่มจากตู้กาชา'+(HW.rPool.includes(id)?' หรือตู้ฮาโลวีน':''):'การ์ดนี้ยังไม่เปิดให้ได้รับ (จะมีวิธีได้รับภายหลัง)');
       if(pos>=0)SV.team.splice(pos,1);else if(SV.team.length<MAX_TEAM)SV.team.push(id);else return toast('ทีมเต็ม '+MAX_TEAM+' ใบแล้ว');
-      save();renderTeam()};
+      save();if(window.Online&&Online.srv)Online.srv.syncTeam();renderTeam()};
     d.onclick=e=>{if(e.target.closest('[data-info]')){e.stopPropagation();showInfo(id)}else act()};
     d.onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&!e.target.closest('[data-info]')){e.preventDefault();act()}};
     g.appendChild(d);
@@ -248,8 +259,8 @@ function showInfo(id){
 }
 $('#tslots').onclick=e=>{
   const m=e.target.closest('[data-mv]'),r=e.target.closest('[data-rm]');
-  if(m){const[i,d]=m.dataset.mv.split(',').map(Number),j=i+d;if(j>=0&&j<SV.team.length){[SV.team[i],SV.team[j]]=[SV.team[j],SV.team[i]];save();renderTeam()}}
-  if(r){SV.team.splice(+r.dataset.rm,1);save();renderTeam()}
+  if(m){const[i,d]=m.dataset.mv.split(',').map(Number),j=i+d;if(j>=0&&j<SV.team.length){[SV.team[i],SV.team[j]]=[SV.team[j],SV.team[i]];save();if(window.Online&&Online.srv)Online.srv.syncTeam();renderTeam()}}
+  if(r){SV.team.splice(+r.dataset.rm,1);save();if(window.Online&&Online.srv)Online.srv.syncTeam();renderTeam()}
 };
 
 /* ---------- ด่าน ---------- */
@@ -265,21 +276,29 @@ function renderStages(){
       <button data-st="${st.id}" ${open?'':'disabled'}>เข้าด่าน</button></div>`}).join('');
 }
 $('#stgList').onclick=e=>{const b=e.target.closest('[data-st]');if(b)startStage(stageList().find(s=>s.id==b.dataset.st))};
-function startStage(st){
+let stageTok=null;   /* token ด่านที่เซิร์ฟเวอร์ออกให้ตอนเริ่มสู้ */
+async function startStage(st){
+  stageTok=null;
   if(sMode==='hw'&&!hwOpen())return toast('อีเว้นท์จบแล้ว');
   const team=SV.team.filter(x=>SV.owned.includes(x));
   if(!team.length){toast('ต้องมีการ์ดในทีมอย่างน้อย 1 ใบ');return go('team')}
+  if(srvOn()&&sMode!=='hw'){const b=await sc('battle_begin',{p_stage:st.id});if(!b.ok)return toast(srvMsg(b));stageTok=b.token}
   clearAuto();setAutoBtn();Battle.start({auto:true,a:team,la:team.map(clv),sa:team.map(cstar),b:st.enemy,lb:st.elv,title:st.name,first:$('#first').value==='b'?'b':'a',
     onExit:()=>go(sGo()),onEnd:r=>finishStage(st,r)});
 }
-function finishStage(st,r){
+async function finishStage(st,r){
   const L=stageList(),idx=L.indexOf(st),next=L[idx+1];
   if(!r.win){
     modal(`<h2>แพ้แล้ว…</h2><p>ลองปรับลำดับการ์ด หรือสุ่มการ์ดใหม่จากตู้กาชาแล้วกลับมาสู้อีกครั้ง</p>${SV.auto!=='off'?'<p class="mute">ออโต้หยุดเพราะแพ้ — จัดทีมหรือลองใหม่ได้เลย</p>':''}<div class="two"><button id="rAgain">ลองใหม่</button><button class="sec" id="rTeam">จัดทีม</button><button class="sec" id="rBack">กลับ</button></div>`);
     $('#rAgain').onclick=()=>{closeModal();startStage(st)};$('#rTeam').onclick=()=>go('team');$('#rBack').onclick=()=>go(sGo());return}
-  const first=!SV.cleared[st.id],rw=first?st.first:st.repeat,lv0=lvOf(SV.exp),au=SV.auto!=='off',nxt=SV.auto==='next'&&next;
-  SV.coins+=rw.coins;SV.exp+=rw.exp;SV.cleared[st.id]=true;save();
-  const up=lvOf(SV.exp)>lv0;
+  let first=!SV.cleared[st.id],rw=first?st.first:st.repeat,up;const lv0=lvOf(SV.exp),au=SV.auto!=='off',nxt=SV.auto==='next'&&next;
+  if(stageTok&&srvOn()){   /* ออนไลน์: เซิร์ฟเวอร์เป็นคนให้รางวัล (ค่าจากตาราง stage_defs) */
+    const tk=stageTok;stageTok=null;
+    const c=await sc('battle_claim',{p_token:tk,p_win:true,p_turns:r.turns||1});
+    if(!c.ok){modal(`<h2>เซิร์ฟเวอร์ไม่รับผลด่าน</h2><p>${srvMsg(c)}</p><div class="two"><button id="rAgain">ลองใหม่</button><button class="sec" id="rBack">กลับ</button></div>`);
+      $('#rAgain').onclick=()=>{closeModal();startStage(st)};$('#rBack').onclick=()=>go(sGo());return}
+    first=!!c.first;rw={coins:c.coins,exp:c.exp};up=!!c.levelUp;
+  }else{SV.coins+=rw.coins;SV.exp+=rw.exp;SV.cleared[st.id]=true;save();up=lvOf(SV.exp)>lv0}
   modal(`<h2>ชนะ! 🎉</h2><p>${first?'ผ่านด่านครั้งแรก — ได้รางวัลเต็ม!':'เล่นซ้ำ — รางวัลลดลง'} · ใช้ ${r.turns} เทิร์น</p>
     <div class="reward"><div>💰 +${rw.coins}</div><div>EXP +${rw.exp}</div></div>${up?`<p class="lvup">⬆ เลเวลอัป! Lv.${lvOf(SV.exp)}</p>`:''}${lvrReady().length?`<p class="lvup">🎁 มีรางวัลเลเวลรอรับ ${lvrReady().length} รายการ</p>`:''}${first&&next?`<p class="mute">ปลดล็อก ${next.name}</p>`:''}
     ${au?'<p class="mute" id="autoLine"></p>':''}<div class="two">${next?'<button id="rNext">ด่านถัดไป</button>':''}<button class="${next?'sec':''}" id="rAgain">เล่นอีกครั้ง</button>${au?'<button class="sec" id="autoStop">หยุดออโต้</button>':''}<button class="sec" id="rBack">กลับ</button></div>`);
@@ -357,10 +376,18 @@ function grant(id){
   if(!dup){SV.owned.push(id);SV.count[id]=1}else if(SV.autoSell){SV.coins+=back;sold=true}else SV.count[id]++;
   return{id,dup,sold,back};
 }
-function pull(n){
+async function pull(n){
   const hw=gMode==='hw',cost=gcost(n);
   if(pulling)return;if(hw&&!hwOpen())return toast('อีเว้นท์จบแล้ว');if(gbal()<cost)return toast(hw?'ลูกอมไม่พอ':'เงินไม่พอ');
-  if(hw)SV.candy-=cost;else{SV.coins-=cost;onSpend(cost)}const res=[];for(let i=0;i<n;i++)res.push(grant(roll()));save();hud();
+  let res=[];
+  if(!hw&&srvOn()){   /* ตู้หลักออนไลน์: สุ่ม/การันตี/ราคา คำนวณที่เซิร์ฟเวอร์ */
+    pulling=true;
+    const r=await sc('gacha_pull',{p_n:n});
+    if(!r.ok){pulling=false;return toast(srvMsg(r))}
+    res=r.results||[];onSpend(cost);
+  }else{
+    if(hw)SV.candy-=cost;else{SV.coins-=cost;onSpend(cost)}for(let i=0;i<n;i++)res.push(grant(roll()));save();hud();
+  }
   pulling=true;renderGacha();
   const box=$('#bbox'),im=$('.bc.main img'),ids=gcfg().pool;
   box.classList.add('shake');let k=0;const cyc=setInterval(()=>{im.src=CARDS[ids[k++%ids.length]].img},90);
@@ -602,9 +629,11 @@ function renderLvr(){
       <b class="rl">Lv.${l}</b><div class="rr">${r.coins.toLocaleString()} เหรียญ${sp?`<br><span class="rcard">+ ${CARDS[r.card].name} ${rarTag(r.card)}</span>`:''}</div>
       <button class="small${can?'':' sec'}" data-claim="${l}" ${can?'':'disabled'}>${got?'✔ รับแล้ว':can?'รับรางวัล':'🔒 ถึง Lv.'+l}</button></div>`}).join('');
 }
-function claimLv(list){
+async function claimLv(list){
   let coins=0;const cards=[];
-  list.forEach(l=>{if(SV.lvClaimed[l]||lvOf(SV.exp)<l)return;const r=lvReward(l);SV.lvClaimed[l]=true;SV.coins+=r.coins;coins+=r.coins;
+  if(srvOn()){for(const l of list){if(SV.lvClaimed[l]||lvOf(SV.exp)<l)continue;const r=await sc('claim_level_reward',{p_lv:l});if(!r.ok){toast(srvMsg(r));break}
+    const w=lvReward(l);coins+=r.coins||w.coins;if(w.card)cards.push(w.card)}}
+  else list.forEach(l=>{if(SV.lvClaimed[l]||lvOf(SV.exp)<l)return;const r=lvReward(l);SV.lvClaimed[l]=true;SV.coins+=r.coins;coins+=r.coins;
     if(r.card){if(SV.owned.includes(r.card))SV.count[r.card]=(SV.count[r.card]||1)+1;else{SV.owned.push(r.card);SV.count[r.card]=1}cards.push(r.card)}});
   if(!coins&&!cards.length)return;
   save();hud();renderLvr();
@@ -669,7 +698,7 @@ function renderUp(flash){
     <div class="upinfo"><b class="upname">${c.name} ${rarTag(id)}</b>${tabs}${body}
       <button class="sec small" data-uppick>🔄 เปลี่ยนการ์ด</button></div></div>`;
 }
-$('#upList').onclick=e=>{
+$('#upList').onclick=async e=>{
   if(e.target.closest('[data-uppick]'))return openUpPicker();
   const tb=e.target.closest('[data-uptab]');if(tb){upTab=tb.dataset.uptab;return renderUp()}
   const sb=e.target.closest('[data-star]');
@@ -677,21 +706,24 @@ $('#upList').onclick=e=>{
     const id=sb.dataset.star,need=starCost(id);
     if(cstar(id)>=STAR_MAX)return;
     if(extra(id)<need)return toast('การ์ดซ้ำไม่พอ');
+    if(srvOn()){const r=await sc('star_up',{p_card:id});if(!r.ok)return toast(srvMsg(r));renderUp(id);toast('⭐ '+CARDS[id].name+' → '+cstar(id)+' ดาว (ใช้การ์ดซ้ำ '+need+' ใบ)');return}
     SV.count[id]-=need;SV.star[id]=cstar(id)+1;save();hud();renderUp(id);
     toast('⭐ '+CARDS[id].name+' → '+cstar(id)+' ดาว (ใช้การ์ดซ้ำ '+need+' ใบ)');return;
   }
   const b=e.target.closest('[data-up]');if(!b)return;
   const[id,k]=b.dataset.up.split(','),r=upAffordable(id,+k);
   if(!r.k)return toast('เงินไม่พอ');
+  if(srvOn()){const q=await sc('level_up',{p_card:id,p_n:r.k});if(!q.ok)return toast(srvMsg(q));onSpend(q.spent||0);renderUp(id);toast(CARDS[id].name+' → Lv.'+clv(id)+' (-💰'+(q.spent||0)+')');return}
   SV.coins-=r.c;onSpend(r.c);SV.lv[id]=clv(id)+r.k;save();hud();renderUp(id);
   toast(CARDS[id].name+' → Lv.'+clv(id)+' (-💰'+r.c+')');
 };
 
 /* ---------- คลังการ์ด / ขายการ์ดซ้ำ ---------- */
-function setAuto(v){SV.autoSell=v;save();$('#autoSell').checked=v;$('#autoSell2').checked=v;toast(v?'เปิดขายการ์ดซ้ำอัตโนมัติ':'การ์ดซ้ำจะเก็บเข้าคลัง')}
+async function setAuto(v){if(srvOn()){const r=await sc('set_auto_sell',{p_on:v});if(!r.ok){toast(srvMsg(r));v=!!SV.autoSell;$('#autoSell').checked=v;$('#autoSell2').checked=v;return}}else{SV.autoSell=v;save()}$('#autoSell').checked=v;$('#autoSell2').checked=v;toast(v?'เปิดขายการ์ดซ้ำอัตโนมัติ':'การ์ดซ้ำจะเก็บเข้าคลัง')}
 $('#autoSell').onchange=e=>setAuto(e.target.checked);$('#autoSell2').onchange=e=>setAuto(e.target.checked);
-function sell(id,n){
+async function sell(id,n){
   n=Math.min(n,extra(id));if(n<=0)return toast('ต้องเก็บไว้อย่างน้อย 1 ใบ');
+  if(srvOn()){const r=await sc('sell_dup',{p_card:id,p_n:n});if(!r.ok)return toast(srvMsg(r));renderSell();return toast('ขาย '+CARDS[id].name+' ×'+r.sold+' ได้ 💰'+r.got)}
   SV.count[id]-=n;SV.coins+=n*refund(id);save();hud();renderSell();toast('ขาย '+CARDS[id].name+' ×'+n+' ได้ 💰'+n*refund(id));
 }
 /* ขายการ์ด (เข้าจากหน้าจัดทีม) */
@@ -719,7 +751,9 @@ function renderInv(){
   }
 }
 $('#sellList').onclick=e=>{const b=e.target.closest('[data-sell]');if(b){const[id,n]=b.dataset.sell.split(',');sell(id,+n)}};
-$('#sellAll').onclick=()=>{let t=0;SV.owned.forEach(id=>{const n=extra(id);if(n){t+=n*refund(id);SV.count[id]-=n}});SV.coins+=t;save();hud();renderSell();toast('ขายการ์ดซ้ำทั้งหมด ได้ 💰'+t)};
+$('#sellAll').onclick=async()=>{
+  if(srvOn()){let t=0;for(const id of [...SV.owned]){const n=extra(id);if(!n)continue;const r=await sc('sell_dup',{p_card:id,p_n:n});if(r.ok)t+=r.got||0;else{toast(srvMsg(r));break}}renderSell();return toast('ขายการ์ดซ้ำทั้งหมด ได้ 💰'+t)}
+  let t=0;SV.owned.forEach(id=>{const n=extra(id);if(n){t+=n*refund(id);SV.count[id]-=n}});SV.coins+=t;save();hud();renderSell();toast('ขายการ์ดซ้ำทั้งหมด ได้ 💰'+t)};
 
 /* ---------- อีเว้นท์ ---------- */
 const EVENT_OPEN=true;   /* เปลี่ยนเป็น false เพื่อปิดอีเว้นท์ (ด่านบอส + ตู้ฮาโลวีน) */
