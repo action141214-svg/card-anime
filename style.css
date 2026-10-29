@@ -769,3 +769,5 @@ body{padding:0}
 .badge.hwb{top:auto;bottom:calc(var(--bs)*6.6);background:#fff3b0;color:#4a3300;box-shadow:0 0 18px #ffd54a}
 .holywound .badge.hwb{display:block}
 .cw.holywound img{filter:sepia(.35) saturate(1.4) drop-shadow(0 0 8px #ffd54a)}
+/* Void Shield (คอสมิค กาโร่) */
+.cw.vshield{box-shadow:0 0 0 2px rgba(127,200,255,.9),0 0 22px 6px rgba(127,170,255,.75)}
