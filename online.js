@@ -73,7 +73,7 @@ async function gate(cb){
 /* ---------------- หลังล็อคอิน: โปรไฟล์ + เซฟคลาวด์ ---------------- */
 async function afterLogin(user){
   const meta=(user.user_metadata&&user.user_metadata.username)||(user.email||'').split('@')[0];
-  me={id:user.id,username:meta,name:null};
+  me={id:user.id,username:meta,name:null};syncReady=false;
   for(let i=0;i<3&&!me.name;i++){
     const {data}=await sb.from('profiles').select('username,display_name').eq('id',me.id).maybeSingle();
     if(data){me.username=data.username||me.username;me.name=data.display_name||null;break}
@@ -85,15 +85,36 @@ async function afterLogin(user){
   if(!me.name)await askName(true);
 }
 const loadLocal=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
+/* ---- กันเซฟหาย ----
+   syncReady = อ่านเซฟบนเซิร์ฟเวอร์สำเร็จแล้วเท่านั้นจึงจะอัปโหลดได้ (เดิม: อ่านพลาดแล้วถือว่า "ไม่มีเซฟ" → อัปโหลดเซฟเปล่าทับของจริง)
+   rich() = ขนาดความคืบหน้าคร่าวๆ ใช้เทียบกันไม่ให้เซฟที่น้อยกว่ามากทับเซฟที่เยอะกว่าโดยไม่ถามผู้เล่น */
+let syncReady=false,cloudRich=0,dropOk=false,dropAsked=false,uploadPaused=false,rejAsked=0;
+const rich=s=>s?((s.owned||[]).length*10+Object.keys(s.cleared||{}).length*5):0;
+function backupLocal(){   // สำรองเซฟในเครื่องไว้ก่อนถูกแทนที่ (เก็บล่าสุด 3 ชุด · คีย์ <KEY>_bak_<เวลา>)
+  try{const raw=localStorage.getItem(KEY);if(!raw)return;localStorage.setItem(KEY+'_bak_'+Date.now(),raw);
+    const ks=Object.keys(localStorage).filter(x=>x.startsWith(KEY+'_bak_')).sort();while(ks.length>3)localStorage.removeItem(ks.shift())}catch(e){}
+}
+async function readCloud(){   // → {ok:true,data|null} หรือ {ok:false} (error จาก Supabase ต้องเช็คเอง · ไม่ throw)
+  for(let i=0;i<4;i++){
+    try{const {data,error}=await sb.from('saves').select('data').eq('user_id',me.id).maybeSingle();if(!error)return{ok:true,data:(data&&data.data)||null}}catch(e){}
+    await sleep(500*(i+1));
+  }
+  return{ok:false};
+}
 async function syncSave(){
   KEY=BASE_KEY+'_'+me.id;
   const local=loadLocal(KEY);
-  let cloud=null;
-  try{const {data}=await sb.from('saves').select('data').eq('user_id',me.id).maybeSingle();cloud=data&&data.data}catch(e){toast('โหลดเซฟจากเซิร์ฟเวอร์ไม่ได้ ใช้เซฟในเครื่องก่อน')}
+  let r=await readCloud();
+  while(!r.ok&&!local){   // ไม่มีเซฟในเครื่อง + อ่านเซฟบนเซิร์ฟเวอร์ไม่ได้ → ห้ามเริ่มเกมใหม่ (จะไปทับเซฟจริง) ต้องลองใหม่จนอ่านได้
+    await new Promise(res=>{modal(`<h2>โหลดเซฟไม่สำเร็จ</h2><p>เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ จึงยังไม่เริ่มเกม เพื่อไม่ให้เซฟเดิมของคุณถูกทับ<br><small>ตรวจอินเทอร์เน็ตแล้วกดลองใหม่</small></p><div class="two"><button id="syR">ลองใหม่</button></div>`);$('#syR').onclick=()=>{closeModal();res()}});
+    r=await readCloud();
+  }
+  const cloud=r.ok?r.data:null;
+  if(!r.ok)toast('อ่านเซฟจากเซิร์ฟเวอร์ไม่ได้ ใช้เซฟในเครื่องก่อน (ยังไม่อัปโหลดจนกว่าจะเชื่อมต่อได้)');
   let use=null,push=false;
   if(cloud&&(!local||(cloud.savedAt||0)>=(local.savedAt||0)))use=cloud;
-  else if(local){use=local;push=!cloud||(local.savedAt||0)>(cloud.savedAt||0)}
-  else{
+  else if(local){use=local;push=r.ok&&(!cloud||(local.savedAt||0)>(cloud.savedAt||0))}
+  else if(r.ok){
     const legacy=loadLocal(BASE_KEY),claimed=localStorage.getItem(BASE_KEY+'_claimed');
     if(legacy&&!claimed&&legacy.owned&&legacy.owned.length){
       const yes=await new Promise(res=>{
@@ -104,31 +125,53 @@ async function syncSave(){
       if(yes){use=legacy;push=true}
     }
   }
+  if(use===cloud&&local)backupLocal();   // เซฟบนเซิร์ฟเวอร์ใหม่กว่า → สำรองของในเครื่องไว้ก่อนแทนที่
   try{if(use)localStorage.setItem(KEY,JSON.stringify(use))}catch(e){}
   load();hud();
-  if(push||!cloud)scheduleUpload(300);
+  cloudRich=rich(cloud);
+  if(r.ok){syncReady=true;if(push||!cloud)scheduleUpload(300)}
+  else setTimeout(resumeSync,15000);
 }
-function onSave(){if(sb&&me){scheduleUpload(2500);retrack()}}
+async function resumeSync(){   // อ่านเซฟบนเซิร์ฟเวอร์ไม่ได้ตอนเข้าเกม → ลองใหม่เป็นระยะ พออ่านได้ถึงเปิดการอัปโหลด (ผ่านตัวกันเซฟน้อยทับเซฟเยอะ)
+  if(!me||syncReady)return;
+  const r=await readCloud();
+  if(!r.ok)return setTimeout(resumeSync,20000);
+  cloudRich=rich(r.data);syncReady=true;scheduleUpload(500);
+}
+function onSave(){if(sb&&me){retrack();if(syncReady&&!uploadPaused)scheduleUpload(2500)}}
 function scheduleUpload(ms){clearTimeout(saveT);saveT=setTimeout(uploadSave,ms)}
 let saveOkShown=false,lastSaveMsg='';   /* แจ้งสถานะเซฟบนจอ (เปิด F12 ไม่ได้ก็เห็นว่าเซฟขึ้นเซิร์ฟเวอร์ไหม) */
+function dropAsk(){   // เซฟในเครื่องน้อยกว่าบนเซิร์ฟเวอร์มาก (เช่นเริ่มเกมใหม่โดยไม่ตั้งใจ) → ถามก่อนทับ
+  if(dropAsked)return;dropAsked=true;
+  modal(`<h2>⚠ เซฟในเครื่องน้อยกว่าบนเซิร์ฟเวอร์มาก</h2><p>เครื่องนี้มีการ์ด ${(SV.owned||[]).length} ใบ แต่เซฟบนเซิร์ฟเวอร์มีมากกว่านี้มาก อาจเกิดจากเริ่มเกมใหม่โดยไม่ตั้งใจ<br><small>ยังไม่ได้อัปโหลดอะไรทับ</small></p><div class="two"><button id="dpR">โหลดเซฟจากเซิร์ฟเวอร์</button><button class="sec" id="dpK">อัปโหลดทับ (ตั้งใจให้เป็นแบบนี้)</button></div>`);
+  $('#dpR').onclick=()=>restoreCloud(true);
+  $('#dpK').onclick=()=>{dropOk=true;closeModal();scheduleUpload(300)};
+}
+function rejectAsk(){   // เซิร์ฟเวอร์ไม่รับเซฟ → ไม่ลบเซฟในเครื่องอีกแล้ว ให้ผู้เล่นเลือก
+  if(Date.now()-rejAsked<300000)return;rejAsked=Date.now();uploadPaused=true;
+  modal(`<h2>เซิร์ฟเวอร์ไม่รับเซฟล่าสุด</h2><p>ตรวจพบการเพิ่มของผิดปกติเมื่อเทียบกับเซฟบนเซิร์ฟเวอร์ ระบบ<b>ไม่ได้ลบ</b>เซฟในเครื่องของคุณ<br><small>ถ้าเป็นเซฟจริงของคุณ ให้เล่นต่อและแจ้งผู้ดูแล · ระหว่างนี้จะยังไม่อัปโหลด</small></p><div class="two"><button id="rjK">เล่นต่อด้วยเซฟในเครื่อง</button><button class="sec" id="rjR">กู้เซฟจากเซิร์ฟเวอร์</button></div>`);
+  $('#rjK').onclick=closeModal;$('#rjR').onclick=()=>restoreCloud(true);
+}
 async function uploadSave(){
-  if(!sb||!me||saving)return;
+  if(!sb||!me||saving||!syncReady||uploadPaused)return;
+  if(!dropOk&&cloudRich>=30&&rich(SV)<cloudRich*0.5){dropAsk();return}   // กันเซฟเปล่า/น้อยผิดปกติไปทับเซฟเต็ม
   saving=true;
   try{
     /* เขียนเซฟผ่านฟังก์ชัน save_game บนเซิร์ฟเวอร์ (ตรวจความผิดปกติ) — ไม่เขียนตารางตรงๆ แล้ว */
     const r=await sb.rpc('save_game',{p:SV});if(r&&r.error)throw r.error;
     const s=r&&r.data;
-    if(s==='ok'||s==='flag'){lastSaveMsg='';if(!saveOkShown){saveOkShown=true;toast('☁ เซฟขึ้นเซิร์ฟเวอร์แล้ว')}}
+    if(s==='ok'||s==='flag'){cloudRich=rich(SV);lastSaveMsg='';if(!saveOkShown){saveOkShown=true;toast('☁ เซฟขึ้นเซิร์ฟเวอร์แล้ว')}}
     else if(s==='invalid'&&lastSaveMsg!=='invalid'){lastSaveMsg='invalid';toast('เซิร์ฟเวอร์ไม่รับเซฟ (รูปแบบข้อมูลผิดปกติ)')}
-    if(s==='reject')await restoreCloud();            /* เซิร์ฟเวอร์ปฏิเสธเซฟที่เพิ่มของผิดปกติ → กู้เซฟล่าสุดที่ถูกต้อง */
+    if(s==='reject')rejectAsk();                      /* เซิร์ฟเวอร์ปฏิเสธเซฟที่เพิ่มของผิดปกติ → ไม่ทับเซฟในเครื่องแล้ว ถามผู้เล่น */
     else if(s==='throttled')scheduleUpload(3000);    /* เซฟถี่เกิน → ลองใหม่ทีหลัง */
   }catch(e){const m=(e&&(e.message||e.code))||String(e);if(m!==lastSaveMsg){lastSaveMsg=m;toast('เซฟขึ้นเซิร์ฟเวอร์ไม่สำเร็จ: '+m)}scheduleUpload(8000)}
   saving=false;
 }
-async function restoreCloud(){
+async function restoreCloud(manual){
   try{
-    const {data}=await sb.from('saves').select('data').eq('user_id',me.id).maybeSingle();
-    if(data&&data.data){localStorage.setItem(KEY,JSON.stringify(data.data));toast('เซฟไม่ผ่านการตรวจสอบ กู้คืนเซฟล่าสุดจากเซิร์ฟเวอร์แล้ว');setTimeout(()=>location.reload(),1200)}
+    const r=await readCloud();
+    if(r.ok&&r.data){backupLocal();localStorage.setItem(KEY,JSON.stringify(r.data));toast('โหลดเซฟจากเซิร์ฟเวอร์แล้ว (เซฟเดิมในเครื่องถูกสำรองไว้)');setTimeout(()=>location.reload(),1200)}
+    else toast('โหลดเซฟจากเซิร์ฟเวอร์ไม่สำเร็จ');
   }catch(e){}
 }
 addEventListener('pagehide',()=>{if(me&&saveT){clearTimeout(saveT);uploadSave()}});
