@@ -169,7 +169,7 @@ function setFighter(k){
 
 /* ---------- 2v2: ลงสนามฝั่งละ 2 ใบ · สลับกันโจมตี · ผู้เล่นเลือกเป้าได้ ---------- */
 function duoHtml(k){
-  const one=n=>sideHtml(k).replace('id="f'+k+'"','id="f'+k+'x'+n+'" data-k="'+k+'" data-s="'+n+'"');
+  const one=n=>sideHtml(k).replace('id="f'+k+'"','id="f'+k+'x'+n+'" data-k="'+k+'" data-s="'+n+'"').replace('<div class="stat">','<div class="stat"><small class="own"></small>');
   return '<div class="duo2">'+one(0)+one(1)+'</div><div class="line rsv" id="rsv'+k+'"></div>'}
 const duoAlive=k=>S.slots[k].filter(i=>i>=0&&S.roster[k][i]&&S.roster[k][i].hp>0);
 /* ผูก id ของช่องการ์ด: ตัวที่กำลังเล่น/ถูกเลือกเป็น #fa / #fb (โค้ดเดิมใช้ id นี้ทั้งหมด) ตัวอื่นเป็น #fa x0/x1 */
@@ -179,7 +179,7 @@ function bindDuo(){
     const els=[...document.querySelectorAll('#team'+k.toUpperCase()+' .fighter')];
     if(!S.slots[k].includes(S.idx[k])){const al=duoAlive(k);S.idx[k]=al.length?al[0]:S.slots[k][0]}
     S[k]=S.roster[k][S.idx[k]];
-    els.forEach((el,n)=>{const ri=S.slots[k][n];el.dataset.ri=ri;el.id=(ri===S.idx[k])?'f'+k:'f'+k+'x'+n});
+    els.forEach((el,n)=>{const ri=S.slots[k][n];el.dataset.ri=ri;el.id=(ri===S.idx[k])?'f'+k:'f'+k+'x'+n;const ow=$('.own',el),nmx=OPT.slotNames&&OPT.slotNames[k]&&OPT.slotNames[k][n];if(ow)ow.textContent=nmx?'👤 '+nmx:''});
     setFighter(k);
   }
   paintBench();
@@ -212,7 +212,8 @@ function pickTargetUi(dk,list,my){
 }
 async function chooseTarget(ak,dk,list,my){
   const n=S.n;let v=list[0];
-  if(OPT.mySide&&OPT.mySide!==ak&&OPT.recvTarget){v=await OPT.recvTarget(n,my);if(run!==my)throw 'cancel'}
+  const slot=S.slots[ak].indexOf(S.idx[ak]),ms=OPT.mySlot;
+  if(ms&&!(ms.k===ak&&ms.s===slot)&&OPT.recvTarget){v=await OPT.recvTarget(n,my);if(run!==my)throw 'cancel'}   /* ตาของผู้เล่นคนอื่น: รอรับเป้าที่เขาเลือก */
   else{
     if(OPT.autoTarget)v=OPT.autoTarget(list,S);
     else v=await pickTargetUi(dk,list,my);
@@ -241,7 +242,7 @@ function startBattle(opts){
   const mk=(lvs,sts)=>{const f=mk0(lvs,sts);return (id,i)=>jwInit(f(id,i))};   /* ซอง จิน วู: ผูก HP ให้รอดตาย */
   let first=opts.first||$('#first').value;if(first==='r')first=RR()<.5?'a':'b';
   S={a:null,b:null,roster:{a:opts.a.map(mk(opts.la,opts.sa)),b:opts.b.map(mk(opts.lb,opts.sb))},idx:{a:0,b:0},turn:first,n:1,over:false,phase2:opts.phase2||null};
-  if(opts.duo){S.duo=true;S.slots={a:[0,opts.a.length>1?1:-1],b:[0,opts.b.length>1?1:-1]};S.next={a:Math.min(2,opts.a.length),b:Math.min(2,opts.b.length)};S.rot={a:0,b:0}}   /* 2v2: ลงสนามฝั่งละ 2 ใบ ที่เหลือเป็นตัวสำรอง */   /* phase2 = บอสเควส 2 เฟส: เมื่อเฟส 1 ตาย บอสตัวเดิมเปลี่ยนเป็นเฟส 2 */
+  if(opts.duo){const per=opts.per||Math.ceil(opts.a.length/2);S.duo=true;S.per=per;S.slots={a:[0,per],b:[0,per]};S.next={a:[1,per+1],b:[1,per+1]};S.rot={a:0,b:0}}   /* 2v2 (4 ผู้เล่น): ทีมละ 2 ช่อง ช่องละ per ใบ (การ์ดของผู้เล่นคนนั้น) ใบแรกลงสนาม ที่เหลือเป็นตัวสำรองของช่อง */   /* 2v2: ลงสนามฝั่งละ 2 ใบ ที่เหลือเป็นตัวสำรอง */   /* phase2 = บอสเควส 2 เฟส: เมื่อเฟส 1 ตาย บอสตัวเดิมเปลี่ยนเป็นเฟส 2 */
   if(opts.bossHp){const r=S.roster.b[0];r.max=opts.bossHp.max;r.hp=opts.bossHp.cur;r.boss=true;
     if(opts.noHeal)r.noHeal=true;   /* เควสพัฒนา: บอสไม่ฟื้นฟู HP */
     if(opts.bossP!=null)r.p=opts.bossP;   /* อีเว้นท์: กำหนด POWER บอสเอง */
@@ -1027,8 +1028,9 @@ async function handleKO(dk,ak){
     if(S&&S.over&&OPT.onEnd)OPT.onEnd({...endInfo(),win:w==='a',turns:S.n,left:S.roster.a.filter(x=>x.hp>0).length,bossHp:Math.max(0,S.roster.b[0].hp)});return true};
   if(S.duo){   /* 2v2: ตัวที่ตายถูกแทนด้วยตัวสำรอง ถ้าไม่มีสำรองช่องนั้นว่าง */
     const refill=k=>{const out=[];for(let n=0;n<2;n++){const ri=S.slots[k][n];if(ri>=0&&S.roster[k][ri].hp<=0){
-        while(S.next[k]<S.roster[k].length&&S.roster[k][S.next[k]].hp<=0)S.next[k]++;
-        if(S.next[k]<S.roster[k].length){const ni=S.next[k]++;S.slots[k][n]=ni;out.push(ni)}}}return out};
+        const end=(n+1)*S.per;let nx=S.next[k][n];
+        while(nx<end&&nx<S.roster[k].length&&S.roster[k][nx].hp<=0)nx++;
+        if(nx<end&&nx<S.roster[k].length){S.slots[k][n]=nx;S.next[k][n]=nx+1;out.push(nx)}else S.next[k][n]=nx}}return out};
     const nd=refill(dk),na=xko?refill(ak):[];
     const dOut2=!duoAlive(dk).length,xOut2=xko&&!duoAlive(ak).length;
     if(dOut2||xOut2)return finish(xOut2?dk:ak);
