@@ -938,3 +938,9 @@ body{padding:0}
 .r10.r50{grid-template-columns:repeat(8,minmax(0,1fr));max-height:56vh;overflow-y:auto;padding-right:4px}
 .r10.r50 .rt10 img{height:clamp(60px,11vh,110px)}
 @media (max-width:760px){.r10.r50{grid-template-columns:repeat(4,minmax(0,1fr))}.r10.r50 .rt10 img{height:12vh}}
+/* Loadout ทีม 1-5 */
+.lobar{display:flex;align-items:center;gap:6px;flex:none;overflow-x:auto;white-space:nowrap;padding:2px 0}
+.lobar>span{font-family:Kanit;color:var(--gold);margin-right:2px}
+.lobar .lob{display:inline-flex;align-items:center;gap:4px;min-width:44px;justify-content:center}
+.lobar .lob small{opacity:.75;font-size:.72em}
+.lobar>em{font-style:normal;color:var(--mute);font-size:.8em;margin-left:6px}
