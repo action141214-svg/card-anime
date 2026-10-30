@@ -128,7 +128,6 @@ function renderHome(){
 $('#howBtn').onclick=()=>tutorial(false);
 /* ---------- โค้ดของขวัญ ---------- */
 const GIFT_CODES={
-  KIRITO:()=>{const id='kiritoevo';if(SV.owned.includes(id))SV.count[id]=(SV.count[id]||1)+1;else{SV.owned.push(id);SV.count[id]=1}SV.lv[id]=SV.lv[id]||1;SV.star=SV.star||{};SV.star[id]=Math.max(SV.star[id]||1,6);return 'ได้รับ ผู้ปลดปล่อยดวงดาว คิริโตะ (LTD) 6 ดาว'},   /* ออฟไลน์เท่านั้น · ออนไลน์ใช้ตาราง code_defs บนเซิร์ฟเวอร์ */
   RELEASE:()=>{SV.coins=(SV.coins||0)+3000000;SV.candy=(SV.candy||0)+3000;return 'เงิน +3,000,000 · ลูกอม +3,000'}
 };
 function codeModal(){
@@ -147,7 +146,6 @@ function codeModal(){
       await sc('get_state');   /* ดึงสถานะล่าสุดจากเซิร์ฟเวอร์มาใส่เกมทันที (การ์ด/ของที่ได้จากโค้ดจะขึ้นเลยโดยไม่ต้องรีเฟรช) */
       save();hud();if(typeof renderHome==='function')renderHome();
       let okMsg='ได้รับของขวัญจากโค้ด '+c+' แล้ว';
-      if(c==='KIRITO'){okMsg=SV.owned.includes('kiritoevo')?'ได้รับ ผู้ปลดปล่อยดวงดาว คิริโตะ (LTD) '+cstar('kiritoevo')+' ดาว':'โค้ดผ่านแล้ว แต่ยังไม่พบการ์ดคิริโตะ LTD ในคลัง (ตรวจแถว KIRITO ใน code_defs)'}
       $('#cdE').textContent='';$('#cdOk').textContent='✅ รับสำเร็จ: '+okMsg;$('#cdI').value='';toast('รับของขวัญสำเร็จ!');return}
     if(!f){$('#cdE').textContent='โค้ดไม่ถูกต้อง';return}
     if(SV.codes[c]){$('#cdE').textContent='โค้ดนี้ใช้ไปแล้ว';return}
@@ -1284,7 +1282,7 @@ load();hud();
    แก้ข้อความอัปเดตที่ DEV_MSG · เปลี่ยน ver ทุกครั้งที่มีอัปเดตใหม่ (ผู้เล่นที่กด "ไม่ต้องแสดงอีก" จะเห็นข้อความใหม่อีกครั้ง)
    ขึ้นกลางจออัตโนมัติทุกครั้งที่เข้าเกม (หลังเลือกเปิด/ปิดเพลง) · กดปุ่ม "สารจากผู้พัฒนา" ข้างปุ่มออนไลน์เพื่อเปิดดูได้ตลอด */
 const DEV_MSG={
-  ver:'2026-10-30k',
+  ver:'2026-10-30l',
   title:'สารจากผู้พัฒนา',
   date:'30 ต.ค. 2569',
   sections:[
@@ -1301,7 +1299,6 @@ const DEV_MSG={
       '👑 จักรพรรดิเงา ซอง จิน วู: ทุกครั้งที่โจมตี ทหารเงา (เบรุ / อิกริส / ไออน) จะผุดขึ้นมาจากเงา พุ่งเข้าโจมตีศัตรู แล้วจางหายกลับเข้าเงา',
       '🌀 อุซึมากิ นารูโตะ: เมื่อร่างหลักถูกทำลายจะมีควันคาถาแยกเงาพวยพุ่ง แล้วร่างแยกโผล่ออกมาจากควัน']},
     {h:'🎁 โค้ดรับของขวัญ',items:[
-      'CODE: KIRITO · ได้รับ ผู้ปลดปล่อยดวงดาว คิริโตะ 6 ดาว',
       'CODE: SORRY · ได้รับวัตถุดิบทุกอย่าง อย่างละ 1 ชิ้น',
       'CODE: SWORD · ได้รับมีดเขี้ยวงูของคาสากะ และมีดนักฆ่าอัศวิน อย่างละ 1 เล่ม']},
     {h:'🛠 แก้ไขระบบ',items:[
