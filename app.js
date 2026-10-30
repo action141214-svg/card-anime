@@ -1124,10 +1124,10 @@ const EVOS=[{from:'naruto',to:'naruto1',need:{cards:50,items:{seal9:1},coins:100
   {from:'chahaein',to:'chaevo',need:{cards:50,items:{sword:1},coins:20000000},
   boss:{card:'chaboss',name:'เริงระบำเจ้าหญิงดาบ ชา แฮ อิน',hp:10000,power:150,lv:1,coins:100,drops:[{item:'sword',rate:.01}]}},
   {from:'slime',to:'rimuru',need:{cards:100,items:{shisu:1},coins:50000000},
-  boss:{card:'slime',count:4,name:'ริมุรุ ร่างสไลม์ ×4',hp:5000,power:100,lv:1,coins:100,drops:[{item:'shisu',rate:.005}]}},
+  boss:{card:'slime',count:4,name:'ริมุรุ ร่างสไลม์ ×4',hp:5000,power:100,lv:1,coins:100,drops:[{item:'shisu',rate:.05}]}},
   /* need.more = การ์ดอื่นที่ต้องใช้เพิ่ม · need.kills = สังหารศัตรูสะสม (ไม่ถูกใช้หมดไป) · grant = ดาว/เลเวลของการ์ดที่ได้ */
   {from:'rimuru',to:'rimulord',need:{cards:5,more:{slime:50},items:{shisu:10},kills:10000,coins:200000000},grant:{lv:1,star:6},
-  boss:{card:'rimuruboss',name:'ริมุรุ ร่าง SSR',hp:30000,power:150,lv:1,coins:100,drops:[{item:'shisu',rate:.005}]}},
+  boss:{card:'rimuruboss',name:'ริมุรุ ร่าง SSR',hp:30000,power:150,lv:1,coins:100,drops:[{item:'shisu',rate:.075}]}},
   /* บอส 2 เฟส: เฟส 1 ตายแล้วเปลี่ยนเป็นเฟส 2 · drops: first = โอกาสออกเมื่อชนะครั้งแรก (rate = ครั้งต่อๆ ไป) · safe = กันจุดตายทันที */
   {from:'rimulord',to:'truerimuru',need:{cards:5,more:{slime:100,rimuru:10},items:{shisu:20,rsword:1},kills:20000,coins:1000000000},grant:{lv:1,star:6},
   boss:{card:'rimulordboss',name:'จอมมาร ริมุรุ เทมเพสต์ (เฟส 1)',hp:10000,power:200,lv:1,coins:100,safe:true,
@@ -1145,9 +1145,9 @@ const EVOS=[{from:'naruto',to:'naruto1',need:{cards:50,items:{seal9:1},coins:100
   /* drops แบบ pick = โอกาสออกรวม rate แล้วสุ่มหนึ่งชิ้นจากรายการ (ออกอีกา 5% → จริง/ปลอม อย่างละ 50%) */
   {from:'shichi',to:'susanoo',need:{cards:1,items:{crowr:5,crowf:10},coins:10000000000},grant:{star:6},
   boss:{card:'susanooboss',name:'อิทาจิและชิซุย ซูซาโนะอุขั้นสมบูรณ์',hp:50000,power:300,lv:1,coins:100,drops:[{item:'crowr',pick:['crowr','crowf'],rate:.05}]}},
-  /* need.jwc = ซอง จิน วู ใช้ความสามารถ (HP เหลือ 1) สะสม · ดรอปมีดแต่ละเล่มแยกกัน เล่มละ 2% */
+  /* need.jwc = ซอง จิน วู ใช้ความสามารถ (HP เหลือ 1) สะสม · ดรอปมีดแต่ละเล่มแยกกัน เล่มละ 5% */
   {from:'jinwoo',to:'jinwoo2',need:{cards:50,items:{kasaga:1,dagger:1},jwc:10,coins:50000000},
-  boss:{card:'jinwoo2boss',name:'ปลุกพลังขั้นสอง ซอง จิน วู',hp:30000,power:200,lv:1,coins:100,drops:[{item:'kasaga',rate:.02},{item:'dagger',rate:.02}]}},
+  boss:{card:'jinwoo2boss',name:'ปลุกพลังขั้นสอง ซอง จิน วู',hp:30000,power:200,lv:1,coins:100,drops:[{item:'kasaga',rate:.05},{item:'dagger',rate:.05}]}},
   /* need.dungeon = ผ่านดันเจี้ยนสะสม (SV.dgw) · ใช้บอสเดียวกับด่านดันเจี้ยน แต่ HP/POWER ต่ำกว่า */
   {from:'jinwoo2',to:'shadowemp',need:{cards:50,items:{shadoworb:1,beru:1,igris:1,ion:1},dungeon:1,coins:10000000000},
   boss:{card:'shadowempboss',name:'จักรพรรดิเงา ซอง จิน วู',hp:100000,power:200,lv:1,coins:100,drops:[{item:'shadoworb',rate:.001}]}}];
