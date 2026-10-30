@@ -7,7 +7,7 @@ const GACHA={cost:100000,cost10:900000,   /* ราคาสุ่มเป็�
   pool:['jinwoo','milim','goku','zenitsu','yuji','naruto','sasukekid','gekko','ino','kirara','garo','vegeta','ichigo','kirito','megumi','gil','kurapika','shuna','chahaein','kaneki','reze','kdash','mai','kula','rias','issei','rocklee'],
   /* เรทออก % : base = ปกติ, up = ตอนเป็นการ์ดเรทอัป (การ์ด R ที่เหลือแบ่งเท่าๆ กัน) */
   /* เรทตามระดับ (รวมทุกใบในระดับนั้น): USR 0.1% · UR 1% — แบ่งเท่าๆ กันในระดับเดียวกัน, ถ้าเป็นการ์ดเรทอัปได้ส่วนแบ่ง rarUp ของระดับนั้น (ตัวเลขใน rates ด้านล่างของ UR/USR ใช้แสดงผลเท่านั้น) */
-  rarTotal:{USR:0.1,UR:1},rarUp:0.7,
+  rarTotal:{S:20,SR:10,SSR:4.9,UR:1,USR:0.1},rarUp:0.7,   /* เรทรวมตามระดับ (%): R ได้ส่วนที่เหลือ = 64% · ถ้าเป็นการ์ดเรทอัปได้ส่วนแบ่ง rarUp ของระดับนั้น */
   /* การันตี (ตู้ปกติ): สุ่มครบกี่ครั้งโดยยังไม่ได้ระดับนั้น → ครั้งถัดไปได้แน่นอน (ได้ USR ถือว่านับ UR ใหม่ด้วย) */
   pityUR:400,pityUSR:1000,
   rates:{base:{milim:5,kirito:15,ichigo:15,kaneki:10,megumi:5,shuna:8,chahaein:4,issei:5,gil:0.5,reze:0.5,kurapika:0.05,kdash:0.05,mai:0.05},up:{milim:5,kirito:30,ichigo:30,kaneki:10,megumi:10,shuna:8,chahaein:4,issei:5,gil:0.7,reze:0.7,kurapika:0.07,kdash:0.07,mai:0.07}},
@@ -35,7 +35,7 @@ const hwLeft=()=>{const l=Math.max(0,HW.end-Date.now()),d=Math.floor(l/864e5),h=
 let gMode='main',sMode='main';   /* โหมดตู้กาชา / หน้าเลือกด่าน: main = ปกติ, hw = ฮาโลวีน */
 const gcfg=()=>gMode==='hw'?{pool:[...HW.rPool,...HW.pool],rates:HW.rates}:{pool:GACHA.pool,rates:GACHA.rates};
 /* ตู้ฮาโลวีนใช้ลูกอม 🍬 / ตู้ปกติใช้เงิน 💰 */
-const gcost=n=>gMode==='hw'?(n===1?HW.cost:HW.cost10):(n===1?GACHA.cost:GACHA.cost10);
+const gcost=n=>gMode==='hw'?(n===1?HW.cost:n===10?HW.cost10:HW.cost10*(n/10)):(n===1?GACHA.cost:n===10?GACHA.cost10:GACHA.cost10*(n/10));   /* ×50 = ราคา ×10 คูณ 5 (ส่วนลดเท่ากัน) */
 const gbal=()=>gMode==='hw'?SV.candy:SV.coins;
 const gico=()=>gMode==='hw'?'🍬':'💰';
 const stageList=()=>sMode==='hw'?HW.stages:STAGES;
@@ -321,14 +321,14 @@ function updTimer(){
 }
 function renderGacha(){
   const hw=gMode==='hw';$('#gCandy').classList.toggle('hidden',!hw);$('#gachaScr').classList.toggle('hw',hw);$('#gTitle').textContent=hw?'ตู้สุ่มฮาโลวีน 🎃':'ตู้กาชา';$('#gBack').dataset.go=hw?'event':'home';$('#bRt').textContent=hw?'HALLOWEEN!!!':'RATE UP!!!';
-  const b=curB(),r=bannerRates(b);lastSlot=curSlot();
+  const b=curB(),r=bannerRates(b),r0=hw?r:bannerRates({c:'',s:[]});lastSlot=curSlot();
   $('#bBoost').textContent=hw?'การ์ดฮาโลวีนสุดพิเศษ!':'การ์ดตรงกลาง เรทออกเพิ่มขึ้น!';
-  $('#bCards').innerHTML=[b.s[0],b.c,b.s[1]].filter(Boolean).map(id=>{const main=id===b.c,c=CARDS[id],upd=main&&(hw||gcfg().rates.up[id]!==gcfg().rates.base[id]);
-    return `<div class="bc${main?' main':''}" style="--c:${RARITY[c.rar]};--k:${main?1:.8}"><div class="bcimg"><img src="${c.img}" alt="${c.name}">${upd?'<span class="rib">เรทอัป ⬆</span>':''}${SV.owned.includes(id)?`<span class="own">มี ×${SV.count[id]}</span>`:''}</div><b>${c.name}</b><div>${rarTag(id)} <em>${pct(r[id])}</em>${upd&&!hw?` <small class="was">ปกติ ${pct(gcfg().rates.base[id])}</small>`:''}</div></div>`}).join('');
+  $('#bCards').innerHTML=[b.s[0],b.c,b.s[1]].filter(Boolean).map(id=>{const main=id===b.c,c=CARDS[id],upd=main&&(hw||Math.abs(r[id]-r0[id])>1e-9);
+    return `<div class="bc${main?' main':''}" style="--c:${RARITY[c.rar]};--k:${main?1:.8}"><div class="bcimg"><img src="${c.img}" alt="${c.name}">${upd?'<span class="rib">เรทอัป ⬆</span>':''}${SV.owned.includes(id)?`<span class="own">มี ×${SV.count[id]}</span>`:''}</div><b>${c.name}</b><div>${rarTag(id)} <em>${pct(r[id])}</em>${upd&&!hw?` <small class="was">ปกติ ${pct(r0[id])}</small>`:''}</div></div>`}).join('');
   $('#bDesc').textContent=hw?'ตู้พิเศษอีเว้นท์ฮาโลวีน! ใช้ลูกอม 🍬 สุ่ม · การ์ดอีเว้นท์รวม '+HW.eventRate+'% · การันตีที่ '+HW.pity+' ครั้ง (สุ่มมาแล้ว '+SV.evg.pity+'/'+HW.pity+') · แตะแบนเนอร์เพื่อดูเรททั้งหมด':'ใช้เงินสุ่มการ์ดใหม่! การ์ดตรงกลางมีโอกาสออกสูงกว่าปกติ · การันตี UR ที่ '+GACHA.pityUR+' ครั้ง (ตอนนี้ '+((SV.gp&&SV.gp.ur)||0)+') · USR ที่ '+GACHA.pityUSR+' ครั้ง (ตอนนี้ '+((SV.gp&&SV.gp.usr)||0)+') · แตะแบนเนอร์เพื่อดูเรททั้งหมด';
   updTimer();
-  $('#pullBtn').textContent='สุ่ม 1 ครั้ง · '+gico()+gcost(1);$('#pull10Btn').textContent='สุ่ม 10 ครั้ง · '+gico()+gcost(10);
-  const off=hw&&!hwOpen();$('#pullBtn').disabled=pulling||off||gbal()<gcost(1);$('#pull10Btn').disabled=pulling||off||gbal()<gcost(10);
+  $('#pullBtn').textContent='สุ่ม 1 ครั้ง · '+gico()+gcost(1);$('#pull10Btn').textContent='สุ่ม 10 ครั้ง · '+gico()+gcost(10);$('#pull50Btn').textContent='สุ่ม 50 ครั้ง · '+gico()+gcost(50);
+  const off=hw&&!hwOpen();$('#pullBtn').disabled=pulling||off||gbal()<gcost(1);$('#pull10Btn').disabled=pulling||off||gbal()<gcost(10);$('#pull50Btn').disabled=pulling||off||gbal()<gcost(50);
   $('#autoSell').checked=SV.autoSell;
 }
 function roll(){
@@ -382,17 +382,17 @@ function showPull(res,n){
     modal(`<div class="reveal" style="--c:${RARITY[c.rar]}"><div class="glow"></div><img src="${c.img}" alt="${c.name}"></div><h2>${c.name} ${rarTag(r.id)}</h2><p>${r.dup?(r.sold?`ได้การ์ดซ้ำ — ขายอัตโนมัติ ได้เงินคืน 💰${r.back}`:`ได้การ์ดซ้ำ — เก็บเข้าคลังแล้ว (มี ×${SV.count[r.id]} ใบ)`):'<b class="new">NEW!</b> ปลดล็อกการ์ดใหม่แล้ว'}</p><div class="two"><button id="pAgain" ${gbal()<gcost(1)?'disabled':''}>สุ่มอีก (${gico()}${gcost(1)})</button><button class="sec" id="pClose">ปิด</button></div>`);
   }else{
     const back=res.filter(r=>r.sold).reduce((s,r)=>s+r.back,0),nw=res.filter(r=>!r.dup).length;
-    modal(`<div class="wide"><h2>ผลการสุ่ม ×${n}</h2><div class="r10">${res.map(r=>{const c=CARDS[r.id];return `<div class="rt10" style="--c:${RARITY[c.rar]}"><img src="${c.img}" alt="${c.name}"><b>${c.name}</b><small>${r.dup?(r.sold?'+💰'+r.back:'เข้าคลัง'):'<span class="new">NEW!</span>'}</small></div>`}).join('')}</div><p>การ์ดใหม่ ${nw} ใบ${back?` · ขายซ้ำอัตโนมัติได้ 💰${back}`:''}${gMode==='hw'?` · การันตีการ์ดอีเว้นท์อีก ${HW.pity-SV.evg.pity} ครั้ง`:''}</p><div class="two"><button id="pAgain" ${gbal()<gcost(10)?'disabled':''}>สุ่ม ×10 อีก (${gico()}${gcost(10)})</button><button class="sec" id="pClose">ปิด</button></div></div>`);
+    modal(`<div class="wide"><h2>ผลการสุ่ม ×${n}</h2><div class="r10${n>10?' r50':''}">${res.map(r=>{const c=CARDS[r.id];return `<div class="rt10" style="--c:${RARITY[c.rar]}"><img src="${c.img}" alt="${c.name}"><b>${c.name}</b><small>${r.dup?(r.sold?'+💰'+r.back:'เข้าคลัง'):'<span class="new">NEW!</span>'}</small></div>`}).join('')}</div><p>การ์ดใหม่ ${nw} ใบ${back?` · ขายซ้ำอัตโนมัติได้ 💰${back}`:''}${gMode==='hw'?` · การันตีการ์ดอีเว้นท์อีก ${HW.pity-SV.evg.pity} ครั้ง`:''}</p><div class="two"><button id="pAgain" ${gbal()<gcost(n)?'disabled':''}>สุ่ม ×${n} อีก (${gico()}${gcost(n)})</button><button class="sec" id="pClose">ปิด</button></div></div>`);
   }
   $('#pAgain').onclick=again;$('#pClose').onclick=()=>{closeModal();renderGacha()};
 }
 function showRates(){
   const b=curB(),r=bannerRates(b);
-  modal(`<div class="wide"><h2>รายละเอียดและเรท</h2><p>${gMode==='hw'?'':`เรทอัปตอนนี้: <b>${CARDS[b.c].name}</b> (${pct(gcfg().rates.base[b.c])} → ${pct(gcfg().rates.up[b.c])}) `}${gMode==='hw'?'ตู้ฮาโลวีน (เฉพาะช่วงอีเว้นท์) · ใช้ลูกอม 🍬 · การ์ดอีเว้นท์รวม '+HW.eventRate+'% (การ์ดหน้าตู้ '+pct(HW.eventRate*HW.upShare)+') · การันตีที่ '+HW.pity+' ครั้ง (สุ่มมาแล้ว '+SV.evg.pity+')':'เปลี่ยนทุก 1 ชั่วโมงตามเวลาไทย · การ์ดระดับ LTD ยังไม่เปิดให้สุ่ม'} · การ์ดซ้ำเก็บเข้าคลังหรือขายคืนเงิน (${Object.entries(GACHA.dup).map(([k,v])=>k+' 💰'+v).join(' · ')})</p>
+  modal(`<div class="wide"><h2>รายละเอียดและเรท</h2><p>${gMode==='hw'?'':`เรทอัปตอนนี้: <b>${CARDS[b.c].name}</b> (${pct(bannerRates({c:'',s:[]})[b.c])} → ${pct(r[b.c])}) `}${gMode==='hw'?'ตู้ฮาโลวีน (เฉพาะช่วงอีเว้นท์) · ใช้ลูกอม 🍬 · การ์ดอีเว้นท์รวม '+HW.eventRate+'% (การ์ดหน้าตู้ '+pct(HW.eventRate*HW.upShare)+') · การันตีที่ '+HW.pity+' ครั้ง (สุ่มมาแล้ว '+SV.evg.pity+')':'เปลี่ยนทุก 1 ชั่วโมงตามเวลาไทย · การ์ดระดับ LTD ยังไม่เปิดให้สุ่ม'} · การ์ดซ้ำเก็บเข้าคลังหรือขายคืนเงิน (${Object.entries(GACHA.dup).map(([k,v])=>k+' 💰'+v).join(' · ')})</p>
     <div class="pool">${gcfg().pool.map(id=>`<div class="pt${SV.owned.includes(id)?'':' lk'}" style="--c:${CARDS[id].color}"><div class="pi"><img src="${CARDS[id].img}" alt="${CARDS[id].name}">${SV.owned.includes(id)?'':'<span>🔒</span>'}</div><b>${CARDS[id].name}</b><div>${rarTag(id)} <em>${pct(r[id])}${id===b.c?' ⬆':''}</em></div></div>`).join('')}</div><button id="rClose" style="margin-top:12px">ปิด</button></div>`);
   $('#rClose').onclick=closeModal;
 }
-$('#pullBtn').onclick=()=>pull(1);$('#pull10Btn').onclick=()=>pull(10);$('#rateBtn').onclick=showRates;
+$('#pullBtn').onclick=()=>pull(1);$('#pull10Btn').onclick=()=>pull(10);$('#pull50Btn').onclick=()=>pull(50);$('#rateBtn').onclick=showRates;
 $('#bbox').onclick=showRates;$('#bbox').onkeydown=e=>{if(e.key==='Enter'||e.key===' ')showRates()};
 
 /* ---------- เลือกโหมด / เรด / ชาเลนจ์ ---------- */
