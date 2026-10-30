@@ -1,75 +1,78 @@
-/* music.js — เพลงพื้นหลังล็อบบี้ เล่นต่อเนื่องทุกหน้า/ทุกด่าน
-   โหมดเพลง (เลือกได้จากปุ่ม "🎼 เลือกเพลง" หน้าหลัก · จำค่าไว้ในเครื่อง):
-     • 🔀 สุ่มทุกเพลง — เพลงจบแล้วสุ่มเพลงถัดไป (ไม่ซ้ำเพลงเดิมติดกัน)
-     • 🔁 เลือกเพลงเดียว — เล่นเพลงที่เลือกวนซ้ำไปเรื่อยๆ
-   อยากเพิ่มเพลง ให้เพิ่มรายการใน TRACKS (file = ชื่อไฟล์, name = ชื่อที่แสดง)
-   เบราว์เซอร์ไม่ให้เล่นเสียงเองก่อนผู้เล่นแตะหน้าจอ → เริ่มเล่นตอนแตะ/กดครั้งแรก
-   ปุ่ม #musicBtn เปิด/ปิดเพลง · พักเพลงอัตโนมัติเมื่อสลับแท็บ/ออกจากแอป */
+/* music.js — เพลงพื้นหลังล็อบบี้ (lobby.mp3 / lobby1.mp3) เล่นสลับและสุ่มกันต่อเนื่องทุกหน้า/ทุกด่าน
+   เริ่มจากเพลงสุ่ม พอเพลงจบจะสุ่มเพลงถัดไป (ไม่ซ้ำเพลงเดิมติดกัน) · อยากเพิ่มเพลง ให้เพิ่มชื่อไฟล์ใน TRACKS
+   ก่อนเริ่มเกมจะมีหน้าถามว่าจะ "เปิด" หรือ "ปิด" เสียงเพลง (กันเพลงดังจนสะดุ้ง) · ตอนกดเลือกก็ปลดล็อกเสียงของเบราว์เซอร์ไปพร้อมกัน
+   เพลงที่เปิดจะค่อยๆ ดังขึ้น (fade-in) ไม่ดังพรวดทันที · window.__musicGateDone = Promise ที่เสร็จเมื่อผู้เล่นเลือกแล้ว (app.js รอก่อนขึ้นสารจากผู้พัฒนา)
+   ปุ่ม #musicBtn (หน้าหลัก) เปิด/ปิดเพลง จำค่าไว้ในเครื่อง · พักเพลงอัตโนมัติเมื่อสลับแท็บ/ออกจากแอป */
 (()=>{
-  const KEY='cardduel_music',KEYM='cardduel_music_mode',VOL=1;
-  const TRACKS=[{file:'lobby.mp3',name:'เพลงล็อบบี้ 1'},{file:'lobby1.mp3',name:'เพลงล็อบบี้ 2'}];
-  const a=new Audio();a.preload='auto';a.volume=VOL;
-  let on=true,started=false,bad=0,mode='shuffle',cur=Math.floor(Math.random()*TRACKS.length);   // mode: 'shuffle' หรือชื่อไฟล์ที่เลือกวนซ้ำ
-  try{on=localStorage.getItem(KEY)!=='off'}catch(e){}
-  try{const m=localStorage.getItem(KEYM);if(m&&TRACKS.some(t=>t.file===m))mode=m}catch(e){}
-  const single=()=>mode!=='shuffle';
-  const load=()=>{a.loop=single();a.src=TRACKS[cur].file};
-  if(single())cur=TRACKS.findIndex(t=>t.file===mode);
-  load();
+  const KEY='cardduel_music',VOL=1,FADE_MS=1800,TRACKS=['lobby.mp3','lobby1.mp3'];
+  const a=new Audio();a.loop=false;a.preload='auto';a.volume=VOL;
+  let on=true,started=false,cur=Math.floor(Math.random()*TRACKS.length),bad=0,ft=null;
+  const load=()=>{a.src=TRACKS[cur]};
   const next=()=>{   // สุ่มเพลงถัดไป ไม่ซ้ำเพลงเดิมติดกัน (ถ้ามีมากกว่า 1 เพลง)
     if(TRACKS.length>1){let n;do{n=Math.floor(Math.random()*TRACKS.length)}while(n===cur);cur=n}
     load();
   };
-  const play=()=>{const p=a.play();if(p&&p.then)return p.then(()=>{started=true;return true}).catch(()=>false);started=true;return Promise.resolve(true)};
-  a.addEventListener('ended',()=>{bad=0;if(!single())next();else load();if(on&&started)play()});   // โหมดเพลงเดียวปกติวนด้วย loop อยู่แล้ว (กันไว้เผื่อเบราว์เซอร์ไม่วน)
-  a.addEventListener('error',()=>{   // ไฟล์หาไม่เจอ: โหมดสุ่มข้ามไปเพลงอื่น · โหมดเพลงเดียวไม่ทำอะไร (กันวนไม่รู้จบ)
-    if(single()||++bad>=TRACKS.length)return;
+  load();
+  a.addEventListener('ended',()=>{bad=0;next();if(on&&started)play()});
+  a.addEventListener('error',()=>{   // ไฟล์ใดไฟล์หนึ่งหาไม่เจอ → ข้ามไปเพลงถัดไป (กันวนไม่รู้จบถ้าไม่มีเลย)
+    if(++bad>=TRACKS.length)return;
     next();if(on&&started)play();
   });
-  const label=()=>{const b=document.getElementById('musicBtn');if(b)b.textContent=on?'🔊 เพลง: เปิด':'🔇 เพลง: ปิด'};
+  let label=()=>{const b=document.getElementById('musicBtn');if(b)b.textContent=on?'🔊 เพลง: เปิด':'🔇 เพลง: ปิด'};
+  const fadeIn=()=>{   // ค่อยๆ เพิ่มเสียงจาก 0 → VOL
+    clearInterval(ft);a.volume=0;const t0=Date.now();
+    ft=setInterval(()=>{const k=Math.min(1,(Date.now()-t0)/FADE_MS);a.volume=VOL*k;if(k>=1)clearInterval(ft)},60);
+  };
+  const play=()=>{
+    const wasPaused=a.paused;if(wasPaused)fadeIn();
+    const p=a.play();if(p&&p.then)return p.then(()=>{started=true;return true}).catch(()=>{if(wasPaused){clearInterval(ft);a.volume=VOL}return false});
+    started=true;return Promise.resolve(true);
+  };
   const EV=['pointerdown','touchend','keydown'];
   function unlock(){
     if(!on||started)return;
     play().then(ok=>{if(ok)EV.forEach(e=>document.removeEventListener(e,unlock,true))});
   }
+  const stopUnlock=()=>EV.forEach(e=>document.removeEventListener(e,unlock,true));
   EV.forEach(e=>document.addEventListener(e,unlock,true));
-
-  /* เปลี่ยนโหมด: 'shuffle' หรือชื่อไฟล์ */
-  function setMode(m){
-    mode=m;try{localStorage.setItem(KEYM,m)}catch(e){}
-    bad=0;
-    if(single())cur=TRACKS.findIndex(t=>t.file===m);else cur=Math.floor(Math.random()*TRACKS.length);
-    load();
-    if(on)play();
-  }
-  function pickModal(){
-    const opts=[{m:'shuffle',t:'🔀 สุ่มทุกเพลง'}].concat(TRACKS.map(t=>({m:t.file,t:'🔁 '+t.name+' (วนซ้ำเพลงนี้)'})));
-    const html='<h2>🎼 เลือกเพลง</h2><div style="display:flex;flex-direction:column;gap:8px;margin:10px 0">'
-      +opts.map(o=>'<button data-ms="'+o.m+'" class="'+(o.m===mode?'':'sec')+'">'+(o.m===mode?'✔ ':'')+o.t+'</button>').join('')+'</div>'
-      +(on?'':'<p class="mute">ตอนนี้ปิดเพลงอยู่ กดปุ่ม 🔇 เพื่อเปิดเสียง</p>')
-      +'<div class="two"><button class="sec" id="msClose">ปิด</button></div>';
-    if(typeof modal!=='function'){   // ไม่มีหน้าต่างของเกม → สลับโหมดทีละขั้น
-      const i=opts.findIndex(o=>o.m===mode);setMode(opts[(i+1)%opts.length].m);alert('โหมดเพลง: '+opts[(i+1)%opts.length].t);return;
-    }
-    modal(html);
-    document.querySelectorAll('[data-ms]').forEach(b=>b.onclick=()=>{setMode(b.dataset.ms);if(typeof closeModal==='function')closeModal()});
-    const c=document.getElementById('msClose');if(c)c.onclick=()=>{if(typeof closeModal==='function')closeModal()};
-  }
-  /* ปุ่มเลือกเพลง: แทรกต่อจากปุ่มเปิด/ปิดเพลงในหน้าหลัก */
-  const mb=document.getElementById('musicBtn');
-  if(mb&&!document.getElementById('musicPickBtn')){
-    const pb=document.createElement('button');pb.id='musicPickBtn';pb.className=mb.className;pb.textContent='🎼 เลือกเพลง';
-    mb.insertAdjacentElement('afterend',pb);
-  }
   document.addEventListener('click',e=>{
-    if(e.target.closest('#musicPickBtn')){pickModal();return}
     if(!e.target.closest('#musicBtn'))return;
     on=!on;try{localStorage.setItem(KEY,on?'on':'off')}catch(x){}
     if(on)play();else a.pause();
     label();
   });
+  try{on=localStorage.getItem(KEY)!=='off'}catch(e){}
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden)a.pause();else if(on&&started)play();
   });
   label();
+
+  /* ---------- หน้าถามก่อนเริ่มเกม: เปิด / ปิด เสียงเพลง ---------- */
+  let gateRes;window.__musicGateDone=new Promise(r=>{gateRes=r});
+  function choose(v,box){
+    on=v;try{localStorage.setItem(KEY,on?'on':'off')}catch(x){}
+    if(on){play()}else{a.pause();stopUnlock()}
+    label();
+    box.classList.add('out');setTimeout(()=>{box.remove();gateRes()},220);
+  }
+  function mountGate(){
+    if(document.getElementById('musicGate')){return}
+    const st=document.createElement('style');
+    st.textContent='#musicGate{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:18px;background:radial-gradient(ellipse at center,#1b1535ee,#05030aee);backdrop-filter:blur(4px);transition:opacity .2s}'
+      +'#musicGate.out{opacity:0}'
+      +'#musicGate .mgBox{max-width:420px;width:100%;text-align:center;background:#150f2a;border:1px solid #6b4bd1;border-radius:18px;padding:26px 22px;box-shadow:0 0 40px #6b4bd155,0 20px 60px #000a;color:#fff;font-family:Kanit,system-ui,sans-serif}'
+      +'#musicGate h2{margin:0 0 8px;font-size:24px}#musicGate p{margin:0 0 18px;line-height:1.5;color:#cfc8ea}#musicGate small{color:#9d94c4}'
+      +'#musicGate .mgBtns{display:flex;flex-direction:column;gap:10px}'
+      +'#musicGate button{font:600 17px Kanit,system-ui,sans-serif;padding:13px 16px;border-radius:12px;border:1px solid #6b4bd1;background:#6b4bd1;color:#fff;cursor:pointer}'
+      +'#musicGate button.sec{background:#241b45;color:#e7e1ff}#musicGate button:active{transform:scale(.98)}';
+    document.head.appendChild(st);
+    const o=document.createElement('div');o.id='musicGate';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');
+    o.innerHTML='<div class="mgBox"><h2>🎵 เสียงเพลงในเกม</h2><p>ต้องการเปิดเสียงเพลงพื้นหลังหรือไม่?<br><small>เพลงจะค่อยๆ ดังขึ้น · เปลี่ยนทีหลังได้ที่ปุ่ม “เพลง” หน้าหลัก</small></p>'
+      +'<div class="mgBtns"><button id="mgOn">🔊 เปิดเสียงเพลง</button><button id="mgOff" class="sec">🔇 ปิดเสียงเพลง</button></div></div>';
+    document.body.appendChild(o);
+    document.getElementById('mgOn').onclick=()=>choose(true,o);
+    document.getElementById('mgOff').onclick=()=>choose(false,o);
+    document.getElementById('mgOn').focus();
+  }
+  if(document.body)mountGate();else document.addEventListener('DOMContentLoaded',mountGate);
 })();

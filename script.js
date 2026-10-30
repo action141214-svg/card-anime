@@ -67,9 +67,9 @@ const CARDS={
   jinwoo:{name:'ซอง จิน วู',rar:'R',img:'song.jpeg',power:25,hp:290,color:'#4aa8ff',ability:'jinwoo',
         desc:'เมื่อรับความเสียหายถึงตาย HP จะเหลือ 1 เป็นเวลา 5 เทิร์น (ไม่ตายในช่วงนี้ · ใช้ได้ 1 ครั้งต่อการต่อสู้)'},
   milim:{name:'มิลิม นาวา',rar:'SSR',img:'milim.jpeg',power:39,hp:400,color:'#ff7ab8',ability:'milim',
-        desc:'หลอดความโกรธ ยิ่งโจมตี ยิ่งรับดาเมจ ยิ่งถูกสกิลโจมตี ค่าความโกรธจะเพิ่มขึ้น · เมื่อหลอดความโกรธเต็ม เข้าสู่โหมด "ซาตานาเอล" สเตตัสเพิ่มเป็น 3 เท่า และกันสถานะทุกอย่าง จนครบ 10 เทิร์น'},
+        desc:'หลอดความโกรธ ยิ่งโจมตี ยิ่งรับดาเมจ ยิ่งถูกสกิลโจมตี ค่าความโกรธจะเพิ่มขึ้น · เมื่อหลอดความโกรธเต็ม เข้าสู่โหมด "ซาตานาเอล" สเตตัสเพิ่มเป็น 3 เท่า และกันสถานะทุกอย่าง จนครบ 10 เทิร์น · ใช้ได้เพียง 1 ครั้งต่อเกม'},
   rias:{name:'รีอัส เกรโมรี่',rar:'UR',img:'rias.jpeg',power:32,hp:400,color:'#e0364b',ability:'rias',
-        desc:'ลบสถานะผิดปกติให้ตัวเองแล้วสะท้อนกลับไปหาศัตรู · มีโอกาส 30% ที่จะทำลายการ์ดของศัตรูได้ในครั้งเดียว · มี Void Shield กันดาเมจและสกิล 3 ครั้ง'},
+        desc:'ลบสถานะผิดปกติให้ตัวเองแล้วสะท้อนกลับไปหาศัตรู · มีโอกาส 10% ที่จะสั่งตายการ์ดของศัตรู (ตายหลังผ่านไป 3 เทิร์น) · มี Void Shield กันดาเมจและสกิล 3 ครั้ง'},
   issei:{name:'เฮียวโด อิซเซย์',rar:'SR',img:'issei.jpeg',power:30,hp:300,color:'#d63a2e',ability:'issei',
         desc:'เมื่อเริ่มเกมสเตตัสทุกอย่างจะถูกเพิ่มขึ้น 2 เท่าเป็นเวลา 10 เทิร์น ก่อนจะถูกลดไปเหลือเท่าเดิมหลังจากนั้น'},
   rimulord:{name:'จอมมาร ริมุรุ เทมเพสต์',rar:'USR',evo:true,img:'rimurulord.jpeg',power:40,hp:425,color:'#9a5cff',ability:'rimulord',
@@ -101,7 +101,7 @@ const CARDS={
   susanooboss:{name:'สองคู่หูซูซาโนะอุขั้นสมบูรณ์ อิทาจิและชิซุย (บอสเควส)',rar:'LTD',evo:true,questOnly:true,img:'shichievo.jpeg',power:300,hp:50000,color:'#ff6a3d',ability:'susanoo',
         desc:'บอสเควสพัฒนาของ สองคู่หูซูซาโนะอุขั้นสมบูรณ์ อิทาจิและชิซุย · โจมตีทะลุ Void Shield · สะท้อนสกิลที่บังคับตาย · สะท้อนสถานะผิดปกติ'},
   shichi:{name:'สองอัจฉริยะแห่งตระกูลอุจิวะ ชิซุยและอิทาจิ',rar:'USR',img:'shichi.jpeg',power:30,hp:500,color:'#c0203a',ability:'shichi',
-        desc:'มีโอกาส 50% ควบคุมให้ศัตรูโจมตีตัวเอง · สะท้อนสกิลประเภทที่โจมตีแล้วตาย (ตายทันที) กลับไปใส่ศัตรู · ป้องกันสถานะทุกอย่าง'},
+        desc:'มีโอกาส 50% ควบคุมให้ศัตรูโจมตีตัวเอง · สะท้อนสกิลประเภทที่สั่งตาย (จุดตาย / ทำลายในครั้งเดียว) กลับไปใส่ศัตรู · ป้องกันสถานะทุกอย่าง'},
   slime:{name:'ริมุรุ ร่างสไลม์',rar:'S',img:'slime.jpeg',power:33,hp:250,color:'#5fb6ff',ability:'slime',
         desc:'เมื่อสังหารการ์ดศัตรูใบไหนได้จะทำการแปลงร่างเป็นการ์ดนั้น แล้วคงสเตตัสและความสามารถของการ์ดที่ถูกสังหารได้'},
   rimuru:{name:'ริมุรุ เทมเพสต์',rar:'SSR',evo:true,img:'rimuru.jpeg',power:39,hp:400,color:'#6a5cff',ability:'rimuru',
@@ -129,7 +129,7 @@ const CARDS={
   alucard:{name:'อลูคาร์ด',rar:'LTD',event:'halloween',img:'alucard.jpeg',power:22,hp:460,color:'#d11a3a',ability:'double',
         desc:'โจมตีได้ 2 ครั้งใน 1 เทิร์น และเมื่อโจมตีศัตรูจะได้รับสถานะ "เลือดไหล" เสียหาย 5% ของ HP สูงสุดทุกเทิร์น'},
   isaac:{name:'ไอแซ็ค ฟรอสเตอร์',rar:'LTD',event:'halloween',img:'isaac.jpeg',power:33,hp:333,color:'#b3122e',ability:'scythe',
-        desc:'สุ่มการโจมตี 3 รูปแบบ: โจมตีปกติ / โจมตีเฉียดจุดตาย (ดาเมจ 2 เท่าของ POWER ปัจจุบัน) / โจมตีจุดตาย (ศัตรูตายทันที)'},
+        desc:'สุ่มการโจมตี 3 รูปแบบ: โจมตีปกติ / โจมตีเฉียดจุดตาย (ดาเมจ 2 เท่าของ POWER ปัจจุบัน) / โจมตีจุดตาย = สั่งตาย โอกาส 10% (ศัตรูตายหลังผ่านไป 3 เทิร์น)'},
   konan:{name:'มัมมี่สาว โคนัน',rar:'LTD',event:'halloween',endless:true,img:'konanmummy.jpeg',power:45,hp:470,color:'#b48cff',ability:'paper',
         desc:'เพิ่มค่าสเตตัสให้กับการ์ดในอีเว้นท์ฮาโลวีน 20% ทุกครั้งที่โจมตีจะเรียกกระดาษที่มีความสามารถแบบสุ่ม 2 รูปแบบ: กระดาษลดความเสียหาย 75% ของ POWER สูงสุดของฝ่ายตรงข้าม · กระดาษระเบิดสร้างความเสียหาย 75% ของ POWER ปัจจุบันใส่การ์ดในทีมฝ่ายตรงข้ามใบที่สอง'},
   okarun:{name:'โอคารุน',rar:'LTD',event:'halloween',img:'okarun.jpeg',power:40,hp:400,color:'#c23dff',ability:'turbo',
@@ -241,7 +241,7 @@ async function duoPrep(my){
 function startBattle(opts){
   OPT=opts;FIXED=!!opts.online;RNG=opts.seed!=null?mulberry(opts.seed>>>0):null;if(opts.online){speed=1;$('#speedBtn').textContent='ความเร็ว x1'}
   run++;paused=false;$('#pauseBtn').textContent='หยุด';$('#fx').innerHTML='';$('#autoBtn').classList.toggle('hidden',!opts.auto);
-  C={j2n:Math.max(2,Math.round(num('#j2N'))),j2s:num('#j2S')/100,jwt:Math.max(1,Math.round(num('#jwT'))),mla:num('#mlA'),mld:num('#mlD'),mls:num('#mlS'),mlm:Math.max(1,num('#mlM')),mlt:Math.max(1,Math.round(num('#mlT'))),mlx:Math.max(1,num('#mlX')),sub:num('#suB')/100,sun:Math.max(1,Math.round(num('#suN'))),rsk:num('#rsK')/100,rvs:Math.max(0,Math.round(num('#rsV'))),isx:num('#isX'),isn:Math.max(1,Math.round(num('#isN'))),mih:num('#maT')/100,mib:num('#maB')/100,mit:Math.max(1,Math.round(num('#maN'))),mim:num('#maM'),mis:num('#maS')/100,kkd:num('#kkD')/100,kkc:num('#kkC')/100,kkn:Math.max(2,Math.round(num('#kkN'))),cem:num('#ceM'),ced:num('#ceD')/100,gr:num('#gr')/100,zc:num('#zc')/100,kh:num('#kh')/100,ki:Math.max(1,num('#ki')),gc:num('#gc'),gd:num('#gd')/100,nh:num('#nh')/100,rm:num('#rm'),lb:num('#lb')/100,lc:num('#lc')/100,ym:num('#ym'),gm:num('#oM'),gn:Math.max(1,num('#oN')),sd:num('#mD')/100,sn:num('#mN')/100,se:num('#mE'),sr:num('#mR')/100,bd:num('#hB')/100,bt:Math.max(1,num('#hT')),gh:num('#hG')/100,pc:num('#fC')/100,gx:num('#eG')/100,ab:num('#aB')/100,kf:num('#kdF')/100,sv:num('#scV')/100,sc:num('#scC')/100,st:Math.max(1,num('#scT')),kb:num('#kdB')/100,kt:Math.max(1,num('#kdT')),xn:num('#xN'),xk:num('#xK'),xm:num('#xM'),ot:num('#uT')/100,od:num('#uD')/100,nr:num('#wR')/100,gk:num('#qR')/100,ni:Math.max(1,Math.round(num('#inI'))),nx:num('#inX'),n1h:num('#n1h')/100,n1c:num('#n1c')/100,wp:num('#mhW'),gqw:num('#gqW')/100,gqc:Math.max(1,Math.round(num('#gqC'))),gqe:num('#gqE')/100,gqm:num('#gqM'),wr:num('#mhR')/100,zb:num('#rzB')/100,zm:num('#rzM'),zs:num('#rzS')/100,rb:num('#rzX'),shh:num('#shA')/100,shp:num('#shB')/100,cm:num('#chM'),kyd:num('#kyD')/100,kyt:Math.max(1,num('#kyT')),kyr:num('#kyR')/100,krn:Math.max(1,Math.round(num('#krN'))),krc:num('#krC')/100,krr:num('#krR')/100,krs:num('#krS')/100,krk:num('#krK')/100,krb:num('#krB')/100,gad:num('#gaD')/100,vgd:num('#vgD')/100,vgn:Math.max(1,Math.round(num('#vgA'))),vgx:Math.max(1,Math.round(num('#vgB'))),kuc:num('#kuC')/100,kud:num('#kuD')/100,kut:Math.max(1,Math.round(num('#kuT'))),knb:num('#knB')/100,knr:num('#knR')/100,knx:num('#knX')/100,rit:num('#riT')/100,rib:num('#riB')/100,rin:Math.max(1,Math.round(num('#riN'))),pcd:num('#voD')/100,pcn:Math.max(2,Math.round(num('#voN'))),pcc:num('#voC')/100,pcs:Math.max(0,Math.round(num('#voS'))),pfd:num('#pfD')/100,pfn:Math.max(2,Math.round(num('#pfN'))),pfc:num('#pfC')/100,pfb:num('#pfB')/100,pft:Math.max(1,Math.round(num('#pfT'))),grd:num('#grD')/100,kbd:num('#kbD')/100,shc:num('#ucC')/100,swb:num('#swB')/100,swi:num('#swI'),sws:num('#swS')/100,swz:num('#swZ')/100,kbm:num('#kbM'),kbr:num('#kbR')/100,grn:Math.max(2,Math.round(num('#grN'))),hwd:num('#rlD')/100,hwn:Math.max(1,Math.round(num('#rlN'))),trg:num('#trG')/100,tri:Math.max(1,Math.round(num('#trI'))),trh:num('#trR')/100};
+  C={dm:Math.max(0,Math.round(num('#dmT'))),j2n:Math.max(2,Math.round(num('#j2N'))),j2s:num('#j2S')/100,jwt:Math.max(1,Math.round(num('#jwT'))),mla:num('#mlA'),mld:num('#mlD'),mls:num('#mlS'),mlm:Math.max(1,num('#mlM')),mlt:Math.max(1,Math.round(num('#mlT'))),mlx:Math.max(1,num('#mlX')),sub:num('#suB')/100,sun:Math.max(1,Math.round(num('#suN'))),rsk:num('#rsK')/100,rvs:Math.max(0,Math.round(num('#rsV'))),isx:num('#isX'),isn:Math.max(1,Math.round(num('#isN'))),mih:num('#maT')/100,mib:num('#maB')/100,mit:Math.max(1,Math.round(num('#maN'))),mim:num('#maM'),mis:num('#maS')/100,kkd:num('#kkD')/100,kkc:num('#kkC')/100,kkn:Math.max(2,Math.round(num('#kkN'))),cem:num('#ceM'),ced:num('#ceD')/100,gr:num('#gr')/100,zc:num('#zc')/100,kh:num('#kh')/100,ki:Math.max(1,num('#ki')),gc:num('#gc'),gd:num('#gd')/100,nh:num('#nh')/100,rm:num('#rm'),lb:num('#lb')/100,lc:num('#lc')/100,ym:num('#ym'),gm:num('#oM'),gn:Math.max(1,num('#oN')),sd:num('#mD')/100,sn:num('#mN')/100,se:num('#mE'),sr:num('#mR')/100,bd:num('#hB')/100,bt:Math.max(1,num('#hT')),gh:num('#hG')/100,pc:num('#fC')/100,gx:num('#eG')/100,ab:num('#aB')/100,kf:num('#kdF')/100,sv:num('#scV')/100,sc:num('#scC')/100,st:Math.max(1,num('#scT')),kb:num('#kdB')/100,kt:Math.max(1,num('#kdT')),xn:num('#xN'),xk:num('#xK'),xm:num('#xM'),ot:num('#uT')/100,od:num('#uD')/100,nr:num('#wR')/100,gk:num('#qR')/100,ni:Math.max(1,Math.round(num('#inI'))),nx:num('#inX'),n1h:num('#n1h')/100,n1c:num('#n1c')/100,wp:num('#mhW'),gqw:num('#gqW')/100,gqc:Math.max(1,Math.round(num('#gqC'))),gqe:num('#gqE')/100,gqm:num('#gqM'),wr:num('#mhR')/100,zb:num('#rzB')/100,zm:num('#rzM'),zs:num('#rzS')/100,rb:num('#rzX'),shh:num('#shA')/100,shp:num('#shB')/100,cm:num('#chM'),kyd:num('#kyD')/100,kyt:Math.max(1,num('#kyT')),kyr:num('#kyR')/100,krn:Math.max(1,Math.round(num('#krN'))),krc:num('#krC')/100,krr:num('#krR')/100,krs:num('#krS')/100,krk:num('#krK')/100,krb:num('#krB')/100,gad:num('#gaD')/100,vgd:num('#vgD')/100,vgn:Math.max(1,Math.round(num('#vgA'))),vgx:Math.max(1,Math.round(num('#vgB'))),kuc:num('#kuC')/100,kud:num('#kuD')/100,kut:Math.max(1,Math.round(num('#kuT'))),knb:num('#knB')/100,knr:num('#knR')/100,knx:num('#knX')/100,rit:num('#riT')/100,rib:num('#riB')/100,rin:Math.max(1,Math.round(num('#riN'))),pcd:num('#voD')/100,pcn:Math.max(2,Math.round(num('#voN'))),pcc:num('#voC')/100,pcs:Math.max(0,Math.round(num('#voS'))),pfd:num('#pfD')/100,pfn:Math.max(2,Math.round(num('#pfN'))),pfc:num('#pfC')/100,pfb:num('#pfB')/100,pft:Math.max(1,Math.round(num('#pfT'))),grd:num('#grD')/100,kbd:num('#kbD')/100,shc:num('#ucC')/100,swb:num('#swB')/100,swi:num('#swI'),sws:num('#swS')/100,swz:num('#swZ')/100,kbm:num('#kbM'),kbr:num('#kbR')/100,grn:Math.max(2,Math.round(num('#grN'))),hwd:num('#rlD')/100,hwn:Math.max(1,Math.round(num('#rlN'))),trg:num('#trG')/100,tri:Math.max(1,Math.round(num('#trI'))),trh:num('#trR')/100};
   const mk0=(lvs,sts)=>(id,i)=>{const l=(lvs&&lvs[i])||1,sr=(sts&&sts[i])||1,s=statAt(id,l,sr);return{id,lv:l,star:sr,p:s.p,hp:s.hp,max:s.hp,para:false,sealed:false,lightning:false,miss:false,burn:0,burnDmg:0,sev:0,poss:false,bleed:false,hb:0,ps:0,hw:0,hwDmg:0,turbo:false,cx:0,frz:false,ice:0,iceDmg:0,wkr:0,vs:CARDS[id].ability==='garocosmic'?C.pcs:(CARDS[id].ability==='rias'?C.rvs:0),p0:s.p,slime:id==='slime',rm:0,rmOn:false,rmUsed:false,rmP:0,rmH:0,rmT:0,rmHeal:false,fg:null,t:0}};
   const mk=(lvs,sts)=>{const f=mk0(lvs,sts);return (id,i)=>jwInit(f(id,i))};   /* ซอง จิน วู: ผูก HP ให้รอดตาย */
   let first=opts.first||$('#first').value;if(first==='r')first=RR()<.5?'a':'b';
@@ -765,6 +765,17 @@ async function scytheFx(ak,dk,mode){
   setTimeout(()=>bn.remove(),1500/speed);
   log(mode===2?'💀 '+nm(ak)+' เล็งจุดตาย!':'🗡 '+nm(ak)+' โจมตีเฉียดจุดตาย! (ดาเมจ ×'+C.xm+')',ak);await sl(700);
 }
+/* สั่งตาย (รีอัส / ไอแซ็ค): ไม่ตายทันทีอีกต่อไป → ติดตราสั่งตาย แล้วตายหลังผ่านไป C.dm เทิร์นของเจ้าตัว (ดู doTurn) */
+async function doomMark(ak,dk){
+  const aw=$('#f'+ak+' .cw'),dw=$('#f'+dk+' .cw'),d=S[dk];
+  aw.classList.add('lunge'+ak);await sl(260);
+  if(dodges(dk)){S.lb=0;S.up=false;floatTxt(dw,'หลบ!','miss');log('💨 '+nm(dk)+' หลบการสั่งตายได้!',dk);aw.classList.remove('lungea','lungeb');render();return 0}
+  S.lb=0;S.up=false;
+  if(!d.doomed){d.doomed=true;d.doom=C.dm}
+  floatTxt(dw,'☠ สั่งตาย','crit');dw.classList.remove('deathfx');void dw.offsetWidth;dw.classList.add('deathfx');
+  log('☠ '+nm(ak)+' สั่งตาย '+nm(dk)+'! จะตายหลังผ่านไป '+d.doom+' เทิร์น',ak);
+  aw.classList.remove('lungea','lungeb');render();return 0;
+}
 async function deathStrike(ak,dk){
   const aw=$('#f'+ak+' .cw'),dw=$('#f'+dk+' .cw'),d=S[dk];
   aw.classList.add('lunge'+ak);await sl(260);
@@ -864,31 +875,33 @@ function jwTick(k){
 }
 /* ---------- มิลิม นาวา: หลอดความโกรธ → เต็มแล้วเข้าโหมด "ซาตานาเอล" สเตตัส ×C.mlx + กันสถานะทุกอย่าง นาน C.mlt เทิร์นของตน ---------- */
 function milimRage(k,n){
-  const r=S[k];if(!r||r.hp<=0||CARDS[r.id].ability!=='milim'||r.mlOn||n<=0)return;
+  const r=S[k];if(!r||r.hp<=0||CARDS[r.id].ability!=='milim'||r.mlOn||r.mlUsed||n<=0)return;   /* ซาตานาเอลใช้ได้ครั้งเดียวต่อเกม: ใช้แล้ว (mlUsed) หลอดความโกรธไม่ทำงานอีก */
   r.rg=Math.min(C.mlm,(r.rg||0)+n);S.mlGot=(S.mlGot||0)+1;
   if(r.rg>=C.mlm)milimSatan(k);else render();
 }
 function milimSatan(k){
   const r=S[k];if(!r||r.mlOn)return;
   const ap=Math.round(r.p*(C.mlx-1)*10)/10,ah=Math.round(r.max*(C.mlx-1));
-  r.mlP=ap;r.mlH=ah;r.p=Math.round((r.p+ap)*10)/10;r.max+=ah;r.hp+=ah;r.mlOn=true;r.mlN=C.mlt+1;r.resist=true;r.rg=C.mlm;
+  r.mlP=ap;r.mlH=ah;r.p=Math.round((r.p+ap)*10)/10;r.max+=ah;r.hp+=ah;r.mlOn=true;r.mlUsed=true;r.mlN=C.mlt+1;r.resist=true;r.rg=C.mlm;
   const cw=$('#f'+k+' .cw');floatTxt(cw,'ซาตานาเอล!','crit');cw.classList.remove('gold');void cw.offsetWidth;cw.classList.add('gold');setTimeout(()=>cw.classList.remove('gold'),1600);
   log('😈 หลอดความโกรธเต็ม! '+nm(k)+' เข้าสู่โหมด "ซาตานาเอล" สเตตัส ×'+C.mlx+' (POWER '+r.p+' · HP '+Math.ceil(r.hp).toLocaleString()+'/'+r.max.toLocaleString()+') กันสถานะทุกอย่าง นาน '+C.mlt+' เทิร์น',k);
   gmaxPurify(k);render();
 }
 function milimEnd(r,k){
   r.mlOn=false;r.resist=false;r.rg=0;r.p=Math.max(1,Math.round((r.p-r.mlP)*10)/10);r.max=Math.max(1,r.max-r.mlH);r.hp=Math.min(r.hp,r.max);r.mlP=r.mlH=0;
-  log('😈 โหมดซาตานาเอลของ '+CARDS[r.id].name+' สิ้นสุด สเตตัสกลับเป็นปกติ ความโกรธเริ่มสะสมใหม่ (POWER '+r.p+' · HP '+Math.ceil(r.hp)+'/'+r.max+')',k);render();
+  log('😈 โหมดซาตานาเอลของ '+CARDS[r.id].name+' สิ้นสุด สเตตัสกลับเป็นปกติ และใช้ซาตานาเอลได้ครั้งเดียวต่อเกม จึงใช้อีกไม่ได้แล้ว (POWER '+r.p+' · HP '+Math.ceil(r.hp)+'/'+r.max+')',k);render();
 }
 /* นับถอยหลังเฉพาะเทิร์นของมิลิมเองตอนอยู่ในสนาม */
 function milimTick(k){const r=S[k];if(!r||!r.mlOn||r.hp<=0)return;r.mlN--;if(r.mlN<=0)milimEnd(r,k)}
 function milimUI(f,s){
   $('.cw',f).classList.toggle('jwon',!!s.jwOn);
+  {const cwE=$('.cw',f);cwE.classList.toggle('doomed',!!s.doomed);if(s.doomed)cwE.dataset.doom=s.doom}   /* ตราสั่งตาย */
   const rg=$('.rage',f);if(!rg)return;const m=CARDS[s.id].ability==='milim';
   rg.style.display=m?'block':'none';$('.cw',f).classList.toggle('satan',m&&!!s.mlOn);if(!m)return;
   rg.classList.toggle('on',!!s.mlOn);
-  $('.rfill',rg).style.width=(s.mlOn?Math.max(0,(s.mlN-1)/C.mlt*100):Math.min(100,(s.rg||0)/C.mlm*100))+'%';
-  $('.rtx',rg).textContent=s.mlOn?'ซาตานาเอล · เหลือ '+Math.max(0,s.mlN-1)+' เทิร์น':'ความโกรธ '+Math.round(s.rg||0)+' / '+C.mlm;
+  rg.classList.toggle('used',!!s.mlUsed&&!s.mlOn);
+  $('.rfill',rg).style.width=(s.mlOn?Math.max(0,(s.mlN-1)/C.mlt*100):(s.mlUsed?0:Math.min(100,(s.rg||0)/C.mlm*100)))+'%';
+  $('.rtx',rg).textContent=s.mlOn?'ซาตานาเอล · เหลือ '+Math.max(0,s.mlN-1)+' เทิร์น':(s.mlUsed?'ซาตานาเอล · ใช้แล้ว (ใช้ได้ครั้งเดียว)':'ความโกรธ '+Math.round(s.rg||0)+' / '+C.mlm);
 }
 /* ---------- อิซเซย์: นับถอยหลังทุกครั้งที่ทีมเจ้าของได้เล่น เมื่อครบสเตตัสกลับเป็นเท่าเดิม ---------- */
 function isseiEnd(r,k){
@@ -1079,6 +1092,13 @@ async function doTurn(){
   if(a.rmOn&&a.rm<=0)rimuruEnd(ak);
   isseiTick(ak);milimTick(ak);jwTick(ak);
   a.t++;
+  if(a.doomed){   /* ตราสั่งตาย: นับถอยหลังต้นเทิร์นของเจ้าตัว ครบแล้วตาย (ได้เล่นอีก C.dm เทิร์นหลังถูกสั่ง) */
+    const cw=$('#f'+ak+' .cw');
+    if(a.doom<=0){floatTxt(cw,'DEATH','crit');cw.classList.remove('deathfx');void cw.offsetWidth;cw.classList.add('deathfx');log('☠ '+nm(ak)+' ถึงเวลาตาย! (ถูกสั่งตาย)',dk);a.hp=0;render();await sl(600);
+      if(a.hp<=0){if(await handleKO(ak,dk))return;S.turn=dk;S.n++;render();return}
+      a.doomed=false;   /* รอดตายด้วยความสามารถอื่น (เช่น ซอง จิน วู) */
+    }else{a.doom--;log('☠ '+nm(ak)+' ถูกสั่งตาย · เล่นเทิร์นนี้ได้ และจะตายเมื่อผ่านไปอีก '+a.doom+' เทิร์น',dk);render()}
+  }
   if(a.burn>0){   /* เผาไหม้: เสีย HP ต้นเทิร์นของการ์ดที่ติดสถานะ */
     const bd=stc(a,a.burnDmg),cw=$('#f'+ak+' .cw');a.hp-=bd;a.burn--;floatTxt(cw,'-'+bd,'sm');cw.classList.remove('hit');void cw.offsetWidth;cw.classList.add('hit');
     log('🔥 '+nm(ak)+' ถูก'+(a.burnTx||'เผาไหม้')+' -'+bd+' (เหลือ HP '+Math.max(0,Math.ceil(a.hp))+')',dk);render();await sl(450);
@@ -1153,14 +1173,13 @@ async function doTurn(){
     if(maiB){bombFx(ak,dk);log('💥 '+nm(ak)+' โจมตีโหมดระเบิด! (HP ต่ำกว่า '+Math.round(C.mih*100)+'%)',ak)}
     const refl=(imode===2||rkill)&&['shichi','susanoo'].includes(CARDS[d.id].ability)&&d.hp>0;   /* สกิลประเภทโจมตีแล้วตายทันที (จุดตาย / ทำลายในครั้งเดียว) ถูกสะท้อนกลับ */
     if(refl){log('🪞 '+nm(dk)+' สะท้อนสกิลจุดตายของ '+nm(ak)+' กลับไปใส่ศัตรู!',dk);floatTxt($('#f'+dk+' .cw'),'สะท้อน!','sm')}
-    const dmg=refl?await deathStrike(dk,ak):((imode===2||rkill)?await deathStrike(ak,dk):await hit(ak,dk,big?C.gm:(imode===1?C.xm:(boom?C.zm:(maiB?C.mim:1)))));if(gf)await gf;
+    const dmg=refl?await doomMark(dk,ak):((imode===2||rkill)?await doomMark(ak,dk):await hit(ak,dk,big?C.gm:(imode===1?C.xm:(boom?C.zm:(maiB?C.mim:1)))));if(gf)await gf;
     if(refl&&a.hp<=0){render();if(await handleKO(ak,dk))return;S.turn=dk;S.n++;render();return}
-    if(rkill&&!refl&&dmg>0)log('💀 '+nm(ak)+' ทำลายการ์ดของ '+nm(dk)+' ในครั้งเดียว!',ak);
     if(!sealed&&ac.ability==='ghoul'&&dmg>0)ghoulDrain(ak);   // คาเนกิ: โจมตีโดน → ดูดเลือด
     S.maiHit=dmg>0;
     if(maiB&&dmg>0&&d.hp>0&&RR()<C.mis){d.para=true;log('😵 '+nm(dk)+' ติดสถานะมึนงง! ไม่สามารถโจมตีในเทิร์นถัดไปได้',ak);floatTxt($('#f'+dk+' .cw'),'มึนงง','sm')}
     if(boom&&d.hp>0&&RR()<C.zs){d.para=true;log('😵 '+nm(dk)+' ติดสถานะมึนงง! ไม่สามารถโจมตีในเทิร์นถัดไปได้',ak);floatTxt($('#f'+dk+' .cw'),'มึนงง','sm')}
-    log('เทิร์น '+S.n+' · '+nm(ak)+' โจมตี '+dmg+(S.up?' (ศัตรูระดับสูงกว่า ×'+C.ym+'!)':'')+(big?' (月牙天衝 ×'+C.gm+'!)':'')+(imode===1?' (เฉียดจุดตาย ×'+C.xm+')':imode===2?' (จุดตาย! ตายทันที)':'')+(S.lb?' (รวมสายฟ้า +'+S.lb+')':'')+' (เหลือ HP '+Math.max(0,Math.ceil(d.hp))+')',ak);
+    log('เทิร์น '+S.n+' · '+nm(ak)+' โจมตี '+dmg+(S.up?' (ศัตรูระดับสูงกว่า ×'+C.ym+'!)':'')+(big?' (月牙天衝 ×'+C.gm+'!)':'')+(imode===1?' (เฉียดจุดตาย ×'+C.xm+')':imode===2?' (สั่งตาย! ตายหลังผ่านไป '+C.dm+' เทิร์น)':'')+(S.lb?' (รวมสายฟ้า +'+S.lb+')':'')+' (เหลือ HP '+Math.max(0,Math.ceil(d.hp))+')',ak);
     if(d.hp>0){
       if(finger!==null)await fingerAct(finger,ak,dk);
       else if(!sealed&&ac.ability!=='nen')await applyAb(ac.ability,ak,dk);
