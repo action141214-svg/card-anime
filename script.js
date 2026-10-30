@@ -1079,18 +1079,28 @@ async function paperAb(ak,dk){
    รูป: skill1 = เบรุ · skill2 = อิกริส · skill3 = ไออน (วางไฟล์ไว้โฟลเดอร์เดียวกับ index.html) · เอฟเฟกต์ล้วน ไม่ใช้ RNG ของเกม ---------- */
 const SH_IMG=['skill1.jpeg','skill2.jpeg','skill3.jpeg'];   // เบรุ / อิกริส / ไออน (ลำดับเดียวกับ k ใน shadowAb)
 const SH_NAME=['เบรุ','อิกริส','ไออน'];
+/* หมอกเงาม่วงจางๆ ที่ฐานทหารเงา (ไม่บังตัวทหาร · ใช้ Math.random เฉพาะภาพ) */
+function shadowMist(cx,by,w,n){
+  for(let i=0;i<n;i++){
+    const sz=w*(.18+Math.random()*.16),ox=(Math.random()-.5)*w*.9;
+    const e=fxEl('shmist',cx+ox,by+(Math.random()-.5)*w*.08,sz,sz);
+    e.style.setProperty('--dx',(ox*.4)+'px');e.style.setProperty('--dy',(-w*(.12+Math.random()*.2))+'px');
+    e.style.setProperty('--dl',(Math.random()*.15)+'s');
+    setTimeout(()=>e.remove(),1100);
+  }
+}
 async function shadowSummonFx(ak,dk,k){
   const aw=$('#f'+ak+' .cw'),dw=$('#f'+dk+' .cw');if(!aw||!dw)return;
   const A=rectOf(aw),T=rectOf(dw);
   const vx=T.x-A.x,vy=T.y-A.y,len=Math.hypot(vx,vy)||1,ux=vx/len,uy=vy/len;
-  const w=Math.max(70,Math.min(170,A.w*.6)),h=w*.95;                       /* ตัดเอาเฉพาะส่วนภาพตัวละคร (ไม่เอากรอบชื่อด้านล่างของการ์ด) */
+  const w=Math.max(120,Math.min(320,A.w*1.0)),h=w*.95;                       /* ตัดเอาเฉพาะส่วนภาพตัวละคร (ไม่เอากรอบชื่อด้านล่างของการ์ด) */
   const sx=A.x+ux*A.w*.4,sy=A.y+uy*A.w*.4+A.h*.08;                         /* จุดผุด: หน้าตัวซอง ด้านที่หันเข้าหาศัตรู */
-  const tx=T.x-ux*T.w*.15,ty=T.y-uy*T.w*.15;
+  const tx=T.x-ux*T.w*.45,ty=T.y-uy*T.w*.45;                           /* หยุดหน้าการ์ดศัตรู (ไม่บังตัวเลขดาเมจ) */
   /* 1) เงาใต้เท้า + ควันม่วงดำ แล้วทหารเงาผุดขึ้นมา */
   const pool=fxEl('shpool',sx,sy+h*.5,w*1.4,w*.26);
   pool.animate([{transform:'scale(0)',opacity:0},{transform:'scale(1)',opacity:1,offset:.25},{transform:'scale(1)',opacity:1,offset:.8},{transform:'scale(.3)',opacity:0}],{duration:1300/speed});setTimeout(()=>pool.remove(),1350/speed);
   const b=fxEl('shsol',sx,sy,w,h,'<div class="sc"><img src="'+SH_IMG[k]+'" alt=""></div><i>'+SH_NAME[k]+'</i>');
-  smokePuff(b,7,false,'shsm');
+  shadowMist(sx,sy+h*.42,w,8);
   b.animate([{transform:'translateY('+h*.45+'px) scale(.3)',opacity:0},{transform:'translateY(0) scale(1)',opacity:1}],{duration:450/speed,fill:'forwards',easing:'ease-out'});
   await sl(480);
   /* 2) พุ่งเข้าโจมตี */
