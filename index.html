@@ -22,7 +22,7 @@
 <section class="screen hidden" id="homeScr">
   <header class="top hud">
     <div class="lv"><b id="lvN">Lv.1</b><div class="xp"><i id="xpFill"></i></div><small id="xpTxt"></small></div>
-    <div class="hudr"><button class="sec small rwbtn" data-go="online">🌐 ออนไลน์<span id="onCnt"></span><i class="dot hidden" id="onDot"></i></button><button class="sec small rwbtn" id="devMsgBtn">📜 สารจากผู้พัฒนา</button><button class="sec small rwbtn" data-go="lvr">🎁 รางวัลเลเวล<i class="dot hidden" id="lvrDot"></i></button><div class="coin">💰 <b class="coinN">0</b></div></div>
+    <div class="hudr"><button class="sec small rwbtn" data-go="online">🌐 ออนไลน์<span id="onCnt"></span><i class="dot hidden" id="onDot"></i></button><button class="sec small rwbtn hidden" id="chatBtn" type="button">💬 แชท<i class="dot hidden" id="chatDot">0</i></button><button class="sec small rwbtn" id="devMsgBtn">📜 สารจากผู้พัฒนา</button><button class="sec small rwbtn" data-go="lvr">🎁 รางวัลเลเวล<i class="dot hidden" id="lvrDot"></i></button><div class="coin">💰 <b class="coinN">0</b></div></div>
   </header>
   <div class="fan sm" id="heroes"></div>
   <nav class="menu">
@@ -36,6 +36,11 @@
     <button class="mbtn" data-go="dungeon" id="dgBtn"><span>🕳️</span><b>ดันเจี้ยน</b><small id="dgSub">เปิดสุ่มทุกชั่วโมง</small></button>
     <button class="mbtn" id="howBtn"><span>📖</span><b>วิธีเล่น</b><small>ดูบทสอนอีกครั้ง</small></button>
   </nav>
+    <div class="chatdock hidden" id="chatDock" role="dialog" aria-label="แชทโลก">
+    <div class="cdh"><b>💬 แชทโลก</b><small id="cdMe"></small><button class="sec small" id="cdX" type="button" aria-label="ปิดแชท">✕</button></div>
+    <div class="chatlog" id="dockLog" aria-live="polite"></div>
+    <form class="chatform" id="dockForm"><input id="dockIn" maxlength="200" placeholder="พิมพ์ข้อความ…" autocomplete="off"><button type="submit">ส่ง</button></form>
+  </div>
   <footer class="bar"><button class="sec small" id="codeBtn">🎁 ใส่โค้ดรับของขวัญ</button><button class="sec small" id="musicBtn">🔊 เพลง: เปิด</button><button class="sec small hidden" id="logoutBtn">🚪 ออกจากระบบ</button></footer>
 </section>
 

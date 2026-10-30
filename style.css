@@ -949,3 +949,8 @@ body{padding:0}
 /* จำนวนผู้เล่นที่มีการ์ด (มุมซ้ายล่างของกรอบดูความสามารถ) */
 .info{position:relative;padding-bottom:28px}
 .iown{position:absolute;left:0;bottom:0;font-size:.82em;color:var(--mute,#9aa3b8)}
+/* กล่องแชทบนหน้าล็อบบี้ (ปุ่ม #chatBtn + ตัวเลขแดง #chatDot ใช้สไตล์ .dot เดิม) */
+.chatdock{position:fixed;right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));width:min(380px,calc(100vw - 24px));height:min(62vh,460px);height:min(62dvh,460px);z-index:12;display:flex;flex-direction:column;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:10px;box-shadow:0 12px 40px #000a}
+.chatdock .cdh{display:flex;align-items:center;gap:8px;flex:none}.chatdock .cdh b{flex:1;font-family:Kanit}.chatdock .cdh small{color:var(--mute)}
+.chatdock .chatlog{flex:1;min-height:0}
+.cnew{align-self:stretch;text-align:center;font:600 .8em Kanit,sans-serif;color:#ff6b86;border-top:1px dashed #ff3b5c88;margin:4px 0 2px;padding-top:2px}

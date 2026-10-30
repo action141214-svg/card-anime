@@ -16,6 +16,7 @@ const NAME_RE=/^[\p{L}\p{M}\p{N}_ ]{2,14}$/u;
 let me=null,lobbyCh=null,userCh=null,frCh=null,chatCh=null,saveT=null,saving=false;
 let onlinePres={},lastSetSig='',setT=null;
 let onlineIds=new Set(),FR={rows:[],profs:{}},chatMsgs=[],lastChat=0,R=null;
+let chatUnread=0,chatCap=false,chatReady=false,chatBoot=null;   /* แชท: จำนวนข้อความที่ยังไม่ได้อ่าน (แสดงเป็นตัวเลขแดงที่ปุ่มแชทหน้าล็อบบี้) */
 const cur=()=>{const l=['onlineScr','roomScr','friendsScr','chatScr'].find(i=>!$('#'+i).classList.contains('hidden'));return l||''};
 
 /* ---------------- ล็อคอิน / สมัคร ---------------- */
@@ -177,7 +178,7 @@ async function restoreCloud(manual){
 }
 addEventListener('pagehide',()=>{if(me&&saveT){clearTimeout(saveT);uploadSave()}});
 addEventListener('visibilitychange',()=>{if(document.hidden&&me&&saveT){clearTimeout(saveT);uploadSave()}});
-function updateMe(){['onMe','roomMe','frMe','chMe'].forEach(i=>{const e=$('#'+i);if(e)e.textContent=me?'👤 '+(me.name||me.username):'—'});
+function updateMe(){['onMe','roomMe','frMe','chMe','cdMe'].forEach(i=>{const e=$('#'+i);if(e)e.textContent=me?'👤 '+(me.name||me.username):'—'});
   const lb=$('#logoutBtn');if(lb){lb.classList.toggle('hidden',!(sb&&me));lb.textContent='🚪 ออกจากระบบ'+(me?' ('+(me.name||me.username)+')':'')}}
 
 /* ---------------- ตั้งชื่อ ---------------- */
@@ -240,8 +241,9 @@ function startRealtime(){
   frCh=sb.channel('fr-'+me.id);
   frCh.on('postgres_changes',{event:'*',schema:'public',table:'friendships'},()=>loadFriends()).subscribe();
   loadFriends();
+  chatStart();   /* เริ่มฟังแชทตั้งแต่ล็อกอิน เพื่อนับข้อความใหม่ที่ปุ่มแชทหน้าล็อบบี้ */
 }
-function stopRealtime(){[lobbyCh,userCh,frCh,chatCh].forEach(c=>{if(c)try{sb.removeChannel(c)}catch(e){}});lobbyCh=userCh=frCh=chatCh=null;onlineIds=new Set();onlinePres={};lastSetSig='';updOnCount()}
+function stopRealtime(){chatReset();[lobbyCh,userCh,frCh,chatCh].forEach(c=>{if(c)try{sb.removeChannel(c)}catch(e){}});lobbyCh=userCh=frCh=chatCh=null;onlineIds=new Set();onlinePres={};lastSetSig='';updOnCount()}
 function onInvite(p){
   if(!p||!/^\d{6}$/.test(p.code||'')||R)return;
   if(!$('#battleScr').classList.contains('hidden'))return;
@@ -304,36 +306,95 @@ async function inviteFriend(fid){
   if(cur()!=='roomScr')go('room');
 }
 
-/* ---------------- แชทโลก ---------------- */
-async function chatOpen(){
-  const log=$('#chatLog');
-  if(!chatCh){
-    const {data}=await sb.from('chat_messages').select('id,name,text,created_at,user_id').order('created_at',{ascending:false}).limit(60);
-    chatMsgs=(data||[]).reverse();
+/* ---------------- แชทโลก ----------------
+   ใช้ได้ 2 ที่: หน้าแชทเต็ม (chatScr · เข้าจากหน้าออนไลน์) และกล่องแชทบนหน้าล็อบบี้ (#chatDock · ปุ่ม #chatBtn)
+   ฟังแชทตั้งแต่ล็อกอิน → ข้อความที่ยังไม่ได้อ่านนับเป็นตัวเลขแดง (#chatDot) · "อ่านแล้ว" = เปิดกล่องแชท/หน้าแชทอยู่ตอนข้อความเข้า หรือเปิดดู
+   เก็บเวลาข้อความล่าสุดที่อ่านแล้วไว้ในเครื่อง (ต่อบัญชี) → ปิดเกมแล้วกลับมา ตัวเลขยังนับข้อความที่ค้างอ่านอยู่ */
+const chatMs=m=>new Date(m.created_at).getTime();
+const readKey=()=>'cardduel_chat_read_'+(me?me.id:'');
+const loadRead=()=>{try{return +localStorage.getItem(readKey())||0}catch(e){return 0}};
+const dockShown=()=>{const d=$('#chatDock'),h=$('#homeScr');return !!d&&!d.classList.contains('hidden')&&!!h&&!h.classList.contains('hidden')};
+const chatShown=()=>cur()==='chatScr'||dockShown();
+function updChatDot(){
+  const d=$('#chatDot');if(!d)return;
+  if(chatUnread>0){d.textContent=chatUnread>99?'99+':(chatCap?chatUnread+'+':String(chatUnread));d.classList.remove('hidden')}
+  else d.classList.add('hidden');
+}
+function chatMarkRead(){   /* ถือว่าอ่านทุกข้อความที่มีอยู่แล้ว */
+  chatUnread=0;chatCap=false;
+  if(chatMsgs.length){try{localStorage.setItem(readKey(),String(chatMs(chatMsgs[chatMsgs.length-1])))}catch(e){}}
+  updChatDot();
+}
+function chatReset(){chatBoot=null;chatReady=false;chatMsgs=[];chatUnread=0;chatCap=false;updChatDot();const d=$('#chatDock');if(d)d.classList.add('hidden')}
+function onChatInsert(p){
+  const m=p&&p.new;if(!m||chatMsgs.some(x=>x.id===m.id))return;
+  chatMsgs.push(m);if(chatMsgs.length>150)chatMsgs.shift();
+  if(!chatReady)return;   /* ยังโหลดประวัติไม่เสร็จ: เดี๋ยวคำนวณตัวเลขรวมตอนโหลดเสร็จ */
+  if(chatShown()){drawChat();chatMarkRead()}
+  else if(me&&m.user_id!==me.id){chatUnread++;updChatDot()}
+}
+function chatStart(){
+  if(!sb||!me)return Promise.resolve();
+  if(chatBoot)return chatBoot;
+  chatBoot=(async()=>{
     chatCh=sb.channel('chat-public');
-    chatCh.on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_messages'},p=>{
-      if(chatMsgs.some(m=>m.id===p.new.id))return;
-      chatMsgs.push(p.new);if(chatMsgs.length>150)chatMsgs.shift();if(cur()==='chatScr')drawChat();
-    }).subscribe();
-  }
-  drawChat();
+    chatCh.on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_messages'},onChatInsert).subscribe();
+    const {data}=await sb.from('chat_messages').select('id,name,text,created_at,user_id').order('created_at',{ascending:false}).limit(60);
+    const have=new Set(chatMsgs.map(x=>x.id));
+    (data||[]).forEach(m=>{if(!have.has(m.id))chatMsgs.push(m)});
+    chatMsgs.sort((a,b)=>chatMs(a)-chatMs(b));
+    let last=loadRead();
+    if(!last&&chatMsgs.length){last=chatMs(chatMsgs[chatMsgs.length-1]);try{localStorage.setItem(readKey(),String(last))}catch(e){}}   /* ใช้ครั้งแรก: ถือว่าอ่านประวัติเก่าแล้ว */
+    chatUnread=chatMsgs.filter(m=>chatMs(m)>last&&m.user_id!==me.id).length;
+    chatCap=chatMsgs.length>=60&&chatMs(chatMsgs[0])>last;   /* โหลดมาแค่ 60 ข้อความล่าสุด ถ้าค้างอ่านเกินนั้นให้ขึ้น "60+" */
+    chatReady=true;
+    if(chatShown()){drawChat();chatMarkRead()}else updChatDot();
+  })().catch(()=>{chatBoot=null});
+  return chatBoot;
 }
-function drawChat(){
-  const log=$('#chatLog');if(!log)return;
+async function chatOpen(){
+  await chatStart();
+  drawChat();chatMarkRead();
+}
+function drawLog(log,sepMs){
+  if(!log||!me)return;
   const near=log.scrollHeight-log.scrollTop-log.clientHeight<80;
+  let sep=false;
   log.innerHTML=chatMsgs.length?chatMsgs.map(m=>{const t=new Date(m.created_at),hh=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
-    return `<div class="cm${m.user_id===me.id?' mine':''}"><b>${esc(m.name)}</b><span>${esc(m.text)}</span><small>${hh}</small></div>`}).join(''):'<p class="mute">ยังไม่มีข้อความ — ทักทายคนแรกเลย!</p>';
-  if(near||chatMsgs.length<=60)log.scrollTop=log.scrollHeight;
+    let mark='';if(sepMs&&!sep&&chatMs(m)>sepMs&&m.user_id!==me.id){sep=true;mark='<div class="cnew">▼ ข้อความใหม่</div>'}
+    return mark+`<div class="cm${m.user_id===me.id?' mine':''}"><b>${esc(m.name)}</b><span>${esc(m.text)}</span><small>${hh}</small></div>`}).join(''):'<p class="mute">ยังไม่มีข้อความ — ทักทายคนแรกเลย!</p>';
+  if(near||chatMsgs.length<=60||sep)log.scrollTop=log.scrollHeight;
 }
-$('#chatForm').onsubmit=async ev=>{
-  ev.preventDefault();
-  const i=$('#chatIn'),t=i.value.trim();if(!t||!me)return;
+function drawChat(sepMs){drawLog($('#chatLog'));drawLog($('#dockLog'),sepMs)}
+async function sendChat(i){
+  const t=i.value.trim();if(!t||!me)return;
   if(!me.name)return askName(true);
   if(Date.now()-lastChat<1500)return toast('ส่งเร็วเกินไป รอสักครู่');
   lastChat=Date.now();i.value='';
   const r=await sb.from('chat_messages').insert({text:t.slice(0,200)});
   if(r.error){i.value=t;toast(/เร็วเกินไป/.test(r.error.message)?'ส่งเร็วเกินไป รอสักครู่':'ส่งไม่สำเร็จ')}
-};
+}
+$('#chatForm').onsubmit=ev=>{ev.preventDefault();sendChat($('#chatIn'))};
+/* กล่องแชทบนหน้าล็อบบี้ */
+function closeDock(){const d=$('#chatDock');if(d)d.classList.add('hidden')}
+async function toggleDock(){
+  const d=$('#chatDock');if(!d)return;
+  if(!d.classList.contains('hidden')){closeDock();return}
+  if(!sb||!me){go('online');return}   /* ยังไม่ล็อกอิน → ไปหน้าออนไลน์ให้ล็อกอินก่อน */
+  updateMe();
+  const lastSeen=loadRead();
+  d.classList.remove('hidden');
+  await chatStart();
+  drawChat(chatUnread>0?lastSeen:0);   /* มีเส้นคั่น "ข้อความใหม่" ตรงข้อความแรกที่ยังไม่ได้อ่าน */
+  chatMarkRead();
+}
+if(sb&&$('#chatBtn')){
+  $('#chatBtn').classList.remove('hidden');
+  $('#chatBtn').onclick=toggleDock;
+  $('#cdX').onclick=closeDock;
+  $('#dockForm').onsubmit=ev=>{ev.preventDefault();sendChat($('#dockIn'))};
+  new MutationObserver(()=>{if($('#homeScr').classList.contains('hidden'))closeDock()}).observe($('#homeScr'),{attributes:true,attributeFilter:['class']});   /* ออกจากหน้าล็อบบี้ → ปิดกล่องแชท */
+}
 
 /* ---------------- หน้าออนไลน์ ---------------- */
 function hub(){
