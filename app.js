@@ -128,7 +128,7 @@ function renderHome(){
 $('#howBtn').onclick=()=>tutorial(false);
 /* ---------- โค้ดของขวัญ ---------- */
 const GIFT_CODES={
-  KIRITO:()=>{const id='kiritoevo';if(SV.owned.includes(id))SV.count[id]=(SV.count[id]||1)+1;else{SV.owned.push(id);SV.count[id]=1}SV.lv[id]=SV.lv[id]||1;SV.star=SV.star||{};SV.star[id]=6;return 'ได้รับ ผู้ปลดปล่อยดวงดาว คิริโตะ 6 ดาว'},   /* ออฟไลน์เท่านั้น · ออนไลน์ใช้ตาราง code_defs บนเซิร์ฟเวอร์ */
+  KIRITO:()=>{const id='kiritoevo';if(SV.owned.includes(id))SV.count[id]=(SV.count[id]||1)+1;else{SV.owned.push(id);SV.count[id]=1}SV.lv[id]=SV.lv[id]||1;SV.star=SV.star||{};SV.star[id]=Math.max(SV.star[id]||1,6);return 'ได้รับ ผู้ปลดปล่อยดวงดาว คิริโตะ (LTD) 6 ดาว'},   /* ออฟไลน์เท่านั้น · ออนไลน์ใช้ตาราง code_defs บนเซิร์ฟเวอร์ */
   RELEASE:()=>{SV.coins=(SV.coins||0)+3000000;SV.candy=(SV.candy||0)+3000;return 'เงิน +3,000,000 · ลูกอม +3,000'}
 };
 function codeModal(){
@@ -1127,7 +1127,7 @@ const EVOS=[{from:'naruto',to:'naruto1',need:{cards:50,items:{seal9:1},coins:100
   {from:'chahaein',to:'chaevo',need:{cards:50,items:{sword:1},coins:20000000},
   boss:{card:'chaboss',name:'เริงระบำเจ้าหญิงดาบ ชา แฮ อิน',hp:10000,power:150,lv:1,coins:100,drops:[{item:'sword',rate:.01}]}},
   /* คิริโตะ → ผู้ปลดปล่อยดวงดาว · need.kid / kih / kik = คิริโตะ (S) ทำดาเมจ / ฟื้นฟู HP / สังหารศัตรู สะสม (นับตั้งแต่อัปเดตนี้) · ดาบออกเล่มละ 0.1% */
-  {from:'kirito',to:'kiritoevo',need:{cards:500,items:{bluerose:1,nightsword:1},kid:1000000,kih:100000,kik:10000,coins:0},
+  {from:'kirito',to:'kiritoevo',need:{cards:500,items:{bluerose:1,nightsword:1},kid:1000000,kih:100000,kik:10000,coins:0},grant:{star:6},
   boss:{card:'kiritoboss',name:'ผู้ปลดปล่อยดวงดาว คิริโตะ',hp:500000,power:30,lv:1,coins:100,drops:[{item:'bluerose',rate:.001},{item:'nightsword',rate:.001}]}},
   {from:'slime',to:'rimuru',need:{cards:100,items:{shisu:1},coins:50000000},
   boss:{card:'slime',count:4,name:'ริมุรุ ร่างสไลม์ ×4',hp:5000,power:100,lv:1,coins:100,drops:[{item:'shisu',rate:.05}]}},
@@ -1304,7 +1304,7 @@ const DEV_MSG={
       'แก้ระบบเซฟไอดี',
       'แก้ไขหน้าคลังและขายการ์ด (UI)']},
     {h:'✨ การ์ดใหม่',items:[
-      'ผู้ปลดปล่อยดวงดาว คิริโตะ (LTD) · พัฒนาได้จากเควสพัฒนา: คิริโตะ ×500 + ดาบกุหลาบน้ำเงิน + ดาบรัตติกาล · ใช้คิริโตะทำดาเมจรวม 1,000,000 / ฟื้นฟู HP 100,000 / สังหารศัตรู 10,000 (นับตั้งแต่อัปเดตนี้)',
+      'ผู้ปลดปล่อยดวงดาว คิริโตะ (LTD) · อีโวแล้วได้ 6 ดาวทันที · พัฒนาได้จากเควสพัฒนา: คิริโตะ ×500 + ดาบกุหลาบน้ำเงิน + ดาบรัตติกาล · ใช้คิริโตะทำดาเมจรวม 1,000,000 / ฟื้นฟู HP 100,000 / สังหารศัตรู 10,000 (นับตั้งแต่อัปเดตนี้)',
       'สัตว์ประหลาดที่สมบูรณ์แบบ กาโร่ (UR) และ คอสมิค กาโร่ (USR) · พัฒนาได้จากเควสพัฒนา',
       'สองคู่หูซูซาโนะอุขั้นสมบูรณ์ อิทาจิและชิซุย (LTD) · พัฒนาได้จากเควสพัฒนา',
       'ปลุกพลังขั้นสอง ซอง จิน วู (SSR) · พัฒนาได้จากเควสพัฒนา',
