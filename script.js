@@ -166,7 +166,7 @@ function log(t,c='',ic=''){const d=document.createElement('div');d.className=c;i
 function sideHtml(k){return `<div class="fighter" id="f${k}"><div class="cardbox"><div class="cw"><img alt=""><span class="badge pb">⚡ ชา</span><span class="badge zp">🌩 สายฟ้า</span><span class="badge bl">🐇 สับสน</span><span class="badge ch">⚔ พลังสะสม ×3</span><span class="badge lock">🔒 ผนึกความสามารถ</span><span class="badge bn">🔥 เผาไหม้</span><span class="badge sv">⚡ ชารุนแรง</span><span class="badge ps">👻 เข้าสิง</span><span class="badge bd">🩸 เลือดไหล</span><span class="badge pz">☠ ติดพิษ</span><span class="badge tb">⚡ เทอร์โบ</span><span class="badge cx">✦ กางเขนใต้</span><span class="badge fz">❄ แช่แข็ง</span><span class="badge hwb">✝ บาดแผลศักดิ์สิทธิ์</span><div class="fgr"></div></div></div><div class="stat"><div class="row"><b class="nm"></b><span>POWER <span class="num pw"></span></span></div><div class="bar-hp"><div class="fill"></div></div><div class="hpt"></div><div class="rage"><div class="rfill"></div><span class="rtx"></span></div></div><div class="line"></div></div>`}
 function setFighter(k){
   const f=$('#f'+k),c=CARDS[S[k].id],cw=$('.cw',f);
-  cw.classList.remove('ko','para','seal','zap','lungea','lungeb','hit','gold','heal');
+  cw.classList.remove('ko','poof','bunshin','para','seal','zap','lungea','lungeb','hit','gold','heal');
   cw.classList.toggle('kcloak',c.ability==='kyuubi');
   f.style.setProperty('--c',c.color);const im=$('img',f);im.src=c.img;im.alt=c.name;$('.nm',f).textContent=nm(k)+' Lv.'+S[k].lv;
 }
@@ -1074,12 +1074,42 @@ async function paperAb(ak,dk){
   if(T.hp<=0){T.hp=0;log('💀 '+CARDS[T.id].name+' ถูกกำจัดด้วยกระดาษระเบิด!','sys');if(T.id==='shuna')shunaFade(dk)}
   render();await sl(550);
 }
-/* ---------- จักรพรรดิเงา ซอง จิน วู: ทุกครั้งที่โจมตีสุ่มทหารเงา 1 ใน 3 ออกมาช่วยโจมตี (ยังไม่มีอนิเมชั่นเรียก) ---------- */
+/* ---------- จักรพรรดิเงา ซอง จิน วู: ทุกครั้งที่โจมตีสุ่มทหารเงา 1 ใน 3 ออกมาช่วยโจมตี (มีอนิเมชั่นเรียก: shadowSummonFx) ---------- */
+/* ---------- จักรพรรดิเงา: อนิเมชั่นเรียกทหารเงา — การ์ดทหารเงาผุดจากเงาใต้เท้า พุ่งเข้าโจมตี แล้วจางหายกลับเข้าเงา
+   รูป: skill1 = เบรุ · skill2 = อิกริส · skill3 = ไออน (วางไฟล์ไว้โฟลเดอร์เดียวกับ index.html) · เอฟเฟกต์ล้วน ไม่ใช้ RNG ของเกม ---------- */
+const SH_IMG=['skill1.jpeg','skill2.jpeg','skill3.jpeg'];   // เบรุ / อิกริส / ไออน (ลำดับเดียวกับ k ใน shadowAb)
+const SH_NAME=['เบรุ','อิกริส','ไออน'];
+async function shadowSummonFx(ak,dk,k){
+  const aw=$('#f'+ak+' .cw'),dw=$('#f'+dk+' .cw');if(!aw||!dw)return;
+  const A=rectOf(aw),T=rectOf(dw);
+  const vx=T.x-A.x,vy=T.y-A.y,len=Math.hypot(vx,vy)||1,ux=vx/len,uy=vy/len;
+  const w=Math.max(70,Math.min(170,A.w*.6)),h=w*.95;                       /* ตัดเอาเฉพาะส่วนภาพตัวละคร (ไม่เอากรอบชื่อด้านล่างของการ์ด) */
+  const sx=A.x+ux*A.w*.4,sy=A.y+uy*A.w*.4+A.h*.08;                         /* จุดผุด: หน้าตัวซอง ด้านที่หันเข้าหาศัตรู */
+  const tx=T.x-ux*T.w*.15,ty=T.y-uy*T.w*.15;
+  /* 1) เงาใต้เท้า + ควันม่วงดำ แล้วทหารเงาผุดขึ้นมา */
+  const pool=fxEl('shpool',sx,sy+h*.5,w*1.4,w*.26);
+  pool.animate([{transform:'scale(0)',opacity:0},{transform:'scale(1)',opacity:1,offset:.25},{transform:'scale(1)',opacity:1,offset:.8},{transform:'scale(.3)',opacity:0}],{duration:1300/speed});setTimeout(()=>pool.remove(),1350/speed);
+  const b=fxEl('shsol',sx,sy,w,h,'<div class="sc"><img src="'+SH_IMG[k]+'" alt=""></div><i>'+SH_NAME[k]+'</i>');
+  smokePuff(b,7,false,'shsm');
+  b.animate([{transform:'translateY('+h*.45+'px) scale(.3)',opacity:0},{transform:'translateY(0) scale(1)',opacity:1}],{duration:450/speed,fill:'forwards',easing:'ease-out'});
+  await sl(480);
+  /* 2) พุ่งเข้าโจมตี */
+  await flyTo(b,tx-sx,ty-sy,300);await sl(1);
+  /* 3) เอฟเฟกต์กระแทกตามตัวละคร */
+  shImpact(T.x,T.y,150);
+  if(k===0){const e=fxEl('shvenom',T.x,T.y,T.w*1.1,T.w*1.1);setTimeout(()=>e.remove(),600)}                 /* เบรุ: พิษกระจาย */
+  else if(k===1){[-35,35].forEach((deg,i)=>setTimeout(()=>{const e=fxEl('shslash',T.x,T.y,T.w*1.5,8);e.style.transform='rotate('+deg+'deg)';setTimeout(()=>e.remove(),450)},i*120))}   /* อิกริส: ฟันกากบาท */
+  else{const e=fxEl('shwave',T.x,T.y,T.w*1.2,T.w*1.2);setTimeout(()=>e.remove(),650)}                          /* ไออน: คลื่นกระแทก */
+  /* 4) จางหายกลับเข้าเงา (ไม่รอ) */
+  b.animate([{transform:'translate('+(tx-sx)+'px,'+(ty-sy)+'px) scale(1)',opacity:1},{transform:'translate('+(tx-sx)+'px,'+(ty-sy+22)+'px) scale(.6)',opacity:0}],{duration:380/speed,fill:'forwards'});
+  setTimeout(()=>b.remove(),450/speed);
+}
 async function shadowAb(ak,dk){
   const A=S[ak],D=S[dk],dw=$('#f'+dk+' .cw');if(D.hp<=0)return;
   const k=Math.floor(RR()*3),nmz=['เบรุ','อิกริส','ไออน'][k],emo=['🐜','⚔️','🛡️'][k];   // เบรุ / อิกริส / ไออน (ตัวละ 1 ใน 3)
   const dmg=Math.max(1,Math.round(A.p*(k===1?C.swi:1)));
   log('🌑 '+nm(ak)+' เรียกทหารเงา '+emo+' '+nmz+' ออกมาช่วยโจมตี!',ak);
+  await shadowSummonFx(ak,dk,k);
   dealSummon(ak,dk,dmg,emo+' '+nmz+' โจมตี');
   if(D.hp<=0){await sl(300);return}
   if(k===0){   /* เบรุ: สถานะพิษ 8% ของ HP สูงสุดศัตรู ต่อเทิร์น */
@@ -1094,6 +1124,21 @@ async function shadowAb(ak,dk){
 }
 /* ---------- เล่นเทิร์น ---------- */
 /* การ์ดถูกกำจัด: คืน true ถ้าจบเกม */
+/* ---------- นารูโตะ: คาถาแยกเงา — ควันขาวพวยพุ่ง (เอฟเฟกต์ล้วน ใช้ Math.random ไม่แตะ RNG ของเกม) ---------- */
+function smokePuff(cw,n,big,cls=''){
+  const r=cw.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+  for(let i=0;i<n;i++){
+    const sz=r.width*(big?.55+Math.random()*.45:.35+Math.random()*.3);
+    const ox=(Math.random()-.5)*r.width*.7,oy=(Math.random()-.5)*r.height*.65;
+    const e=fxEl('smk'+(cls?' '+cls:''),cx+ox,cy+oy,sz,sz);
+    e.style.setProperty('--dx',(ox*.8+(Math.random()-.5)*r.width*.5)+'px');
+    e.style.setProperty('--dy',(-r.height*(.12+Math.random()*.25))+'px');
+    e.style.setProperty('--s',1.4+Math.random()*.7);
+    e.style.setProperty('--d',(.85+Math.random()*.35)+'s');
+    e.style.setProperty('--dl',(Math.random()*.12)+'s');
+    setTimeout(()=>e.remove(),1500);
+  }
+}
 async function handleKO(dk,ak){
   const dd=S[dk];
   if(dk==='b'&&dd.boss&&S.phase2&&!dd.ph2){   /* บอสเควส 2 เฟส: เฟส 1 ถูกกำจัด → เปลี่ยนเป็นเฟส 2 (HP/POWER ใหม่ ล้างสถานะทั้งหมด) แล้วสู้ต่อ */
@@ -1107,12 +1152,14 @@ async function handleKO(dk,ak){
     await sl(1100);return false;
   }
   if(CARDS[dd.id].ability==='clone'&&!dd.cl&&!dd.safe){   /* นารูโตะ: ถูกกำจัดครั้งแรก → เรียกร่างแยกมาแทน สเตตัสลดลง C.nr */
-    const cw=$('#f'+dk+' .cw');cw.classList.add('ko');log('💀 '+nm(dk)+' ถูกกำจัด!','sys');render();await sl(700);
+    const cw=$('#f'+dk+' .cw');cw.classList.add('poof');smokePuff(cw,12,true);   /* คาถาแยกเงา: ควันขาวพวยพุ่งปกคลุมร่างหลัก */
+    {const r=cw.getBoundingClientRect(),bn=fxEl('banner shb',r.left+r.width/2,Math.max(34,r.top+r.height*.1),320,54,'<small>影分身の術</small>คาถาแยกเงา');setTimeout(()=>bn.remove(),1500/speed)}
+    log('💀 '+nm(dk)+' ถูกกำจัด!','sys');render();await sl(750);
     dd.cl=true;dd.p=Math.max(1,Math.round(dd.p*(1-C.nr)*10)/10);dd.max=Math.max(1,Math.round(dd.max*(1-C.nr)));dd.hp=dd.max;
     dd.para=dd.sealed=dd.lightning=dd.miss=dd.poss=dd.bleed=dd.turbo=false;dd.burn=0;dd.burnDmg=0;dd.sev=0;dd.hb=dd.ps=0;dd.hw=0;dd.hwDmg=0;dd.frz=false;dd.ice=0;dd.iceDmg=0;dd.cx=0;dd.fg=null;dd.t=0;
     setFighter(dk);log('🌀 เรียกร่างแยก! '+nm(dk)+' ลงสนาม (POWER '+dd.p+' · HP '+dd.hp+')','sys');
-    const cw2=$('#f'+dk+' .cw');floatTxt(cw2,'ร่างแยก!','heal');cw2.classList.remove('gold');void cw2.offsetWidth;cw2.classList.add('gold');setTimeout(()=>cw2.classList.remove('gold'),1400);
-    render();await sl(600);return false;
+    const cw2=$('#f'+dk+' .cw');floatTxt(cw2,'ร่างแยก!','heal');cw2.classList.remove('bunshin');void cw2.offsetWidth;cw2.classList.add('bunshin');setTimeout(()=>cw2.classList.remove('bunshin'),800);smokePuff(cw2,8,false);   /* ร่างแยกโผล่ออกจากควัน */
+    render();await sl(700);return false;
   }
   $('#f'+dk+' .cw').classList.add('ko');log('💀 '+nm(dk)+' ถูกกำจัด!','sys');susanooAlly(dk);
   if(typeof onKillHook==='function'&&!OPT.online&&dk==='b'&&S[ak])onKillHook(S[ak].id,!!dd.boss);   /* นับการสังหาร (เควสตัวละคร) */
