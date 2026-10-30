@@ -450,9 +450,9 @@ async function fingerFx(ak,dk,f){
 /* เอฟเฟกต์ตอนการ์ดชนกัน: แฟลช + วงแหวน + ประกายรัศมี ที่จุดปะทะ (ใช้กับการโจมตีธรรมดาของทุกใบ · ไม่แสดงตอนหลบ/โล่กัน) */
 function impactFx(aw,dw){
   try{
-    const a=aw.getBoundingClientRect(),d=dw.getBoundingClientRect();
-    const ax=a.left+a.width/2,ay=a.top+a.height/2,dx=d.left+d.width/2,dy=d.top+d.height/2;
-    const x=ax+(dx-ax)*.62,y=ay+(dy-ay)*.62,sz=Math.max(90,Math.min(a.width,d.width)*.9);
+    const d=dw.getBoundingClientRect();
+    const dx=d.left+d.width/2,dy=d.top+d.height/2;
+    const x=dx,y=dy,sz=Math.max(110,Math.min(d.width,d.height)*.75);   /* จุดปะทะ = กลางตัวการ์ดที่โดนตี (เป้าหมาย) */
     let rays='';for(let i=0;i<8;i++)rays+='<i class="ry" style="--a:'+(i*45)+'deg"></i>';
     const e=fxEl('impact',x,y,sz,sz,'<i class="ib"></i><i class="ir"></i>'+rays);
     e.style.setProperty('--d',(.4/speed)+'s');setTimeout(()=>e.remove(),420/speed);
