@@ -36,9 +36,9 @@ const CARDS={
         desc:'สร้างความเสียหาย 20 เท่าแก่ BOSS · เมื่อโจมตี BOSS จะติดสถานะ "เริงระบำ" (แสตก) ซัดซ้ำเพิ่มอีก 50% ของความเสียหายที่สร้างใส่ BOSS · มีโอกาส 50% ที่จะหลบการโจมตีทุกรูปแบบได้ (ได้จากการอีโวชา แฮ อิน)'},
   chaboss:{name:'เริงระบำเจ้าหญิงดาบ ชา แฮ อิน (บอสเควส)',rar:'UR',evo:true,questOnly:true,img:'chaevo.jpeg',power:150,hp:10000,color:'#e8b84a',ability:'questboss',
         desc:'บอสเควสพัฒนาของชา แฮ อิน ไม่มีความสามารถพิเศษ'},
-  kiritoevo:{name:'ผู้ปลดปล่อยดวงดาว คิริโตะ',rar:'LTD',evo:true,img:'star.jpeg',power:30,hp:450,color:'#7fe3ff',ability:'starlib',
+  kiritoevo:{name:'ผู้ปลดปล่อยดวงดาว คิริโตะ',rar:'LTD',evo:true,fixedP:true,img:'star.jpeg',power:30,hp:450,color:'#7fe3ff',ability:'starlib',
         desc:'ไม่โจมตีปกติ แต่จะสุ่มโจมตีตั้งแต่ 10 ครั้งถึง 17 ครั้ง แต่ละครั้งสร้างความเสียหาย 30 POWER · โอกาส 40% ที่จะปัดป้องกันโจมตีทุกรูปแบบได้ (ได้จากการอีโวคิริโตะ)'},
-  kiritoboss:{name:'ผู้ปลดปล่อยดวงดาว คิริโตะ (บอสเควส)',rar:'LTD',evo:true,questOnly:true,img:'star.jpeg',power:30,hp:450,color:'#7fe3ff',ability:'starlib',
+  kiritoboss:{name:'ผู้ปลดปล่อยดวงดาว คิริโตะ (บอสเควส)',rar:'LTD',evo:true,questOnly:true,fixedP:true,img:'star.jpeg',power:30,hp:450,color:'#7fe3ff',ability:'starlib',
         desc:'บอสเควสพัฒนาของคิริโตะ ใช้ความสามารถเดียวกับการ์ดต้นฉบับ (สุ่มโจมตี 10–17 ครั้ง · ปัดป้อง 40%)'},
   kdash:{name:'เค แดช',rar:'USR',img:'k.jpeg',power:36,hp:420,color:'#ff5a2a',ability:'pflame',
         desc:'การควบคุมไฟได้อย่างชำนาญทำให้สถานะเผาไหม้ต่างๆ ไม่มีผลกับการ์ดใบนี้ สร้างสถานะ "ไฟบริสุทธิ์" ใส่ศัตรูสร้างความเสียหาย 15% ของ HP สูงสุด และลด POWER ลงทันที 15% เมื่อลงสนาม'},
@@ -164,7 +164,7 @@ const LV_MAX=100,levelMult=l=>1+0.04*(l-1);
 /* ดาวการ์ด: ได้จากการ์ดซ้ำ สูงสุด 6 ดาว (เริ่ม 1 ดาว) · ทุกดาวที่เพิ่มได้ POWER/HP +STAR_BONUS ของค่าพื้นฐาน · ใช้การ์ดซ้ำ STAR_COST[ดาวปัจจุบัน-1] ใบต่อการอัพ 1 ดาว */
 const STAR_MAX=6,STAR_BONUS=0.10,STAR_COST=[1,1,2,3,4];
 const starMult=s=>1+STAR_BONUS*(Math.max(1,s)-1);
-const statAt=(id,l,st=1)=>{const b=ID[id],p0=b?num(b.p):CARDS[id].power,h0=b?num(b.h):CARDS[id].hp;const m=levelMult(l)*starMult(st);return{p:Math.round(p0*m*10)/10,hp:Math.round(h0*m)}};
+const statAt=(id,l,st=1)=>{const b=ID[id],p0=b?num(b.p):CARDS[id].power,h0=b?num(b.h):CARDS[id].hp;const m=levelMult(l)*starMult(st);return{p:CARDS[id].fixedP?p0:Math.round(p0*m*10)/10,hp:Math.round(h0*m)}};   /* fixedP = POWER ตายตัว ไม่เพิ่มตามเลเวล/ดาว (คิริโตะ LTD) */
 let S=null,run=0,paused=false,speed=1,C={},OPT={};
 /* ถ้าออก/เริ่มสู้ใหม่ระหว่างเทิร์น (run เปลี่ยน) ให้เทิร์นเก่าหยุดทันที */
 const sl=async ms=>{const r=run;await sleepRaw(ms/speed);if(r!==run)throw 'cancel'};
