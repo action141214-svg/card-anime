@@ -132,6 +132,7 @@ const GIFT_CODES={
 };
 function codeModal(){
   modal(`<h2>🎁 ใส่โค้ดรับของขวัญ</h2><form class="auth" id="cdF"><input id="cdI" placeholder="พิมพ์โค้ดที่นี่" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="30"><p class="aerr" id="cdE"></p><p class="mute" id="cdOk"></p><div class="two"><button type="submit">รับของขวัญ</button><button type="button" class="sec" id="cdX">ปิด</button></div></form>`);
+  $('#cdX').addEventListener('pointerup',e=>{e.preventDefault();e.stopPropagation();closeModal()});
   $('#cdX').onclick=closeModal;
   let busy=false;
   $('#cdF').onsubmit=async e=>{e.preventDefault();if(busy)return;
