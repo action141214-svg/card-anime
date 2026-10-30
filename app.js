@@ -62,7 +62,7 @@ function save(){try{SV.savedAt=Date.now();localStorage.setItem(KEY,JSON.stringif
 const srvOn=()=>!!(window.Online&&Online.srv&&Online.srv.on);   /* true = ล็อกอินแล้วและเชื่อมระบบ player_state สำเร็จ */
 const sc=(fn,a)=>Online.srv.call(fn,a);
 const SRV_ERR={login:'ต้องล็อกอินก่อน',offline:'ยังไม่ได้เชื่อมต่อเซิร์ฟเวอร์',nomoney:'เงินไม่พอ',notowned:'ไม่มีการ์ดใบนี้',max:'ถึงระดับสูงสุดแล้ว',nodup:'การ์ดซ้ำไม่พอ',keep_one:'ต้องเก็บไว้อย่างน้อย 1 ใบ',locked:'ด่านนี้ยังล็อกอยู่',nostage:'ไม่พบด่านนี้',toofast:'เซิร์ฟเวอร์ไม่รับผลด่าน (จบเร็วผิดปกติ)',ratelimit:'เล่นถี่เกินไป รอสักครู่',badtoken:'ผลด่านหมดอายุ ลองเล่นใหม่อีกครั้ง',lowlv:'เลเวลยังไม่ถึง',claimed:'รับไปแล้ว',bad_lv:'เลเวลไม่ถูกต้อง',invalid:'โค้ดไม่ถูกต้อง',taken:'โค้ดนี้ถูกใช้ไปแล้ว',error:'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ ลองใหม่อีกครั้ง'};
-const srvMsg=r=>SRV_ERR[r&&r.error]||('ผิดพลาด: '+(r&&r.error));
+const srvMsg=r=>(SRV_ERR[r&&r.error]||('ผิดพลาด: '+(r&&r.error)))+((r&&r.error==='error'&&r.msg)?' ['+r.msg+']':'');   /* แสดงข้อความ error จริงจากเซิร์ฟเวอร์ไว้ช่วยหาสาเหตุ */
 /* เลเวลผู้เล่น: EXP ที่ต้องใช้อัปเลเวลถัดไปเพิ่มขึ้นเรื่อยๆ (Lv.1→2 = 100, Lv.10→11 ≈ 236, Lv.30→31 ≈ 1,586) */
 const needExp=l=>Math.round(100*Math.pow(1.1,l-1));
 function lvInfo(exp){let l=1,e=exp;while(e>=needExp(l)){e-=needExp(l);l++}return{lv:l,cur:e,need:needExp(l)}}

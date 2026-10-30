@@ -683,7 +683,9 @@ async function srvInit(){   /* หลังล็อกอิน: นำเข�
     const im=await sb.rpc('import_legacy');if(im.error)throw im.error;
     const d=im.data;
     if(d&&d.state){applyState(d.state);if(d.flagged)toast('ตรวจพบค่าสูงผิดปกติในเซฟเก่า ระบบปรับให้อยู่ในเพดานแล้ว')}
-    else{const g=await sb.rpc('get_state');if(g.error)throw g.error;if(!g.data||!g.data.state)throw new Error('nostate');applyState(g.data.state)}
+    else{let g=await sb.rpc('sync_from_save');   /* ดึงของจากเซฟล่าสุดมารวมกับ player_state ทุกครั้งที่เปิดเกม (ถ้ายังไม่ได้รัน resync_from_save.sql จะถอยไปใช้ get_state เดิม) */
+      if(g.error||!g.data||!g.data.state)g=await sb.rpc('get_state');
+      if(g.error)throw g.error;if(!g.data||!g.data.state)throw new Error('nostate');applyState(g.data.state)}
     srvOn=true;
   }catch(e){toast('เชื่อมต่อระบบข้อมูลผู้เล่นบนเซิร์ฟเวอร์ไม่สำเร็จ — เล่นโหมดออฟไลน์ไปก่อน')}
 }
