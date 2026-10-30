@@ -297,7 +297,7 @@ async function finishStage(st,r){
     const c=await sc('battle_claim',{p_token:tk,p_win:true,p_turns:r.turns||1});
     if(!c.ok){modal(`<h2>เซิร์ฟเวอร์ไม่รับผลด่าน</h2><p>${srvMsg(c)}</p><div class="two"><button id="rAgain">ลองใหม่</button><button class="sec" id="rBack">กลับ</button></div>`);
       $('#rAgain').onclick=()=>{closeModal();startStage(st)};$('#rBack').onclick=()=>go(sGo());return}
-    first=!!c.first;rw={coins:c.coins,exp:c.exp};up=!!c.levelUp;
+    first=!!c.first;rw={coins:c.coins,exp:c.exp};up=!!c.levelUp;if(SV.coins>=COIN_CAP)toast('⚠ เงินถึงขีดจำกัดแล้ว (10T)');
   }else{SV.coins+=rw.coins;SV.exp+=rw.exp;SV.cleared[st.id]=true;save();up=lvOf(SV.exp)>lv0}
   modal(`<h2>ชนะ! 🎉</h2><p>${first?'ผ่านด่านครั้งแรก — ได้รางวัลเต็ม!':'เล่นซ้ำ — รางวัลลดลง'} · ใช้ ${r.turns} เทิร์น</p>
     <div class="reward"><div>💰 +${rw.coins}</div><div>EXP +${rw.exp}</div></div>${up?`<p class="lvup">⬆ เลเวลอัป! Lv.${lvOf(SV.exp)}</p>`:''}${lvrReady().length?`<p class="lvup">🎁 มีรางวัลเลเวลรอรับ ${lvrReady().length} รายการ</p>`:''}${first&&next?`<p class="mute">ปลดล็อก ${next.name}</p>`:''}
@@ -918,12 +918,14 @@ function elEnd(quit,r){
    เวฟต่อเวฟ: ผ่านเวฟไหนได้เงินเวฟนั้นทันที (เก็บไว้แม้แพ้) · เงินโตแบบทวีคูณตามเวฟ (เวฟแรกๆ น้อย ยิ่งไกลยิ่งเยอะ)
    หลังชนะแต่ละเวฟเลือกบัฟ: POWER ทีม / HP ทีม / ศัตรูแกร่งขึ้น (แลกกับ "ตัวคูณรายได้" เพิ่มขึ้น)
    ความยากของศัตรู/ตัวเลขบัฟใช้ชุดเดียวกับ EL ด้านบน — ปรับค่าเงินที่ IF */
-const IF={coin:30,growth:1.13,   /* เงินเวฟ w = coin × growth^(w-1) */
-  riskInc:.25,                   /* ศัตรูแกร่งขึ้น 1 ชั้น = รายได้ +25% (บวกต่อชั้น) */
-  bossBonus:2,every:10};         /* เวฟบอส (ทุก every เวฟ) ได้เงิน ×bossBonus */
+const IF={coin:6233,pow:1.8,      /* เงินเวฟ w = coin × w^pow (โตแบบพหุนาม → ไม่เฟ้อ) · เงินสะสมถึงเวฟ 100 ≈ 1B (ไม่นับตัวคูณความเสี่ยง) */
+  riskInc:.25,riskMax:20,        /* ศัตรูแกร่งขึ้น 1 ชั้น = รายได้ +25% (บวกต่อชั้น) · นับสูงสุด 20 ชั้น (×6) */
+  bossBonus:2,every:10};
+const COIN_CAP=1e13;   /* เพดานเงินผู้เล่น 10T (ตรงกับ trigger cap_coins ฝั่งเซิร์ฟเวอร์) */
+const capNote=()=>`<p class="lvup">⚠ เงินถึงขีดจำกัดแล้ว (${COIN_CAP.toLocaleString()}) — เงินที่ได้เพิ่มจะไม่ถูกบวก</p>`;         /* เวฟบอส (ทุก every เวฟ) ได้เงิน ×bossBonus */
 const ifState=()=>{SV.inf=SV.inf||{best:0,run:null};return SV.inf};
-const ifMul=risk=>1+IF.riskInc*(risk||0);
-const ifBase=w=>IF.coin*Math.pow(IF.growth,w-1)*(w%IF.every===0?IF.bossBonus:1);
+const ifMul=risk=>1+IF.riskInc*Math.min(risk||0,IF.riskMax);
+const ifBase=w=>IF.coin*Math.pow(w,IF.pow)*(w%IF.every===0?IF.bossBonus:1);
 const ifCoins=(w,risk)=>Math.round(ifBase(w)*ifMul(risk));
 function renderInf(){
   const E=ifState(),run=E.run,team=SV.team.filter(x=>SV.owned.includes(x)),b=run?run.buf:{p:0,h:0,risk:0},w=run?run.wave:1;
@@ -958,8 +960,9 @@ function finishInfWave(r,w){
   const E=ifState(),run=E.run;if(!run||run.wave!==w)return;
   if(!r.win){ifEnd(false,r);return}   /* แพ้ / หมดเวลา → จบรอบ */
   const got=ifCoins(w,run.buf.risk);
-  SV.coins+=got;run.coins+=got;E.best=Math.max(E.best,w);run.pick=true;save();hud();
-  ifPickModal(`<h2>เวฟ ${w} ผ่าน! 🎉</h2><div class="reward"><div>💰 +${got.toLocaleString()}</div></div><p class="mute">รอบนี้ได้รวม 💰${run.coins.toLocaleString()}</p>`);
+  const c0=SV.coins;SV.coins=Math.min(COIN_CAP,SV.coins+got);const real=SV.coins-c0;
+  run.coins+=real;E.best=Math.max(E.best,w);run.pick=true;save();hud();
+  ifPickModal(`<h2>เวฟ ${w} ผ่าน! 🎉</h2><div class="reward"><div>💰 +${real.toLocaleString()}</div></div><p class="mute">รอบนี้ได้รวม 💰${run.coins.toLocaleString()}</p>${real<got?capNote():''}`);
 }
 function ifPickModal(head){
   const run=ifState().run;if(!run)return go('inf');

@@ -659,6 +659,7 @@ function applyState(st){
   SV.items=st.items||{};SV.team=keep||(st.team||[]).slice();SV.cleared=st.cleared||{};SV.lvClaimed=st.lvClaimed||{};
   SV.gp=st.gp||{ur:0,usr:0};SV.autoSell=!!st.autoSell;SV.started=true;SV.curve=2;
   save();hud();
+  if(SV.coins>=1e13)toast('⚠ เงินถึงขีดจำกัดแล้ว (10T) — เงินที่ได้เพิ่มจะไม่ถูกบวก');
 }
 async function srvCall(fn,args){
   if(!sb||!me||!srvOn)return{error:'offline'};
