@@ -161,6 +161,22 @@ function codeModal(){
   if(!matchMedia('(pointer:coarse)').matches)setTimeout(()=>{const i=$('#cdI');if(i)i.focus()},50);   /* มือถือไม่โฟกัสอัตโนมัติ กันคีย์บอร์ดเด้งแล้วปุ่มเลื่อน */
 }
 $('#codeBtn').onclick=codeModal;
+/* ปิดหน้าต่างใส่โค้ดได้หลายทาง: แตะตรงปุ่มปิด (เช็กจากพิกัด แม้มีอะไรบังอยู่) / แตะพื้นหลังมืด / กด Esc */
+(function(){
+  const mdl=$('#mdl');
+  const hit=e=>{
+    if(mdl.classList.contains('hidden')||!$('#cdF'))return;
+    const p=(e.changedTouches&&e.changedTouches[0])||(e.touches&&e.touches[0])||e,x=p.clientX,y=p.clientY,b=$('#cdX');
+    if(b&&x!=null){const r=b.getBoundingClientRect();
+      if(x>=r.left-6&&x<=r.right+6&&y>=r.top-6&&y<=r.bottom+6){e.preventDefault();e.stopPropagation();closeModal();return}}
+    if(e.target===mdl){closeModal();return}
+    if(e.type==='pointerdown'){const t=e.target;toast('แตะโดน: '+(t.tagName||'')+(t.id?'#'+t.id:'')+(t.className&&t.className.baseVal==null?'.'+String(t.className).split(' ')[0]:''))}   /* ตัวช่วยหาสาเหตุ (ลบได้ภายหลัง) */
+  };
+  window.addEventListener('pointerdown',hit,true);
+  window.addEventListener('mousedown',e=>{if(!window.PointerEvent)hit(e)},true);
+  window.addEventListener('touchstart',e=>{if(!window.PointerEvent)hit(e)},{capture:true,passive:false});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#cdF')&&!mdl.classList.contains('hidden'))closeModal()});
+})();
 $('#logoutBtn').onclick=()=>{if(window.Online)Online.logout()};
 if($('#tuneOk'))$('#tuneOk').onclick=()=>{$('#tune').classList.add('hidden');if(!$('#teamScr').classList.contains('hidden'))renderTeam()};
 $('#devMoney').onclick=()=>{SV.coins+=1000;save();hud();toast('เพิ่มเงิน +1,000 แล้ว')};
