@@ -143,8 +143,12 @@ function codeModal(){
       busy=true;$('#cdE').textContent='กำลังตรวจสอบโค้ด…';
       const r=await sc('redeem_gift',{p_code:c});busy=false;
       if(!r.ok){$('#cdE').textContent=srvMsg(r);return}
-      SV.codes[c]=1;save();if(typeof renderHome==='function')renderHome();
-      $('#cdE').textContent='';$('#cdOk').textContent='✅ รับสำเร็จ: ได้รับของขวัญจากโค้ด '+c+' แล้ว';$('#cdI').value='';toast('รับของขวัญสำเร็จ!');return}
+      SV.codes[c]=1;
+      await sc('get_state');   /* ดึงสถานะล่าสุดจากเซิร์ฟเวอร์มาใส่เกมทันที (การ์ด/ของที่ได้จากโค้ดจะขึ้นเลยโดยไม่ต้องรีเฟรช) */
+      save();hud();if(typeof renderHome==='function')renderHome();
+      let okMsg='ได้รับของขวัญจากโค้ด '+c+' แล้ว';
+      if(c==='KIRITO'){okMsg=SV.owned.includes('kiritoevo')?'ได้รับ ผู้ปลดปล่อยดวงดาว คิริโตะ (LTD) '+cstar('kiritoevo')+' ดาว':'โค้ดผ่านแล้ว แต่ยังไม่พบการ์ดคิริโตะ LTD ในคลัง (ตรวจแถว KIRITO ใน code_defs)'}
+      $('#cdE').textContent='';$('#cdOk').textContent='✅ รับสำเร็จ: '+okMsg;$('#cdI').value='';toast('รับของขวัญสำเร็จ!');return}
     if(!f){$('#cdE').textContent='โค้ดไม่ถูกต้อง';return}
     if(SV.codes[c]){$('#cdE').textContent='โค้ดนี้ใช้ไปแล้ว';return}
     if(f.srv){   /* โค้ดที่ใช้ได้คนเดียวทั้งโลก */
