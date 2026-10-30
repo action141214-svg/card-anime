@@ -349,7 +349,7 @@ function paintF(f,s,k,act){const pc=Math.max(0,s.hp/s.max*100);
     const fl=$('.fill',f);fl.style.width=pc+'%';fl.classList.toggle('low',pc<30);
     $('.hpt',f).textContent='HP '+Math.max(0,Math.ceil(s.hp)).toLocaleString()+' / '+s.max.toLocaleString();
     $('.pw',f).textContent=Number.isInteger(s.p)?s.p:s.p.toFixed(1);
-    $('.cw',f).classList.toggle('para',s.para);$('.cw',f).classList.toggle('seal',s.sealed);$('.cw',f).classList.toggle('zap',s.lightning);$('.cw',f).classList.toggle('blind',s.miss);$('.cw',f).classList.toggle('burning',s.burn>0);$('.cw',f).classList.toggle('sevr',s.sev>0);$('.cw',f).classList.toggle('possessed',!!s.poss);$('.cw',f).classList.toggle('bleeding',!!s.bleed||s.hb>0);$('.cw',f).classList.toggle('poisoned',s.ps>0);$('.cw',f).classList.toggle('holywound',s.hw>0);$('.cw',f).classList.toggle('turbo',!!s.turbo);$('.cw',f).classList.toggle('vshield',s.vs>0);milimUI(f,s);$('.cw',f).classList.toggle('charged',CARDS[s.id].ability==='getsuga'&&s.t%(C.gn+1)===C.gn&&!S.over);{const g=$('.fgr',f);g.style.display=s.fg==null?'none':'flex';g.innerHTML=s.fg==null?'':handSvg(s.fg,26)+'<span>'+FN[s.fg]+'</span>'}{const cwx=$('.cw',f);cwx.classList.toggle('crossed',s.cx>0);cwx.classList.toggle('frozen',!!s.frz||s.ice>0);const bx=$('.badge.cx',f),bz=$('.badge.fz',f);if(bx)bx.textContent='✦ กางเขนใต้ ×'+(s.cx||0);if(bz)bz.textContent=s.frz?'❄ แช่แข็ง':'❄ ผลึกน้ำแข็ง'+(s.ice>1?' ×'+s.ice:'')}f.classList.toggle('active',!!act)}
+    $('.cw',f).classList.toggle('para',s.para);$('.cw',f).classList.toggle('seal',s.sealed);$('.cw',f).classList.toggle('zap',s.lightning);$('.cw',f).classList.toggle('blind',s.miss);$('.cw',f).classList.toggle('burning',s.burn>0);$('.cw',f).classList.toggle('sevr',s.sev>0);$('.cw',f).classList.toggle('possessed',!!s.poss);$('.cw',f).classList.toggle('bleeding',!!s.bleed||s.hb>0);$('.cw',f).classList.toggle('poisoned',s.ps>0);$('.cw',f).classList.toggle('holywound',s.hw>0);$('.cw',f).classList.toggle('turbo',!!s.turbo);$('.cw',f).classList.toggle('vshield',s.vs>0);milimUI(f,s);vsUI($('.cw',f),s);$('.cw',f).classList.toggle('charged',CARDS[s.id].ability==='getsuga'&&s.t%(C.gn+1)===C.gn&&!S.over);{const g=$('.fgr',f);g.style.display=s.fg==null?'none':'flex';g.innerHTML=s.fg==null?'':handSvg(s.fg,26)+'<span>'+FN[s.fg]+'</span>'}{const cwx=$('.cw',f);cwx.classList.toggle('crossed',s.cx>0);cwx.classList.toggle('frozen',!!s.frz||s.ice>0);const bx=$('.badge.cx',f),bz=$('.badge.fz',f);if(bx)bx.textContent='✦ กางเขนใต้ ×'+(s.cx||0);if(bz)bz.textContent=s.frz?'❄ แช่แข็ง':'❄ ผลึกน้ำแข็ง'+(s.ice>1?' ×'+s.ice:'')}f.classList.toggle('active',!!act)}
 function render(){
   qTrack();
   if(S&&!S.over){riasReflect('a');riasReflect('b');gmaxPurify('a');gmaxPurify('b');for(const k of['a','b']){pflameImmune(k);enterField(k);rimuruCheck(k);kabutoAura(k)}}
@@ -464,7 +464,7 @@ async function hit(ak,dk,mult=1){
   if(ak==='a'&&a.id==='garomon'&&!S.ctr&&typeof onAtkHook==='function'&&!OPT.online)onAtkHook(a.id);   /* นับจำนวนครั้งที่โจมตี (เงื่อนไขอีโว คอสมิค กาโร่ · ไม่นับการโต้กลับ) */
   if(CARDS[a.id].ability==='milim')milimRage(ak,C.mla);   /* มิลิม: โจมตี → ความโกรธเพิ่ม */
   if(dodges(dk)){S.lb=0;S.up=false;floatTxt(dw,'หลบ!','miss');log('💨 '+nm(dk)+' หลบการโจมตีได้!',dk);aw.classList.remove('lungea','lungeb');render();return 0}
-  if(d.vs>0&&CARDS[a.id].ability!=='susanoo'){d.vs--;S.lb=0;S.up=false;floatTxt(dw,'🛡 Void Shield','miss');log('🛡 '+nm(dk)+' ใช้ Void Shield กันการโจมตี! (เหลือ '+d.vs+' ครั้ง)',dk);aw.classList.remove('lungea','lungeb');render();return 0}   /* Void Shield: กันการโจมตี (หลบก่อน ถ้าไม่หลบจึงใช้โล่) */
+  if(d.vs>0&&CARDS[a.id].ability!=='susanoo'){d.vs--;S.lb=0;S.up=false;vsFx(dk,d.vs);floatTxt(dw,d.vs>0?'🛡 Void Shield':'🛡 โล่แตก!','miss');log('🛡 '+nm(dk)+' ใช้ Void Shield กันการโจมตี! (เหลือ '+d.vs+' ครั้ง'+(d.vs>0?'':' · โล่แตก')+')',dk);aw.classList.remove('lungea','lungeb');render();await sl(450);return 0}   /* Void Shield: กันการโจมตี (หลบก่อน ถ้าไม่หลบจึงใช้โล่) */
   let tb=0;if(a.turbo&&!S.noAb&&CARDS[a.id].ability==='turbo'){tb=Math.round(a.p*C.ot);a.turbo=false;log('⚡ สัญลักษณ์เทอร์โบ! ดาเมจเพิ่ม +'+tb,ak)}
   const bonus=d.lightning?Math.round(a.p*C.lb):0;S.lb=bonus;const up=CARDS[a.id].ability==='upset'&&!S.noAb&&rIdx(CARDS[d.id].rar)>rIdx(CARDS[a.id].rar);S.up=up;
   const ab268=CARDS[a.id].ability,bm=(d.boss&&!S.noAb&&(ab268==='boss3'||ab268==='boss5'||ab268==='kabuto'))?(ab268==='boss5'?C.cem:ab268==='kabuto'?C.kbm:C.cm):1;if(bm>1)log('⚔ '+nm(ak)+' ดาเมจ ×'+bm+' ใส่บอส!',ak);
@@ -514,7 +514,7 @@ async function applyAb(name,ak,dk,opt={}){
 }
 async function applyAb0(name,ak,dk,opt={}){
   const a=S[ak],d=S[dk];if(d.hp<=0)return;
-  if(d.vs>0&&CARDS[a.id].ability!=='susanoo'&&VS_SKILL.includes(name)){d.vs--;floatTxt($('#f'+dk+' .cw'),'🛡 Void Shield','miss');log('🛡 '+nm(dk)+' ใช้ Void Shield กันสกิลของ '+nm(ak)+'! (เหลือ '+d.vs+' ครั้ง)',dk);render();await sl(350);return}   /* Void Shield: กันสกิลที่ใช้กับเรา */
+  if(d.vs>0&&CARDS[a.id].ability!=='susanoo'&&VS_SKILL.includes(name)){d.vs--;vsFx(dk,d.vs);floatTxt($('#f'+dk+' .cw'),d.vs>0?'🛡 Void Shield':'🛡 โล่แตก!','miss');log('🛡 '+nm(dk)+' ใช้ Void Shield กันสกิลของ '+nm(ak)+'! (เหลือ '+d.vs+' ครั้ง'+(d.vs>0?'':' · โล่แตก')+')',dk);render();await sl(450);return}   /* Void Shield: กันสกิลที่ใช้กับเรา */
   if(name==='paralyze'){if(!d.para&&RR()<C.zc){d.para=true;log('⚡ '+nm(dk)+' ถูกทำให้ชา! ข้ามการโจมตีเทิร์นหน้า',ak)}}
   else if(name==='lightning'){if(!d.lightning)await setLightning(ak,dk);if(!d.para&&RR()<C.lc){d.para=true;log('⚡ '+nm(dk)+' ถูกทำให้ชา! ข้ามการโจมตีเทิร์นหน้า',ak)}}
   else if(name==='gate'){await sl(350);await gate(ak,dk)}
@@ -778,11 +778,67 @@ async function scytheFx(ak,dk,mode){
   log(mode===2?'💀 '+nm(ak)+' เล็งจุดตาย!':'🗡 '+nm(ak)+' โจมตีเฉียดจุดตาย! (ดาเมจ ×'+C.xm+')',ak);await sl(700);
 }
 /* สั่งตาย (รีอัส / ไอแซ็ค): ไม่ตายทันทีอีกต่อไป → ติดตราสั่งตาย แล้วตายหลังผ่านไป C.dm เทิร์นของเจ้าตัว (ดู doTurn) */
+/* ---------- Void Shield: โดมโล่บนการ์ด + เอฟเฟกต์กัน / โล่แตก (เอฟเฟกต์ล้วน ไม่แตะ RNG ของเกม) ---------- */
+function vsUI(cw,s){
+  let e=$('.vsd',cw);
+  if(s.vs>0&&s.hp>0){
+    if(e&&e.classList.contains('gone')){e.remove();e=null}
+    if(!e){e=document.createElement('div');e.className='vsd';cw.appendChild(e)}
+    e.dataset.n=s.vs;
+  }else if(e&&!e.classList.contains('gone')){e.classList.add('gone');setTimeout(()=>e.remove(),400)}
+}
+function vsFx(dk,left){
+  const cw=$('#f'+dk+' .cw');if(!cw)return;
+  const r=cw.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+  const d=$('.vsd',cw);if(d){d.classList.remove('hit');void d.offsetWidth;d.classList.add('hit')}
+  const hx=fxEl('vshex',cx,cy,r.width*.95,r.width*.95);setTimeout(()=>hx.remove(),650);
+  const rg=fxEl('vsring',cx,cy,r.width*.95,r.width*.95);setTimeout(()=>rg.remove(),700);
+  if(left<=0){   /* โล่แตก: เศษโล่กระจาย */
+    for(let i=0;i<14;i++){
+      const ang=Math.random()*Math.PI*2,dist=r.width*(.55+Math.random()*.7),sz=10+Math.random()*16;
+      const e=fxEl('vsshard',cx,cy,sz,sz);
+      e.style.setProperty('--dx',Math.cos(ang)*dist+'px');e.style.setProperty('--dy',Math.sin(ang)*dist+'px');e.style.setProperty('--rot',(Math.random()*540-270)+'deg');
+      setTimeout(()=>e.remove(),900);
+    }
+  }
+}
+/* ---------- สั่งตาย (รีอัส / ไอแซ็ค): ตราบนการ์ด + เอฟเฟกต์ร่ายสกิล ---------- */
+function doomUI(cw,s){
+  let e=$('.dmd',cw);
+  if(s.doomed&&s.hp>0){if(!e){e=document.createElement('div');e.className='dmd';cw.appendChild(e)}}
+  else if(e)e.remove();
+}
+function rectOf(w){const r=w.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2,w:r.width,h:r.height}}
+function doomSkull(dw,big){
+  const t=rectOf(dw);
+  const sk=fxEl('dmskull',t.x,t.y,t.w,t.h*.6,'☠');setTimeout(()=>sk.remove(),1050);
+  const v=fxEl('dmveil',innerWidth/2,innerHeight/2,innerWidth,innerHeight);setTimeout(()=>v.remove(),1050);
+  if(big){const x=fxEl('bfx',t.x,t.y,t.w*1.6,t.w*1.6);setTimeout(()=>x.remove(),550)}
+}
+async function doomFx(ak,dk){
+  const aw=$('#f'+ak+' .cw'),dw=$('#f'+dk+' .cw');if(!aw||!dw)return;
+  const A=rectOf(aw),T=rectOf(dw);
+  if(CARDS[S[ak].id].ability==='scythe'){   /* ไอแซ็ค: เคียวฟันตัดกันเป็นกากบาท */
+    [-38,38].forEach((deg,i)=>setTimeout(()=>{const e=fxEl('dmslash',T.x,T.y,T.w*1.5,8);e.style.transform='rotate('+deg+'deg)';setTimeout(()=>e.remove(),500)},i*170));
+    const sc=fxEl('dmscythe',T.x,T.y,T.w*1.2,T.w*1.2);setTimeout(()=>sc.remove(),600);
+    await sl(430);
+  }else{   /* รีอัส: วงเวทพลังทำลายล้าง + ลูกพลังสีเลือดพุ่งเข้าใส่ */
+    const rias=CARDS[S[ak].id].ability==='rias';
+    const bn=fxEl('banner shb',T.x,Math.max(34,T.y-T.h*.4),340,54,rias?'<small>POWER OF DESTRUCTION</small>สั่งตาย!':'<small>DEATH SENTENCE</small>สั่งตาย!');setTimeout(()=>bn.remove(),1500/speed);
+    const c=fxEl('dmcircle',T.x,T.y,T.w*1.5,T.w*1.5);setTimeout(()=>c.remove(),1050);
+    const o=fxEl('dmorb',A.x,A.y,54,54);
+    const an=o.animate([{transform:'translate(0,0) scale(.5)',opacity:.9},{transform:'translate('+(T.x-A.x)+'px,'+(T.y-A.y)+'px) scale(1.4)',opacity:1}],{duration:480/speed,easing:'ease-in',fill:'forwards'});
+    await sleepAnim(an);o.remove();await sl(1);
+  }
+  doomSkull(dw,true);
+  await sl(350);
+}
 async function doomMark(ak,dk){
   const aw=$('#f'+ak+' .cw'),dw=$('#f'+dk+' .cw'),d=S[dk];
   aw.classList.add('lunge'+ak);await sl(260);
   if(dodges(dk)){S.lb=0;S.up=false;floatTxt(dw,'หลบ!','miss');log('💨 '+nm(dk)+' หลบการสั่งตายได้!',dk);aw.classList.remove('lungea','lungeb');render();return 0}
   S.lb=0;S.up=false;
+  await doomFx(ak,dk);   /* เอฟเฟกต์ร่ายสั่งตาย (รีอัส: วงเวทพลังทำลายล้าง · ไอแซ็ค: ฟันเคียว) */
   if(!d.doomed){d.doomed=true;d.doom=C.dm}
   floatTxt(dw,'☠ สั่งตาย','crit');dw.classList.remove('deathfx');void dw.offsetWidth;dw.classList.add('deathfx');
   log('☠ '+nm(ak)+' สั่งตาย '+nm(dk)+'! จะตายหลังผ่านไป '+d.doom+' เทิร์น',ak);
@@ -907,7 +963,7 @@ function milimEnd(r,k){
 function milimTick(k){const r=S[k];if(!r||!r.mlOn||r.hp<=0)return;r.mlN--;if(r.mlN<=0)milimEnd(r,k)}
 function milimUI(f,s){
   $('.cw',f).classList.toggle('jwon',!!s.jwOn);
-  {const cwE=$('.cw',f);cwE.classList.toggle('doomed',!!s.doomed);if(s.doomed)cwE.dataset.doom=s.doom}   /* ตราสั่งตาย */
+  {const cwE=$('.cw',f);cwE.classList.toggle('doomed',!!s.doomed);if(s.doomed)cwE.dataset.doom=s.doom;doomUI(cwE,s)}   /* ตราสั่งตาย */
   const rg=$('.rage',f);if(!rg)return;const m=CARDS[s.id].ability==='milim';
   rg.style.display=m?'block':'none';$('.cw',f).classList.toggle('satan',m&&!!s.mlOn);if(!m)return;
   rg.classList.toggle('on',!!s.mlOn);
@@ -1106,10 +1162,10 @@ async function doTurn(){
   a.t++;
   if(a.doomed){   /* ตราสั่งตาย: นับถอยหลังต้นเทิร์นของเจ้าตัว ครบแล้วตาย (ได้เล่นอีก C.dm เทิร์นหลังถูกสั่ง) */
     const cw=$('#f'+ak+' .cw');
-    if(a.doom<=0){floatTxt(cw,'DEATH','crit');cw.classList.remove('deathfx');void cw.offsetWidth;cw.classList.add('deathfx');log('☠ '+nm(ak)+' ถึงเวลาตาย! (ถูกสั่งตาย)',dk);a.hp=0;render();await sl(600);
+    if(a.doom<=0){floatTxt(cw,'DEATH','crit');doomSkull(cw,true);cw.classList.remove('deathfx');void cw.offsetWidth;cw.classList.add('deathfx');log('☠ '+nm(ak)+' ถึงเวลาตาย! (ถูกสั่งตาย)',dk);a.hp=0;render();await sl(600);
       if(a.hp<=0){if(await handleKO(ak,dk))return;S.turn=dk;S.n++;render();return}
       a.doomed=false;   /* รอดตายด้วยความสามารถอื่น (เช่น ซอง จิน วู) */
-    }else{a.doom--;log('☠ '+nm(ak)+' ถูกสั่งตาย · เล่นเทิร์นนี้ได้ และจะตายเมื่อผ่านไปอีก '+a.doom+' เทิร์น',dk);render()}
+    }else{a.doom--;floatTxt(cw,'☠ '+a.doom,'crit');{const dm=$('.dmd',cw);if(dm){dm.classList.remove('tick');void dm.offsetWidth;dm.classList.add('tick')}}log('☠ '+nm(ak)+' ถูกสั่งตาย · เล่นเทิร์นนี้ได้ และจะตายเมื่อผ่านไปอีก '+a.doom+' เทิร์น',dk);render()}
   }
   if(a.burn>0){   /* เผาไหม้: เสีย HP ต้นเทิร์นของการ์ดที่ติดสถานะ */
     const bd=stc(a,a.burnDmg),cw=$('#f'+ak+' .cw');a.hp-=bd;a.burn--;floatTxt(cw,'-'+bd,'sm');cw.classList.remove('hit');void cw.offsetWidth;cw.classList.add('hit');
