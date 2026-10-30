@@ -128,25 +128,7 @@ function renderHome(){
 $('#howBtn').onclick=()=>tutorial(false);
 /* ---------- โค้ดของขวัญ ---------- */
 const GIFT_CODES={
-  SHADOW:()=>{if(!SV.owned.includes('shadowemp')){SV.owned.push('shadowemp');SV.count.shadowemp=1}else SV.count.shadowemp=(SV.count.shadowemp||1)+1;SV.lv.shadowemp=SV.lv.shadowemp||1;SV.star=SV.star||{};SV.star.shadowemp=Math.max(SV.star.shadowemp||1,STAR_MAX);return 'ได้รับ จักรพรรดิเงา ซอง จิน วู '+STAR_MAX+' ดาว'},
-  RELEASE:()=>{SV.coins=(SV.coins||0)+3000000;SV.candy=(SV.candy||0)+3000;return 'เงิน +3,000,000 · ลูกอม +3,000'},
-  /* โค้ดคนเดียวทั้งโลก: srv = ต้องจองที่เซิร์ฟเวอร์ก่อน (ต้องล็อคอินออนไลน์ + รัน redeem.sql) */
-  HUTAO:{srv:true,run:()=>{if(!SV.owned.includes('hutao')){SV.owned.push('hutao');SV.count.hutao=1}else SV.count.hutao=(SV.count.hutao||1)+1;SV.lv.hutao=100;return 'ได้รับ ฮูเต๋า เลเวล 100'}},
-  RIMURUTRUE:()=>{if(!SV.owned.includes('truerimuru')){SV.owned.push('truerimuru');SV.count.truerimuru=1;SV.lv.truerimuru=1}else SV.count.truerimuru=(SV.count.truerimuru||1)+1;SV.star=SV.star||{};SV.star.truerimuru=Math.max(SV.star.truerimuru||1,6);return 'ได้รับ จอมมารที่แท้จริง ริมุรุ เทมเพสต์ 6 ดาว'},
-  GILQUEEN:()=>{if(!SV.owned.includes('gilqueen')){SV.owned.push('gilqueen');SV.count.gilqueen=1}else SV.count.gilqueen=(SV.count.gilqueen||1)+1;SV.lv.gilqueen=100;return 'ได้รับ ราชินีแห่งวีรชน กิลกาเมช เลเวล 100'},
-  HOJIN:()=>{SV.items=SV.items||{};SV.items.hojin=(SV.items.hojin||0)+3;return 'ได้รับ ธรรมจักรแปดซี่ ×3'},
-  CC:()=>{if(!SV.owned.includes('cc')){SV.owned.push('cc');SV.count.cc=1}else SV.count.cc=(SV.count.cc||1)+1;SV.lv.cc=Math.max(SV.lv.cc||1,100);SV.star=SV.star||{};SV.star.cc=Math.max(SV.star.cc||1,5);return 'ได้รับ ซีซี เลเวล 100 · 5 ดาว'},
-  LORD:()=>{if(!SV.owned.includes('rimulord')){SV.owned.push('rimulord');SV.count.rimulord=1;SV.lv.rimulord=1}else SV.count.rimulord=(SV.count.rimulord||1)+1;SV.star=SV.star||{};SV.star.rimulord=Math.max(SV.star.rimulord||1,6);return 'ได้รับ จอมมาร ริมุรุ เทมเพสต์ 6 ดาว'},
-  '6STAR':()=>{SV.star=SV.star||{};let n=0;SV.owned.forEach(id=>{if((SV.star[id]||1)<STAR_MAX){SV.star[id]=STAR_MAX;n++}});return 'การ์ดที่มีทุกใบเป็น '+STAR_MAX+' ดาวแล้ว (อัปให้ '+n+' ใบ)'},
-  GAROU:()=>{SV.star=SV.star||{};['garo','garored','garomon','garocosmic'].forEach(id=>{if(!SV.owned.includes(id)){SV.owned.push(id);SV.count[id]=1;SV.lv[id]=1}else SV.count[id]=(SV.count[id]||1)+1;SV.star[id]=STAR_MAX});return 'ได้รับ กาโร่ทุกระดับ (กาโร่ · ลูกครึ่งสัตว์ประหลาด · สัตว์ประหลาดที่สมบูรณ์แบบ · คอสมิค กาโร่) 6 ดาว'},
-  DXD:()=>{SV.star=SV.star||{};['rias','issei'].forEach(id=>{if(!SV.owned.includes(id)){SV.owned.push(id);SV.count[id]=1;SV.lv[id]=1}else SV.count[id]=(SV.count[id]||1)+1;SV.star[id]=Math.max(SV.star[id]||1,STAR_MAX)});return 'ได้รับ รีอัส เกรโมรี่ · เฮียวโด อิซเซย์ 6 ดาว'},
-  UCHIHA:()=>{if(!SV.owned.includes('shichi')){SV.owned.push('shichi');SV.count.shichi=1}else SV.count.shichi=(SV.count.shichi||1)+1;SV.lv.shichi=SV.lv.shichi||1;SV.star=SV.star||{};SV.star.shichi=Math.max(SV.star.shichi||1,STAR_MAX);return 'ได้รับ ชิซุยและอิทาจิ '+STAR_MAX+' ดาว'},
-  KABUTO:()=>{if(!SV.owned.includes('kabuto')){SV.owned.push('kabuto');SV.count.kabuto=1}else SV.count.kabuto=(SV.count.kabuto||1)+1;SV.lv.kabuto=SV.lv.kabuto||1;SV.star=SV.star||{};SV.star.kabuto=Math.max(SV.star.kabuto||1,STAR_MAX);return 'ได้รับ มาสไรเดอร์ คาบูโตะ '+STAR_MAX+' ดาว'},
-  SONG:()=>{SV.star=SV.star||{};['jinwoo','jinwoo2'].forEach(id=>{if(!SV.owned.includes(id)){SV.owned.push(id);SV.count[id]=1;SV.lv[id]=1}else SV.count[id]=(SV.count[id]||1)+1;SV.lv[id]=SV.lv[id]||1;SV.star[id]=Math.max(SV.star[id]||1,STAR_MAX)});return 'ได้รับ ซอง จิน วู และ ปลุกพลังขั้นสอง ซอง จิน วู '+STAR_MAX+' ดาว'},
-  CROW:()=>{const id='susanoo';if(!SV.owned.includes(id)){SV.owned.push(id);SV.count[id]=1;SV.lv[id]=1}else SV.count[id]=(SV.count[id]||1)+1;SV.lv[id]=SV.lv[id]||1;SV.star=SV.star||{};SV.star[id]=Math.max(SV.star[id]||1,STAR_MAX);return 'ได้รับ สองคู่หูซูซาโนะอุขั้นสมบูรณ์ อิทาจิและชิซุย '+STAR_MAX+' ดาว'},
-  /* โค้ดคนเดียวทั้งเซิร์ฟเวอร์ (srv): การ์ดทุกใบในเกม รวมการ์ดบอสเควส ทั้งหมด เลเวล 100 · 6 ดาว — ใบที่มีอยู่แล้วอัปให้เป็น Lv.100 · 6★ (ไม่เพิ่มจำนวนซ้ำ) */
-  CARD:{srv:true,run:()=>{SV.star=SV.star||{};const all=Object.keys(CARDS);let add=0;all.forEach(id=>{if(!SV.owned.includes(id)){SV.owned.push(id);SV.count[id]=1;add++}SV.count[id]=SV.count[id]||1;SV.lv[id]=Math.max(SV.lv[id]||1,100);SV.star[id]=STAR_MAX});return 'ได้รับการ์ดทุกใบในเกม '+all.length+' ใบ (ใหม่ '+add+' ใบ) เลเวล 100 · '+STAR_MAX+' ดาว'}},
-  RIMURU:()=>{if(!SV.owned.includes('rimuru')){SV.owned.push('rimuru');SV.count.rimuru=1}else SV.count.rimuru=(SV.count.rimuru||1)+1;SV.lv.rimuru=Math.max(SV.lv.rimuru||1,100);SV.star=SV.star||{};SV.star.rimuru=Math.max(SV.star.rimuru||1,5);return 'ได้รับ ริมุรุ เทมเพสต์ เลเวล 100 · 5 ดาว'},
+  RELEASE:()=>{SV.coins=(SV.coins||0)+3000000;SV.candy=(SV.candy||0)+3000;return 'เงิน +3,000,000 · ลูกอม +3,000'}
 };
 function codeModal(){
   modal(`<h2>🎁 ใส่โค้ดรับของขวัญ</h2><form class="auth" id="cdF"><input id="cdI" placeholder="พิมพ์โค้ดที่นี่" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="30"><p class="aerr" id="cdE"></p><p class="mute" id="cdOk"></p><div class="two"><button type="submit">รับของขวัญ</button><button type="button" class="sec" id="cdX">ปิด</button></div></form>`);
