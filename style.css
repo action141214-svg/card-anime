@@ -946,3 +946,6 @@ body{padding:0}
 .lobar>em{font-style:normal;color:var(--mute);font-size:.8em;margin-left:6px}
 .badge.dn{background:#ffd36b;color:#3a1500;box-shadow:0 0 18px #ff9f43}.dance .badge.dn{display:block}
 .cw .badge.dn{top:auto;bottom:calc(var(--bs)*6.6)}
+/* จำนวนผู้เล่นที่มีการ์ด (มุมซ้ายล่างของกรอบดูความสามารถ) */
+.info{position:relative;padding-bottom:28px}
+.iown{position:absolute;left:0;bottom:0;font-size:.82em;color:var(--mute,#9aa3b8)}

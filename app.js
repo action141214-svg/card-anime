@@ -239,8 +239,15 @@ function showInfo(id){
   modal(`<div class="info"><div class="iimg" style="--c:${c.color}"><img src="${c.img}" alt="${c.name}"></div><div class="itxt"><h2>${c.name} ${rarTag(id)}</h2>
     <div class="istat"><span>Lv.${l}</span>${own?`<span>${cstar(id)}★</span>`:''}<span>POWER ${s.p}</span><span>HP ${s.hp}</span></div>
     <h3>ความสามารถ</h3><p>${c.desc}</p>${MORE[id]?`<ul>${MORE[id].map(t=>`<li>${t}</li>`).join('')}</ul>`:''}
-    ${own?'':`<p class="mute">🔒 ${lockTxt(id)}</p>`}<button id="iClose">ปิด</button></div></div>`);
+    ${own?'':`<p class="mute">🔒 ${lockTxt(id)}</p>`}<button id="iClose">ปิด</button></div>${srvOn()?`<div class="iown" id="iOwn" data-id="${id}">🃏 กำลังโหลด…</div>`:''}</div>`);
   $('#iClose').onclick=closeModal;
+  if(srvOn())cardOwnN(id).then(n=>{const e=$('#iOwn');if(!e||e.dataset.id!==id)return;if(n===null)e.remove();else e.textContent='🃏 มีการ์ดใบนี้แล้ว '+n.toLocaleString()+' ใบ'});
+}
+/* จำนวนการ์ดใบนี้ที่มีอยู่รวมทุกผู้เล่น (นับที่เซิร์ฟเวอร์ ฟังก์ชัน card_owner_count) · แคช 60 วินาที */
+const OWNN={};
+async function cardOwnN(id){
+  const c=OWNN[id];if(c&&Date.now()-c.t<60000)return c.n;
+  try{const r=await sc('card_owner_count',{p_id:id});if(!r||r.error||typeof r.n!=='number')return null;OWNN[id]={n:r.n,t:Date.now()};return r.n}catch(e){return null}
 }
 $('#tslots').onclick=e=>{
   const m=e.target.closest('[data-mv]'),r=e.target.closest('[data-rm]');
