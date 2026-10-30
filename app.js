@@ -4,7 +4,7 @@ const MAX_TEAM=4;
 /* ตู้กาชา: สุ่มได้ทุกใบรวมถึงตัวซ้ำ (น้ำหนัก = % ที่ออก) — ปรับทีหลังได้ */
 const GACHA={cost:100000,cost10:900000,   /* ราคาสุ่มเป็นเงิน 💰 (ตู้ฮาโลวีนใช้ลูกอม ราคาแยกที่ HW) */
   /* การ์ดที่สุ่มได้ในตู้ (LTD ยังไม่เปิดให้สุ่ม — ซาสึเกะจะหาวิธีได้รับภายหลัง) */
-  pool:['jinwoo','milim','goku','zenitsu','yuji','naruto','sasukekid','gekko','ino','kirara','garo','vegeta','ichigo','kirito','megumi','gil','kurapika','shuna','chahaein','kaneki','reze','kdash','mai','kula','rias','issei'],
+  pool:['jinwoo','milim','goku','zenitsu','yuji','naruto','sasukekid','gekko','ino','kirara','garo','vegeta','ichigo','kirito','megumi','gil','kurapika','shuna','chahaein','kaneki','reze','kdash','mai','kula','rias','issei','rocklee'],
   /* เรทออก % : base = ปกติ, up = ตอนเป็นการ์ดเรทอัป (การ์ด R ที่เหลือแบ่งเท่าๆ กัน) */
   /* เรทตามระดับ (รวมทุกใบในระดับนั้น): USR 0.1% · UR 1% — แบ่งเท่าๆ กันในระดับเดียวกัน, ถ้าเป็นการ์ดเรทอัปได้ส่วนแบ่ง rarUp ของระดับนั้น (ตัวเลขใน rates ด้านล่างของ UR/USR ใช้แสดงผลเท่านั้น) */
   rarTotal:{USR:0.1,UR:1},rarUp:0.7,
@@ -455,14 +455,15 @@ function onSpend(n){SV.cq=SV.cq||{};SV.cq.spent=(SV.cq.spent||0)+(n||0);SV.cq.ss
 function onGuardHook(n){SV.cq=SV.cq||{};SV.cq.guard=(SV.cq.guard||0)+(n||1)}   /* ป้องกันสถานะผิดปกติสำเร็จ (นับต่อสถานะ) */
 function onStatHook(heal,dmg){SV.cq=SV.cq||{};if(heal)SV.cq.heal=(SV.cq.heal||0)+heal;if(dmg){SV.cq.dmg=(SV.cq.dmg||0)+dmg;SV.cq.kdmg=(SV.cq.kdmg||0)+dmg;SV.cq.sdmg=(SV.cq.sdmg||0)+dmg}}
 const totalCards=()=>Object.values(SV.count||{}).reduce((t,n)=>t+(n||0),0);
-function onAtkHook(id){if(id==='garomon')SV.pma=(SV.pma||0)+1}   /* สัตว์ประหลาดที่สมบูรณ์แบบ กาโร่ โจมตี (ไม่นับโต้กลับ) */
+function onAtkHook(id){if(id==='garomon')SV.pma=(SV.pma||0)+1;if(id==='rocklee')SV.rla=(SV.rla||0)+1}   /* ร็อค ลี (R) โจมตีสะสม */
+function onCritHook(id){if(id==='rocklee')SV.rlc=(SV.rlc||0)+1}   /* ร็อค ลี (R) โจมตีติดคริติคอลสะสม */   /* สัตว์ประหลาดที่สมบูรณ์แบบ กาโร่ โจมตี (ไม่นับโต้กลับ) */
 function onCounterHook(id){if(id==='garomon')SV.pmc=(SV.pmc||0)+1}   /* ... โจมตีโต้กลับ */
 function onJwHook(){SV.jwc=(SV.jwc||0)+1}   /* ซอง จิน วู ใช้ความสามารถ (HP เหลือ 1) สะสม → เงื่อนไขอีโว */
 function onDodgeHook(id){SV.cq=SV.cq||{};SV.cq.dodge=(SV.cq.dodge||0)+1;   /* หลบหลีกทุกการ์ด (เควสตัวละคร คาบูโตะ) */
   if(id==='garo')SV.gd=(SV.gd||0)+1;if(id==='garored')SV.gmd=(SV.gmd||0)+1;if(id==='garomon')SV.pmd=(SV.pmd||0)+1}   /* garored (ลูกครึ่งสัตว์ประหลาด) หลบหลีก → เงื่อนไขอีโว สัตว์ประหลาดที่สมบูรณ์แบบ */
 /* กาโร่ (R) หลบหลีกสำเร็จ (เงื่อนไขอีโว ลูกครึ่งสัตว์ประหลาด) */
 function onKillHook(id,boss){if(boss){SV.cq=SV.cq||{};SV.cq.bosskill=(SV.cq.bosskill||0)+1}   /* สังหารบอส (เควสตัวละคร คาบูโตะ) */
-  SV.kills=(SV.kills||0)+1;if(id==='garo')SV.gk=(SV.gk||0)+1;if(id==='garored')SV.gmk=(SV.gmk||0)+1;if(id==='garomon')SV.pmk=(SV.pmk||0)+1;   /* นับสังหารศัตรูรวม (ใช้เป็นเงื่อนไขอีโว จอมมาร ริมุรุ) */
+  SV.kills=(SV.kills||0)+1;if(id==='garo')SV.gk=(SV.gk||0)+1;if(id==='garored')SV.gmk=(SV.gmk||0)+1;if(id==='garomon')SV.pmk=(SV.pmk||0)+1;if(id==='rocklee')SV.rlk=(SV.rlk||0)+1;   /* นับสังหารศัตรูรวม (ใช้เป็นเงื่อนไขอีโว จอมมาร ริมุรุ) */
   if(id!=='gil')return;SV.cq=SV.cq||{};SV.cq.kills=(SV.cq.kills||0)+1}
 const CQ=[{id:'gilq',card:'gilqueen',name:'ราชินีแห่งวีรชน กิลกาเมช',
   reqs:[{t:'ใช้กิลกาเมชสังหารศัตรู',unit:'ครั้ง',need:1000,key:'kills',cur:()=>cqN('kills')},
@@ -1148,6 +1149,9 @@ const EVOS=[{from:'naruto',to:'naruto1',need:{cards:50,items:{seal9:1},coins:100
   /* need.jwc = ซอง จิน วู ใช้ความสามารถ (HP เหลือ 1) สะสม · ดรอปมีดแต่ละเล่มแยกกัน เล่มละ 5% */
   {from:'jinwoo',to:'jinwoo2',need:{cards:50,items:{kasaga:1,dagger:1},jwc:10,coins:50000000},
   boss:{card:'jinwoo2boss',name:'ปลุกพลังขั้นสอง ซอง จิน วู',hp:30000,power:200,lv:1,coins:100,drops:[{item:'kasaga',rate:.05},{item:'dagger',rate:.05}]}},
+  /* ร็อค ลี (R) → จงเปิดประตูด่านที่5 ร็อค ลี · need.rlc/rla/rlk = ร็อค ลี (R) โจมตีติดคริติคอล / โจมตีครบ / สังหาร สะสม · ได้ 1 ดาว (ไม่มี grant) */
+  {from:'rocklee',to:'lee5',need:{cards:100,items:{},rlc:100,rla:1000,rlk:1000,coins:70000000},
+  boss:{card:'lee5boss',name:'จงเปิดประตูด่านที่5 ร็อค ลี',hp:50000,power:70,lv:1,coins:100,drops:[]}},
   /* need.dungeon = ผ่านดันเจี้ยนสะสม (SV.dgw) · ใช้บอสเดียวกับด่านดันเจี้ยน แต่ HP/POWER ต่ำกว่า */
   {from:'jinwoo2',to:'shadowemp',need:{cards:50,items:{shadoworb:1,beru:1,igris:1,ion:1},dungeon:1,coins:10000000000},
   boss:{card:'shadowempboss',name:'จักรพรรดิเงา ซอง จิน วู',hp:100000,power:200,lv:1,coins:100,drops:[{item:'shadoworb',rate:.001}]}}];
@@ -1162,7 +1166,7 @@ function renderQuest(){
   if(evo)renderEvo();else renderCharQ();
 }
 $$('.qtab').forEach(b=>b.onclick=()=>{questTab=b.dataset.qt;renderQuest()});
-const evoOk=e=>(SV.count[e.from]||0)>=e.need.cards&&Object.entries(e.need.more||{}).every(([id,n])=>(SV.count[id]||0)>=n)&&Object.entries(e.need.items).every(([k,n])=>itemN(k)>=n)&&(SV.kills||0)>=(e.need.kills||0)&&(SV.gk||0)>=(e.need.gk||0)&&(SV.gd||0)>=(e.need.gd||0)&&(SV.gmk||0)>=(e.need.gmk||0)&&(SV.gmd||0)>=(e.need.gmd||0)&&(SV.pmk||0)>=(e.need.pmk||0)&&(SV.pmd||0)>=(e.need.pmd||0)&&(SV.pma||0)>=(e.need.pma||0)&&(SV.pmc||0)>=(e.need.pmc||0)&&(SV.jwc||0)>=(e.need.jwc||0)&&(SV.dgw||0)>=(e.need.dungeon||0)&&(!e.need.win||!!SV.evoWin[e.from])&&SV.coins>=e.need.coins;
+const evoOk=e=>(SV.count[e.from]||0)>=e.need.cards&&Object.entries(e.need.more||{}).every(([id,n])=>(SV.count[id]||0)>=n)&&Object.entries(e.need.items).every(([k,n])=>itemN(k)>=n)&&(SV.kills||0)>=(e.need.kills||0)&&(SV.gk||0)>=(e.need.gk||0)&&(SV.gd||0)>=(e.need.gd||0)&&(SV.gmk||0)>=(e.need.gmk||0)&&(SV.gmd||0)>=(e.need.gmd||0)&&(SV.pmk||0)>=(e.need.pmk||0)&&(SV.pmd||0)>=(e.need.pmd||0)&&(SV.pma||0)>=(e.need.pma||0)&&(SV.pmc||0)>=(e.need.pmc||0)&&(SV.jwc||0)>=(e.need.jwc||0)&&(SV.rlc||0)>=(e.need.rlc||0)&&(SV.rla||0)>=(e.need.rla||0)&&(SV.rlk||0)>=(e.need.rlk||0)&&(SV.dgw||0)>=(e.need.dungeon||0)&&(!e.need.win||!!SV.evoWin[e.from])&&SV.coins>=e.need.coins;
 function renderEvo(){
   const body=$('#evoBody'),e=EVOS.find(x=>x.from===evoSel);
   if(!e){
@@ -1196,6 +1200,9 @@ function renderEvo(){
         ${e.need.pmd?row('ใช้สัตว์ประหลาดที่สมบูรณ์แบบ กาโร่ หลบหลีก 💨',Math.min(SV.pmd||0,e.need.pmd),e.need.pmd):''}
         ${e.need.pma?row('ใช้สัตว์ประหลาดที่สมบูรณ์แบบ กาโร่ โจมตี 🗡',Math.min(SV.pma||0,e.need.pma),e.need.pma):''}
         ${e.need.pmc?row('ใช้สัตว์ประหลาดที่สมบูรณ์แบบ กาโร่ โจมตีโต้กลับ ↩',Math.min(SV.pmc||0,e.need.pmc),e.need.pmc):''}
+        ${e.need.rlc?row('ใช้ร็อค ลี (R) โจมตีติดคริติคอล 💥',Math.min(SV.rlc||0,e.need.rlc),e.need.rlc):''}
+        ${e.need.rla?row('ใช้ร็อค ลี (R) โจมตีครบ 👊',Math.min(SV.rla||0,e.need.rla),e.need.rla):''}
+        ${e.need.rlk?row('ใช้ร็อค ลี (R) สังหารศัตรู ⚔',Math.min(SV.rlk||0,e.need.rlk),e.need.rlk):''}
         ${e.need.jwc?row('ใช้ความสามารถของซอง จิน วู (HP เหลือ 1) 🗡',Math.min(SV.jwc||0,e.need.jwc),e.need.jwc):''}
         ${e.need.dungeon?row('ผ่านดันเจี้ยน 🕳️',Math.min(SV.dgw||0,e.need.dungeon),e.need.dungeon):''}
         ${e.need.win?row('ชนะบอสเควสอย่างน้อย 1 ครั้ง 🏆',SV.evoWin[e.from]?1:0,1):''}
