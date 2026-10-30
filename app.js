@@ -132,7 +132,7 @@ const GIFT_CODES={
 };
 function codeModal(){
   modal(`<h2>🎁 ใส่โค้ดรับของขวัญ</h2><form class="auth" id="cdF"><input id="cdI" placeholder="พิมพ์โค้ดที่นี่" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="30"><p class="aerr" id="cdE"></p><p class="mute" id="cdOk"></p><div class="two"><button type="submit">รับของขวัญ</button><button type="button" class="sec" id="cdX">ปิด</button></div></form>`);
-  $('#cdX').addEventListener('pointerup',e=>{e.preventDefault();e.stopPropagation();closeModal()});
+  $('#cdX').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();closeModal()});   /* ปิดตั้งแต่แตะลง ก่อนคีย์บอร์ด/เลย์เอาต์ขยับ */
   $('#cdX').onclick=closeModal;
   let busy=false;
   $('#cdF').onsubmit=async e=>{e.preventDefault();if(busy)return;
@@ -158,7 +158,7 @@ function codeModal(){
     SV.codes[c]=1;const msg=(f.run||f)();save();hud();
     if(typeof renderHome==='function')renderHome();
     $('#cdE').textContent='';$('#cdOk').textContent='✅ รับสำเร็จ: '+msg;$('#cdI').value='';toast('รับของขวัญสำเร็จ!')};
-  setTimeout(()=>{const i=$('#cdI');if(i)i.focus()},50);
+  if(!matchMedia('(pointer:coarse)').matches)setTimeout(()=>{const i=$('#cdI');if(i)i.focus()},50);   /* มือถือไม่โฟกัสอัตโนมัติ กันคีย์บอร์ดเด้งแล้วปุ่มเลื่อน */
 }
 $('#codeBtn').onclick=codeModal;
 $('#logoutBtn').onclick=()=>{if(window.Online)Online.logout()};

@@ -14,6 +14,6 @@
   window.addEventListener('orientationchange',()=>setTimeout(fit,250));
   // กันช่องพิมพ์ (แชท/รหัส) โดนคีย์บอร์ดบัง
   document.addEventListener('focusin',e=>{
-    if(/^(INPUT|TEXTAREA)$/.test(e.target.tagName))setTimeout(()=>e.target.scrollIntoView({block:'center',behavior:'smooth'}),300);
+    if(/^(INPUT|TEXTAREA)$/.test(e.target.tagName)&&!e.target.closest('#mdl'))setTimeout(()=>e.target.scrollIntoView({block:'center',behavior:'smooth'}),300);
   });
 })();
