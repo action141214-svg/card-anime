@@ -713,10 +713,12 @@ function renderSell(){
   $('#autoSell2').checked=SV.autoSell;
   const tot=SV.owned.reduce((s,id)=>s+extra(id)*refund(id),0),n=SV.owned.reduce((s,id)=>s+extra(id),0);
   $('#sellAll').textContent=n?`ขายการ์ดซ้ำทั้งหมด (${n} ใบ · 💰${tot})`:'ไม่มีการ์ดซ้ำให้ขาย';$('#sellAll').disabled=!n;
-  const g=$('#sellList');g.innerHTML='';
+  const g=$('#sellList');g.innerHTML='';g.className='cgrid';   /* จัดวางแบบเดียวกับหน้าจัดทีม: ตารางการ์ดเต็มใบ */
   for(const id of SORTED.filter(k=>SV.owned.includes(k))){
-    const c=CARDS[id],e=extra(id),d=document.createElement('div');d.className='gcard';d.style.setProperty('--c',c.color);
-    d.innerHTML=`<div class="gimg"><div class="gw"><img src="${c.img}" alt="${c.name}"><span class="tag">มี ×${SV.count[id]}</span></div></div><div class="ginfo"><b>${c.name} ${rarTag(id)}</b><span>ราคาขาย 💰${refund(id)} / ใบ</span><div class="two"><button class="sec small" data-sell="${id},1" ${e?'':'disabled'}>ขาย 1 ใบ</button><button class="sec small" data-sell="${id},99" ${e?'':'disabled'}>ขายซ้ำทั้งหมด${e?' (+💰'+e*refund(id)+')':''}</button></div></div>`;
+    const c=CARDS[id],e=extra(id),d=document.createElement('div');d.className='ctile static';d.style.setProperty('--c',c.color);
+    d.innerHTML=`<div class="cimg"><img src="${c.img}" alt="${c.name}"><span class="tag">มี ×${SV.count[id]}</span><button class="ibtn" data-info="${id}" aria-label="ดูความสามารถของ ${c.name}">i</button></div>
+      <div class="cinfo"><b title="${c.name}">${c.name}</b><div class="cmeta">${rarTag(id)} <span>Lv.${clv(id)}</span> <em class="stars">${cstar(id)}★</em></div><div class="cstat">ราคาขาย 💰${refund(id)} / ใบ</div></div>
+      <div class="cact"><button class="sec small" data-sell="${id},1" ${e?'':'disabled'}>ขาย 1 ใบ</button><button class="sec small" data-sell="${id},99" ${e?'':'disabled'}>ขายซ้ำทั้งหมด${e?' (+💰'+e*refund(id)+')':''}</button></div>`;
     g.appendChild(d);
   }
 }
@@ -724,15 +726,18 @@ function renderSell(){
 function renderInv(){
   const keys=Object.keys(ITEMS),have=keys.reduce((s,k)=>s+itemN(k),0);
   $('#invSum').textContent='วัตถุดิบที่มี '+have+' ชิ้น · 💰 '+SV.coins.toLocaleString()+' · 🍬 '+(SV.candy||0).toLocaleString();
-  const g=$('#invList');g.innerHTML='';
+  const g=$('#invList');g.innerHTML='';g.className='cgrid';   /* จัดวางแบบเดียวกับหน้าจัดทีม: ตารางการ์ดเต็มใบ */
   for(const k of keys){
     const it=ITEMS[k],n=itemN(k),use=EVOS.filter(e=>e.need.items[k]),d=document.createElement('div');
-    d.className='gcard'+(n?'':' locked');d.style.setProperty('--c',it.color);
-    d.innerHTML=`<div class="gimg"><div class="gw"><img src="${it.img}" alt="${it.name}"><span class="tag">มี ×${n}</span></div></div><div class="ginfo"><b>${it.name} <i class="rar" style="--r:${RARITY[it.rar]}">${it.rar}</i></b><span>วัตถุดิบวิวัฒนาการ</span><small>${use.length?'ใช้กับ: '+use.map(e=>CARDS[e.from].name+' → '+CARDS[e.to].name).join(', '):it.desc}</small><div class="two"><button class="sec small" data-go="evo" data-tab="evo">ไปเควสพัฒนา</button></div></div>`;
+    const note=use.length?'ใช้กับ: '+use.map(e=>CARDS[e.from].name+' → '+CARDS[e.to].name).join(', '):it.desc;
+    d.className='ctile static'+(n?'':' locked');d.style.setProperty('--c',it.color);
+    d.innerHTML=`<div class="cimg"><img src="${it.img}" alt="${it.name}"><span class="tag">มี ×${n}</span></div>
+      <div class="cinfo"><b title="${it.name}">${it.name}</b><div class="cmeta"><i class="rar" style="--r:${RARITY[it.rar]}">${it.rar}</i> <span>วัตถุดิบวิวัฒนาการ</span></div><div class="cdesc" title="${note.replace(/"/g,'&quot;')}">${note}</div></div>
+      <div class="cact"><button class="sec small" data-go="evo" data-tab="evo">ไปเควสพัฒนา</button></div>`;
     g.appendChild(d);
   }
 }
-$('#sellList').onclick=e=>{const b=e.target.closest('[data-sell]');if(b){const[id,n]=b.dataset.sell.split(',');sell(id,+n)}};
+$('#sellList').onclick=e=>{const ib=e.target.closest('[data-info]');if(ib){showInfo(ib.dataset.info);return}const b=e.target.closest('[data-sell]');if(b){const[id,n]=b.dataset.sell.split(',');sell(id,+n)}};
 $('#sellAll').onclick=async()=>{
   if(srvOn()){let t=0;for(const id of [...SV.owned]){const n=extra(id);if(!n)continue;const r=await sc('sell_dup',{p_card:id,p_n:n});if(r.ok)t+=r.got||0;else{toast(srvMsg(r));break}}renderSell();return toast('ขายการ์ดซ้ำทั้งหมด ได้ 💰'+t)}
   let t=0;SV.owned.forEach(id=>{const n=extra(id);if(n){t+=n*refund(id);SV.count[id]-=n}});SV.coins+=t;save();hud();renderSell();toast('ขายการ์ดซ้ำทั้งหมด ได้ 💰'+t)};
