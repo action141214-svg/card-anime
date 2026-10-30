@@ -447,6 +447,17 @@ async function fingerFx(ak,dk,f){
   const b=fxEl('fbanner',r.left+r.width/2,r.top+r.height*.4,200,150,handSvg(f,64)+`<b>${FN[f]}</b><small>${FD[f]}</small>`);
   setTimeout(()=>b.remove(),1500/speed);await sl(750);
 }
+/* เอฟเฟกต์ตอนการ์ดชนกัน: แฟลช + วงแหวน + ประกายรัศมี ที่จุดปะทะ (ใช้กับการโจมตีธรรมดาของทุกใบ · ไม่แสดงตอนหลบ/โล่กัน) */
+function impactFx(aw,dw){
+  try{
+    const a=aw.getBoundingClientRect(),d=dw.getBoundingClientRect();
+    const ax=a.left+a.width/2,ay=a.top+a.height/2,dx=d.left+d.width/2,dy=d.top+d.height/2;
+    const x=ax+(dx-ax)*.62,y=ay+(dy-ay)*.62,sz=Math.max(90,Math.min(a.width,d.width)*.9);
+    let rays='';for(let i=0;i<8;i++)rays+='<i class="ry" style="--a:'+(i*45)+'deg"></i>';
+    const e=fxEl('impact',x,y,sz,sz,'<i class="ib"></i><i class="ir"></i>'+rays);
+    e.style.setProperty('--d',(.4/speed)+'s');setTimeout(()=>e.remove(),420/speed);
+  }catch(err){}
+}
 async function hit(ak,dk,mult=1){
   const a=S[ak],d=S[dk],aw=$('#f'+ak+' .cw'),dw=$('#f'+dk+' .cw');
   aw.classList.add('lunge'+ak);await sl(260);
@@ -458,6 +469,7 @@ async function hit(ak,dk,mult=1){
   const bonus=d.lightning?Math.round(a.p*C.lb):0;S.lb=bonus;const up=CARDS[a.id].ability==='upset'&&!S.noAb&&rIdx(CARDS[d.id].rar)>rIdx(CARDS[a.id].rar);S.up=up;
   const ab268=CARDS[a.id].ability,bm=(d.boss&&!S.noAb&&(ab268==='boss3'||ab268==='boss5'||ab268==='kabuto'))?(ab268==='boss5'?C.cem:ab268==='kabuto'?C.kbm:C.cm):1;if(bm>1)log('⚔ '+nm(ak)+' ดาเมจ ×'+bm+' ใส่บอส!',ak);
   const dmg=Math.round(a.p*mult*(up?C.ym:1)*bm)+bonus+tb;d.hp-=dmg;
+  impactFx(aw,dw);   /* เอฟเฟกต์ตอนชน */
   if(up){const r=dw.getBoundingClientRect(),x=fxEl('bfx',r.left+r.width/2,r.top+r.height/2,200,200);setTimeout(()=>x.remove(),550);dw.classList.remove('bflash');void dw.offsetWidth;dw.classList.add('bflash')}
   floatTxt(dw,'-'+dmg,up||mult>=3||bm>1?'crit':bonus?'zp':'');dw.classList.remove('hit');void dw.offsetWidth;dw.classList.add('hit');aw.classList.remove('lungea','lungeb');
   if(dmg>0&&CARDS[d.id].ability==='milim')milimRage(dk,C.mld+((mult>1||S.inSkill>0)?C.mls:0));   /* มิลิม: รับดาเมจ (ถ้าเป็นสกิลโจมตี เพิ่มมากกว่า) */
