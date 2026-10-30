@@ -646,7 +646,8 @@ async function redeem(code){
 /* ดันเจี้ยนออนไลน์: เรียกฟังก์ชันใน dungeon.sql → {error:'login'|'offline'|'error'} เมื่อใช้ไม่ได้ */
 async function dgCall(fn,args){
   if(!sb||!me)return {error:'offline'};
-  try{const {data,error}=await sb.rpc(fn,args||{});if(error)return {error:'error'};return data||{error:'error'}}catch(e){return {error:'error'}}
+  try{const {data,error}=await sb.rpc(fn,args||{});if(error)return {error:'error'};if(data&&data.state)applyState(data.state);   /* เซิร์ฟเวอร์ส่งสถานะล่าสุดมา (เช่นไอเทมจากดันเจี้ยน) → ใส่ลงเกมทันที */
+    return data||{error:'error'}}catch(e){return {error:'error'}}
 }
 const dungeon={status:()=>dgCall('dungeon_status'),enter:()=>dgCall('dungeon_enter'),report:(hr,d)=>dgCall('dungeon_report',{p_hr:hr,p_damage:Math.max(0,Math.floor(d||0))}),claim:hr=>dgCall('dungeon_claim',{p_hr:hr}),leaderboard:()=>dgCall('dungeon_leaderboard'),setTeam:(hr,t)=>dgCall('dungeon_set_team',{p_hr:hr,p_team:t})};
 /* ===== ระบบหลังบ้านเฟส 1: เซิร์ฟเวอร์เป็นเจ้าของ player_state — ฝั่งเกมขอทำ action แล้วรับค่าที่เซิร์ฟเวอร์คำนวณมาใส่ SV ===== */
