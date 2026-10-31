@@ -131,9 +131,9 @@ const GIFT_CODES={
   RELEASE:()=>{SV.coins=(SV.coins||0)+3000000;SV.candy=(SV.candy||0)+3000;return 'เงิน +3,000,000 · ลูกอม +3,000'}
 };
 function codeModal(){
-  modal(`<h2>🎁 ใส่โค้ดรับของขวัญ</h2><form class="auth" id="cdF"><input id="cdI" placeholder="พิมพ์โค้ดที่นี่" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="30"><p class="aerr" id="cdE"></p><p class="mute" id="cdOk"></p><div class="two"><button type="submit">รับของขวัญ</button><button type="button" class="sec" id="cdX">ปิด</button></div></form>`);
-  $('#cdX').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();closeModal()});   /* ปิดตั้งแต่แตะลง ก่อนคีย์บอร์ด/เลย์เอาต์ขยับ */
-  $('#cdX').onclick=closeModal;
+  modal(`<h2>🎁 ใส่โค้ดรับของขวัญ</h2><form class="auth" id="cdF"><input id="cdI" placeholder="พิมพ์โค้ดที่นี่" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="30"><p class="aerr" id="cdE"></p><p class="mute" id="cdOk"></p><div class="two"><button type="submit">รับของขวัญ</button><button type="button" class="sec" id="cdClose">ปิด</button></div></form>`);
+  $('#cdClose').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();closeModal()});   /* ปิดตั้งแต่แตะลง ก่อนคีย์บอร์ด/เลย์เอาต์ขยับ */
+  $('#cdClose').onclick=closeModal;
   let busy=false;
   $('#cdF').onsubmit=async e=>{e.preventDefault();if(busy)return;
     const c=$('#cdI').value.trim().toUpperCase(),f=GIFT_CODES[c];
@@ -166,11 +166,10 @@ $('#codeBtn').onclick=codeModal;
   const mdl=$('#mdl');
   const hit=e=>{
     if(mdl.classList.contains('hidden')||!$('#cdF'))return;
-    const p=(e.changedTouches&&e.changedTouches[0])||(e.touches&&e.touches[0])||e,x=p.clientX,y=p.clientY,b=$('#cdX');
+    const p=(e.changedTouches&&e.changedTouches[0])||(e.touches&&e.touches[0])||e,x=p.clientX,y=p.clientY,b=$('#cdClose');
     if(b&&x!=null){const r=b.getBoundingClientRect();
       if(x>=r.left-6&&x<=r.right+6&&y>=r.top-6&&y<=r.bottom+6){e.preventDefault();e.stopPropagation();closeModal();return}}
     if(e.target===mdl){closeModal();return}
-    if(e.type==='pointerdown'){const t=e.target;toast('แตะโดน: '+(t.tagName||'')+(t.id?'#'+t.id:'')+(t.className&&t.className.baseVal==null?'.'+String(t.className).split(' ')[0]:''))}   /* ตัวช่วยหาสาเหตุ (ลบได้ภายหลัง) */
   };
   window.addEventListener('pointerdown',hit,true);
   window.addEventListener('mousedown',e=>{if(!window.PointerEvent)hit(e)},true);
